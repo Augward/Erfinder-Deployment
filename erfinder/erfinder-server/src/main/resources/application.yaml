@@ -1,14 +1,19 @@
 server:
-  error:
-    whitelabel:
-      enabled: false
-    path: /error
   forward-headers-strategy: framework
   port: 8080
 
 spring:
   application:
     name: erfinder
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/erfinder
+    username: root
+    password: httyd3:W1ngs.SQL
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    jpa:
+      hibernate:
+        ddl-auto: update
 
   devtools:
     restart:
@@ -30,6 +35,10 @@ spring:
   web:
     resources:
       static-locations: classpath:/launcherDir/,classpath:/public/
+    error:
+      whitelabel:
+        enabled: false
+      path: /error
 
 debug: false
 

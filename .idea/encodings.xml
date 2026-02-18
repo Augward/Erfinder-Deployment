@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/erfinder/erfinder-client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/erfinder/erfinder-client/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/erfinder/erfinder-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/erfinder/erfinder-server/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/erfinder/erfinder-shared/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/erfinder/erfinder-shared/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/erfinder/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/erfinder/src/main/resources" charset="UTF-8" />
+  </component>
+</project>
