@@ -3,7 +3,7 @@ stages:
   - test
   - sonarqube
 
-sonarqube-check:
+sonarqube:
   stage: sonarqube
   image: maven:3.9.3-eclipse-temurin-17
   variables:
