@@ -4,7 +4,6 @@ stages:
 
 test:
   stage: test
-  image: maven:3.9.12-openjdk-19
   script:
     - cd erfinder
     - mvn clean test
