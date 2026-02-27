@@ -9,7 +9,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/erfinder
     username: root
-    password: httyd3:W1ngs.SQL
+    password: insecure_password
     driver-class-name: com.mysql.cj.jdbc.Driver
     jpa:
       hibernate:

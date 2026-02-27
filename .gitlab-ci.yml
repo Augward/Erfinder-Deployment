@@ -1,0 +1,9 @@
+stages:
+  - build
+  - test
+  - sonarqube
+
+sonarqube:
+  stage: sonarqube
+  script:
+    - sonar-scanner
