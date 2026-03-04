@@ -23,7 +23,6 @@
     <!-- If you add any GWT meta tags, they must   -->
     <!-- be added before this line.                -->
     <!--                                           -->
-    <script src="app/app.nocache.js"></script>
   </head>
 
   <!--                                           -->
@@ -32,6 +31,7 @@
   <!-- to create a completely dynamic UI.        -->
   <!--                                           -->
   <body>
+    <p id="page">Index</p>
 
     <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
     <noscript>
@@ -54,6 +54,11 @@
       <tr>
         <td colspan="2" style="color:red;" id="errorLabelContainer"></td>
       </tr>
+      <tr>
+        <a href="login.html">Login</a>
+      </tr>
     </table>
   </body>
+  <!-- I'm putting this here so it loads last! :) -->
+  <script src="app/app.nocache.js"></script>
 </html>

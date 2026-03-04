@@ -1,3 +1,4 @@
+edu\uiowa\team7\Queries.class
 edu\uiowa\team7\Application.class
-edu\uiowa\team7\StatusController.class
 edu\uiowa\team7\Application$EmbeddedServletContainerConfig.class
+edu\uiowa\team7\StatusController.class

@@ -1,0 +1,1 @@
+mvn gwt:codeserver -pl erfinder-client -am
