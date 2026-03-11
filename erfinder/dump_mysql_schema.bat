@@ -1,0 +1,1 @@
+mysqldump -u root -p --routines --no-data --databases erfinder > schema.sql
