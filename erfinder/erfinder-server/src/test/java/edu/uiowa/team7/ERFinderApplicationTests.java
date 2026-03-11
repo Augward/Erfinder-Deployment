@@ -17,18 +17,6 @@ class ERFinderApplicationTests {
         Queries.GetConnection();
     }
 
-    // tries to get a test user
-    @Test
-    void getTestEntry() {
-        try (Connection c = Queries.GetConnection()) {
-            assert(Queries.ValidateCredentials("user3","password3"));
-        } catch (SQLException ex) {
-            Queries.PrintSQLException(ex);
-            assert (false);
-        } catch (Exception e) {
-            assert(false);
-        }
-    }
 
     @Test
     void CreateUser() {
@@ -55,6 +43,19 @@ class ERFinderApplicationTests {
             assert(false);
         } catch (SQLException e) {
 
+        }
+    }
+
+    // tries to get a test user
+    @Test
+    void getTestEntry() {
+        try (Connection c = Queries.GetConnection()) {
+            assert(Queries.ValidateCredentials("user3","password3"));
+        } catch (SQLException ex) {
+            Queries.PrintSQLException(ex);
+            assert (false);
+        } catch (Exception e) {
+            assert(false);
         }
     }
 
