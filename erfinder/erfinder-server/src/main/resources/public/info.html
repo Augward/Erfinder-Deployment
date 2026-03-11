@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link type="text/css" rel="stylesheet" href="erfinder.css">
+    <title>ERFinder - Edit Profile</title>
+    <style>
+        .top-nav { text-align: right; padding: 15px; background-color: #e2e8f0; font-family: sans-serif; }
+        .top-nav a { margin-left: 15px; text-decoration: none; color: #333; font-weight: bold; }
+    </style>
+</head>
+<body>
+<p id="page" style="display:none;">Info</p>
+
+<div class="top-nav">
+    <a href="home.html">Back to Dashboard</a>
+    <a href="/api/logout">Logout</a>
+</div>
+
+<h1>Edit Profile</h1>
+
+<table align="center" style="margin-top: 30px;">
+    <tr><td style="font-weight:bold;">Email:</td><td id="emailContainer"></td></tr>
+    <tr><td style="font-weight:bold;">Phone:</td><td id="phoneContainer"></td></tr>
+    <tr><td colspan="2" id="submitBtnContainer" style="text-align: center; padding-top: 15px;"></td></tr>
+    <tr><td colspan="2" id="statusContainer" style="color:red; text-align: center;"></td></tr>
+</table>
+
+<script src="app/app.nocache.js"></script>
+</body>
+</html>

@@ -1,39 +1,30 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset=UTF-8>
-    <link type="text/css" rel="stylesheet" href="erfinder.css">
-    <title>ERFinder - Welcome</title>
-  </head>
+<html lang="">
+<head>
+  <meta charset=UTF-8>
+  <link type="text/css" rel="stylesheet" href="erfinder.css">
+  <title>ERFinder - Welcome</title>
+  <style>
+      .top-nav { text-align: right; padding: 15px; background-color: #e2e8f0; font-family: sans-serif; }
+      .top-nav a { margin-left: 15px; text-decoration: none; color: #333; font-weight: bold; }
+      .hero { text-align: center; margin-top: 50px; font-family: sans-serif; }
+  </style>
+</head>
 
-  <body>
-    <p id="page">Index</p>
-    <noscript>
-      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-        Your web browser must have JavaScript enabled
-        in order for this application to display correctly.
-      </div>
-    </noscript>
+<body>
+  <p id="page" style="display:none">Index</p>
 
-    <h1>Welcome</h1>
+  <div class="top-nav">
+      <a href="login.html">Login</a>
+      <a href="signup.html">Sign Up</a>
+  </div>
 
-    <!-- -->
-    <table align="center">
-      <tr>
-        <td colspan="2" style="font-weight:bold;">Please enter your name:</td>        
-      </tr>
-      <tr>
-        <td id="nameFieldContainer"></td>
-        <td id="sendButtonContainer"></td>
-      </tr>
-      <tr>
-        <td colspan="2" style="color:red;" id="errorLabelContainer"></td>
-      </tr>
-      <tr>
-        <a href="login.html">Login</a>
-      </tr>
-    </table>
-  </body>
-  <!-- I'm putting this here so it loads last! :) -->
+  <div class="hero">
+      <h1>Welcome to ERFinder</h1>
+      <p>Find the nearest Emergency Room that provides the best care for your health conditions.</p>
+      <p><i>Medical staff and Administrators, please log in above.</i></p>
+  </div>
+
   <script src="app/app.nocache.js"></script>
+</body>
 </html>
