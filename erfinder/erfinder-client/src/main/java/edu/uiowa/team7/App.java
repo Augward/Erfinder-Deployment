@@ -33,6 +33,11 @@ public class App implements EntryPoint {
 			case Forgot:
 				Forgot forgotPage = new Forgot();
 				break;
+            case Home:
+                Home homePage = new Home();
+                break;
+            case Info:
+                Info infoPage = new Info();
 		}
 	}
 

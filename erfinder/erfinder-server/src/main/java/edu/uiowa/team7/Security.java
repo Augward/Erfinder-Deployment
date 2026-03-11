@@ -111,7 +111,7 @@ public class Security {
             }
             userid = casted;
             needsRefresh = refresh;
-            valid = false;
+            valid = true;
         }
 
         public TokenParseResult() {
