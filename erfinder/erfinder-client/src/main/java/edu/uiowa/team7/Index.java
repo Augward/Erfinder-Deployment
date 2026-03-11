@@ -12,6 +12,8 @@ import com.google.gwt.user.client.ui.TextBox;
 public class Index {
     public static void Build() {
 
+
+
         // 1. Create the UI Widgets
         final Button sendButton = new Button("Check Server Status");
         final TextBox nameField = new TextBox();
@@ -36,7 +38,7 @@ public class Index {
                 errorLabel.setText("Contacting Spring Boot Server...");
 
                 // 4. Build the REST Request to hit your Spring Controller
-                RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/status");
+                RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/username");
                 try {
                     builder.sendRequest(null, new RequestCallback() {
 

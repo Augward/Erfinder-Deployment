@@ -7,7 +7,10 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class App implements EntryPoint {
 	public enum Page {
 		Index,
-		Login
+		Login,
+		Forgot,
+		Home,
+		Info
 	}
 
 	public void SetPage() {
@@ -25,7 +28,10 @@ public class App implements EntryPoint {
 				Index.Build();
 				break;
 			case Login:
-				Login.Build();
+				Login loginPage = new Login();
+				break;
+			case Forgot:
+				Forgot forgotPage = new Forgot();
 				break;
 		}
 	}
@@ -33,4 +39,12 @@ public class App implements EntryPoint {
 	public void onModuleLoad() {
 		SetPage();
 	}
+
+	public static native String B64Encode(String original) /*-{
+		return $wnd.btoa(original);
+	}-*/;
+
+	public static native void Redirect(String url) /*-{
+		$wnd.location = url;
+	}-*/;
 }

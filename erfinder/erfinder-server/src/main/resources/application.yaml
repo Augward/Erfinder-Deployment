@@ -1,8 +1,17 @@
+erfinder:
+  login:
+    max-attempts-in-period: 10
+    clear-attempt-after-minutes: 30
+    timeout-period-minutes: 300
+
+
 server:
   forward-headers-strategy: framework
   port: 8080
 
 spring:
+  main:
+    banner-mode: off
   application:
     name: erfinder
 

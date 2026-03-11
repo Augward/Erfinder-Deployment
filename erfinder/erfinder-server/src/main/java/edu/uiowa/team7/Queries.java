@@ -1,8 +1,7 @@
 package edu.uiowa.team7;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.Optional;
 
 public class Queries {
 
@@ -44,7 +43,7 @@ public class Queries {
     public static boolean ValidateCredentials(String userID, String password)
             throws SQLException, NullPointerException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("CALL ValidatePassword(?,?)");
+            PreparedStatement stmt = c.prepareStatement("CALL ValidatePassword(?,?);");
             stmt.setString(1, userID);
             stmt.setString(2, password);
             if (stmt.execute()) {
@@ -59,17 +58,54 @@ public class Queries {
         }
     }
 
-    public static void PurgeTestUsers() throws SQLException {
+    public static boolean ValidateSecurityAnswer(String userID, String answer)
+            throws SQLException, NullPointerException {
         try(Connection c = GetConnection()) {
-            c.createStatement().executeQuery("CALL PurgeTestUsers()").close();
+            PreparedStatement stmt = c.prepareStatement("CALL ValidateSecurityAnswer(?,?);");
+            stmt.setString(1, userID);
+            stmt.setString(2, answer);
+            if (stmt.execute()) {
+                ResultSet r = stmt.getResultSet();
+                r.next();
+                boolean valid = r.getBoolean(1);
+                r.close();
+                stmt.close();
+                return valid;
+            }
+            return false;
         }
     }
 
-    public static void CreateTestUser(String userID, String password) throws SQLException{
+    public static Optional<String> GetSecurityQuestion(String userID)
+            throws SQLException, NullPointerException {
+        try (Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement("CALL GetSecurityQuestion(?);");
+            stmt.setString(1, userID);
+            if (stmt.execute()) {
+                ResultSet r = stmt.getResultSet();
+                r.next();
+                String question = r.getString(1);
+                r.close();
+                stmt.close();
+                return Optional.of(question);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static void PurgeTestUsers() throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("CALL CreateTestUser(?,?)");
+            c.createStatement().executeQuery("CALL PurgeTestUsers();").close();
+        }
+    }
+
+    public static void CreateTestUser(String userID, String password, String secq, String seca) throws SQLException{
+        try(Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement("CALL CreateTestUser(?,?,?,?);");
             stmt.setString(1, userID);
             stmt.setString(2, password);
+            stmt.setString(3, secq);
+            stmt.setString(4, seca);
             stmt.executeQuery();
             stmt.close();
         }

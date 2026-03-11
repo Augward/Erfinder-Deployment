@@ -3,6 +3,7 @@ package edu.uiowa.team7;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.server.servlet.ConfigurableServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
@@ -14,6 +15,7 @@ import java.util.Objects;
 
 @SpringBootApplication
 @ServletComponentScan
+@EnableConfigurationProperties(Configuration.class)
 public class Application
     extends SpringBootServletInitializer {
 
