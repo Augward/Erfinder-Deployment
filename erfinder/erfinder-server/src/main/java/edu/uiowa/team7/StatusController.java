@@ -119,7 +119,7 @@ public class StatusController {
             return "Not Logged In!";
         }
 
-        // un-expired tokens get
+        // un-expired tokens get refreshed after some time
         result.TryRefreshToken(request, response);
 
         // this method returns the userID embedded in the token
