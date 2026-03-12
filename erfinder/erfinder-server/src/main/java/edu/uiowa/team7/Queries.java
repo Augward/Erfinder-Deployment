@@ -113,23 +113,30 @@ public class Queries {
 
     public static String[] GetUserInfo(String userID) throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("SELECT first_name, email, phone FROM users WHERE user_id = ?");
+            PreparedStatement stmt = c.prepareStatement("SELECT perm, firstn, email, phone, addr FROM users WHERE userid = ?");
             stmt.setString(1, userID);
             ResultSet r = stmt.executeQuery();
             if (r.next()) {
-                return new String[] { r.getString("first_name"), r.getString("email"), r.getString("phone") };
+                return new String[] {
+                        r.getString("perm"),
+                        r.getString("firstn"),
+                        r.getString("email"),
+                        r.getString("phone"),
+                        r.getString("addr") // Added address
+                };
             }
             return null;
         }
     }
 
     // Update user info
-    public static boolean UpdateUserInfo(String userID, String email, String phone) throws SQLException {
+    public static boolean UpdateUserInfo(String userID, String email, String phone, String addr) throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("UPDATE users SET email = ?, phone = ? WHERE user_id = ?");
+            PreparedStatement stmt = c.prepareStatement("UPDATE users SET email = ?, phone = ?, addr = ? WHERE userid = ?");
             stmt.setString(1, email);
             stmt.setString(2, phone);
             stmt.setString(3, userID);
+            stmt.setString(4, userID);
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         }

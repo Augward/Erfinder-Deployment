@@ -136,7 +136,8 @@ public class StatusController {
         try {
             String[] info = Queries.GetUserInfo(result.UserID());
             if (info != null) {
-                return info[0] + "," + info[1] + "," + info[2];
+                // Sends back: Role, FirstN, Email, Phone, Address
+                return info[0] + "," + info[1] + "," + info[2] + "," + info[3] + "," + info[4];
             }
         } catch (Exception e) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -154,7 +155,9 @@ public class StatusController {
         try {
             String email = B64Decode(request.getParameter("email"));
             String phone = B64Decode(request.getParameter("phone"));
-            Queries.UpdateUserInfo(result.UserID(), email, phone);
+            String addr = B64Decode(request.getParameter("addr"));
+
+            Queries.UpdateUserInfo(result.UserID(), email, phone, addr);
             response.setStatus(HttpStatus.OK.value());
         } catch (Exception e) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
