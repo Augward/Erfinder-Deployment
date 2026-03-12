@@ -7,10 +7,13 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class App implements EntryPoint {
 	public enum Page {
 		Index,
+
 		Login,
 		Forgot,
+        Register,
+
 		Home,
-		Info
+		Info,
 	}
 
 	public void SetPage() {
@@ -27,12 +30,17 @@ public class App implements EntryPoint {
 			case Index:
 				Index.Build();
 				break;
+
 			case Login:
 				Login loginPage = new Login();
 				break;
 			case Forgot:
 				Forgot forgotPage = new Forgot();
 				break;
+            case Register:
+                Register registerPage = new Register();
+                break;
+
             case Home:
                 Home homePage = new Home();
                 break;
