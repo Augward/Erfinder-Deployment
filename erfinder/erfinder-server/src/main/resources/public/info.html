@@ -1,31 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
+
+
 <head>
     <meta charset="UTF-8">
     <link type="text/css" rel="stylesheet" href="erfinder.css">
-    <title>ERFinder - Profile</title>
-    <style>
-        .top-nav { text-align: right; padding: 15px; background-color: #e2e8f0; font-family: sans-serif; }
-        .top-nav a { margin-left: 15px; text-decoration: none; color: #333; font-weight: bold; }
-    </style>
+    <title>ERFinder - Profile Editor</title>
 </head>
+
+
 <body>
-<p id="page" style="display:none;">Info</p>
+<p id="page">Info</p>
+
 
 <div class="top-nav">
-    <a href="home.html">Back to Dashboard</a>
-    <a href="/api/logout">Logout</a>
+    <h1 class="brand-title">ERFinder Profile</h1>
+    <div class="nav-links">
+        <a href="home.html">Dashboard</a>
+        <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='index.html'); return false;">Logout</a>
+    </div>
 </div>
 
-<h1>Edit Profile</h1>
 
-<table align="center" style="margin-top: 30px;">
-    <tr><td style="font-weight:bold;">Email:</td><td id="emailContainer"></td></tr>
-    <tr><td style="font-weight:bold;">Phone:</td><td id="phoneContainer"></td></tr>
-    <tr><td colspan="2" id="submitBtnContainer" style="text-align: center; padding-top: 15px;"></td></tr>
-    <tr><td colspan="2" id="statusContainer" style="color:red; text-align: center;"></td></tr>
-</table>
+<div class="page-title-bar">
+    Your Account Profile
+</div>
+
+
+<div class="content-container">
+    <div class="panel">
+        <div id="statusContainer" style="color:red; margin-bottom:15px; font-weight:bold;"></div>
+
+        <div class="profile-grid">
+            <div class="form-row"><label>First Name</label><div id="firstnContainer"></div></div>
+            <div class="form-row"><label>Last Name</label><div id="lastnContainer"></div></div>
+
+            <div class="form-row"><label>Email Address</label><div id="emailContainer"></div></div>
+            <div class="form-row"><label>Phone Number</label><div id="phoneContainer"></div></div>
+
+            <div class="form-row"><label>Address</label><div id="addrContainer"></div></div>
+            <div class="form-row"><label>Zip Code</label><div id="zipContainer"></div></div>
+
+            <div class="form-row"><label>Emergency Contact</label><div id="contactContainer"></div></div>
+        </div>
+
+        <div id="btnContainer" style="margin-top: 20px; text-align: right;"></div>
+    </div>
+</div>
+
+
+<div class="footer">
+    &copy; 2026 ERFinder | Team 7 Fundamentals of Software Engineering
+</div>
+
+
+</body>
+
 
 <script src="app/app.nocache.js"></script>
-</body>
 </html>

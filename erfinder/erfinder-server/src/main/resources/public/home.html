@@ -1,26 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
+
 <head>
-    <meta charset=UTF-8>
+    <meta charset="UTF-8">
     <link type="text/css" rel="stylesheet" href="erfinder.css">
     <title>ERFinder - Home</title>
 </head>
 
+
 <body>
 <p id="page">Home</p>
 
-<noscript>
-    <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-        Your web browser must have JavaScript enabled
-        in order for this application to display correctly.
+
+<div class="top-nav">
+    <h1 class="brand-title">ERFinder Dashboard</h1>
+    <div class="nav-links">
+        <a href="info.html">Profile</a>
+        <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='index.html'); return false;">Logout</a>
     </div>
-</noscript>
+</div>
 
-<h1>Home Page</h1>
 
-<!-- The home page should go here!! :) -->
+<div class="page-title-bar" id="roleBar">
+    Role : Loading Role ...
+</div>
+
+
+<div class="content-container dashboard-grid">
+    <div class="panel">
+        Dynamic area depending on role.
+    </div>
+
+    <div class="panel">
+        <div class="map-placeholder">
+            ER Map Area
+        </div>
+    </div>
+</div>
+
+
+<div class="content-container dashboard-grid">
+    <div class="panel">
+        <h3>More To Come ...</h3>
+        <p>PLACEHOLDER</p>
+    </div>
+
+    <div class="panel">
+        <h3>More To Come ...</h3>
+        <p>PLACEHOLDER</p>
+    </div>
+</div>
+
+
+<div class="footer">
+    &copy; 2026 ERFinder | Team 7 Fundamentals of Software Engineering
+</div>
+
 
 </body>
-<!-- I'm putting this here so it loads last! :) -->
+
+
 <script src="app/app.nocache.js"></script>
 </html>
