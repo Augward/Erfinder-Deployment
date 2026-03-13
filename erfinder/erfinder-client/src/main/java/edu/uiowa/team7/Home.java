@@ -1,49 +1,54 @@
 package edu.uiowa.team7;
 
 import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
 public class Home {
-    private final VerticalPanel mainLayout;
+    private final VerticalPanel dynamicLayout;
 
     public Home() {
-        mainLayout = new VerticalPanel();
-        mainLayout.setWidth("100%");
-        RootPanel.get("dashboardContainer").add(mainLayout);
+        dynamicLayout = new VerticalPanel();
+        dynamicLayout.setSpacing(10);
+        RootPanel.get("dynamicContent").add(dynamicLayout);
 
         loadDashboard();
     }
 
-    private void loadDashboard() {
-        mainLayout.add(new Label("Loading tailored dashboard..."));
 
+    private void loadDashboard() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/myinfo");
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    mainLayout.clear();
                     if (response.getStatusCode() == 200) {
-                        // Assuming backend returns: Role,FirstName,Email,Phone
-                        String[] data = response.getText().split(",");
-                        String role = data[0].trim().toLowerCase();
+                        String[] data = response.getText().split(",", -1);
+                        String role = data[0].trim().toUpperCase();
                         String firstName = data[1];
 
-                        buildTopNav(firstName);
+                        DOM.getElementById("roleBar").setInnerText("Role: " + role);
 
-                        if (role.equals("admin")) {
+                        dynamicLayout.clear();
+                        dynamicLayout.add(new HTML("<h2>Welcome, " + firstName + "</h2>"));
+
+                        if (role.equals("PENDING")) {
+                            buildPendingView();
+                        } else if (role.equals("ADMIN")) {
                             buildAdminView();
-                        } else if (role.equals("medical") || role.equals("er")) {
+                        } else if (role.equals("DOCTOR") || role.equals("NURSE") || role.equals("EMT")) {
                             buildMedicalView();
                         } else {
-                            buildClientView();
+                            buildPatientView();
                         }
+
                     } else {
-                        mainLayout.add(new Label("Session expired. Please log in."));
+                        dynamicLayout.clear();
+                        dynamicLayout.add(new HTML("<h2 style='color:red;'>Session expired. Please log in.</h2>"));
                     }
                 }
                 public void onError(Request request, Throwable exception) {
-                    mainLayout.clear();
-                    mainLayout.add(new Label("Failed to connect to server."));
+                    dynamicLayout.clear();
+                    dynamicLayout.add(new HTML("<h2 style='color:red;'>Server Connection Error.</h2>"));
                 }
             });
         } catch (RequestException e) {
@@ -51,44 +56,37 @@ public class Home {
         }
     }
 
-    private void buildTopNav(String name) {
-        HorizontalPanel nav = new HorizontalPanel();
-        nav.setWidth("100%");
-        nav.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        nav.getElement().getStyle().setBackgroundColor("#e2e8f0");
-        nav.getElement().getStyle().setProperty("padding", "15px");
 
-        HTML profileLink = new HTML("<a href='info.html'>Profile (" + name + ")</a>");
-        HTML spacer = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
-        HTML logoutLink = new HTML("<a href='/api/logout'>Logout</a>");
-
-        nav.add(profileLink);
-        nav.add(spacer);
-        nav.add(logoutLink);
-
-        mainLayout.add(nav);
+    private void buildPendingView() {
+        dynamicLayout.add(new HTML("<h3>Account Pending Approval</h3>"));
+        dynamicLayout.add(new Label("Your account request is currently being reviewed by a system administrator. Please check back later."));
     }
 
-    private void buildClientView() {
-        mainLayout.add(new HTML("<h2>Patient Dashboard</h2>"));
-        mainLayout.add(new Label("Map and ER search tools will go here."));
+    private void buildPatientView() {
+        dynamicLayout.add(new Label("Search for the nearest ER matching your condition:"));
+        TextBox searchBox = new TextBox();
+        searchBox.addStyleName("form-input");
+        dynamicLayout.add(searchBox);
+
+        Button searchBtn = new Button("Search ERs");
+        searchBtn.addStyleName("btn");
+        dynamicLayout.add(searchBtn);
     }
 
     private void buildMedicalView() {
-        mainLayout.add(new HTML("<h2>Medical Staff Dashboard</h2>"));
-        mainLayout.add(new Label("Update ER wait times and capacity:"));
+        dynamicLayout.add(new Label("Update current ER capacity and wait times:"));
+        TextBox waitTimeBox = new TextBox();
+        waitTimeBox.addStyleName("form-input");
+        dynamicLayout.add(waitTimeBox);
 
-        HorizontalPanel updatePanel = new HorizontalPanel();
-        updatePanel.setSpacing(10);
-        updatePanel.add(new TextBox()); // Placeholder for wait time
-        updatePanel.add(new Button("Update Status"));
-        mainLayout.add(updatePanel);
+        Button updateBtn = new Button("Broadcast Update");
+        updateBtn.addStyleName("btn");
+        dynamicLayout.add(updateBtn);
     }
 
     private void buildAdminView() {
-        mainLayout.add(new HTML("<h2>Administrator Dashboard</h2>"));
-        mainLayout.add(new HTML("<h3>Pending Account Requests</h3>"));
-        // Placeholder for the approval list mentioned in your progress doc
-        mainLayout.add(new Label("- No new sign-up requests pending approval."));
+        dynamicLayout.add(new HTML("<h3>System Administration</h3>"));
+        dynamicLayout.add(new Label("To accept pending users in Sprint 1, update the database directly using:"));
+        dynamicLayout.add(new HTML("<code>UPDATE users SET perm='PATIENT' WHERE userid='...';</code>"));
     }
 }

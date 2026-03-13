@@ -129,38 +129,40 @@ public class StatusController {
     @GetMapping("/api/myinfo")
     public String GetMyInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return "Not logged in";
-        }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return "Not logged in"; }
         try {
             String[] info = Queries.GetUserInfo(result.UserID());
             if (info != null) {
-                // Sends back: Role, FirstN, Email, Phone, Address
-                return info[0] + "," + info[1] + "," + info[2] + "," + info[3] + "," + info[4];
+                // Joins all 8 fields with commas
+                return String.join(",", info);
             }
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
+        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
         return "Error loading data";
     }
 
     @GetMapping("/api/updateinfo")
     public void UpdateInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return;
-        }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
-            String email = B64Decode(request.getParameter("email"));
-            String phone = B64Decode(request.getParameter("phone"));
-            String addr = B64Decode(request.getParameter("addr"));
+            // Update all standard profile info
+            Queries.UpdateUserInfo(
+                    result.UserID(),
+                    B64Decode(request.getParameter("firstn")), B64Decode(request.getParameter("lastn")),
+                    B64Decode(request.getParameter("legaln")), B64Decode(request.getParameter("dln")),
+                    B64Decode(request.getParameter("ssn")), B64Decode(request.getParameter("email")),
+                    B64Decode(request.getParameter("phone")), B64Decode(request.getParameter("addr")),
+                    B64Decode(request.getParameter("zip")), B64Decode(request.getParameter("dob")),
+                    B64Decode(request.getParameter("gender")), B64Decode(request.getParameter("contact"))
+            );
 
-            Queries.UpdateUserInfo(result.UserID(), email, phone, addr);
+            // Check if they typed a new password to update
+            String newPass = B64Decode(request.getParameter("newpass"));
+            if (newPass != null && !newPass.trim().isEmpty()) {
+                Queries.UpdatePassword(result.UserID(), newPass);
+            }
+
             response.setStatus(HttpStatus.OK.value());
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
+        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
     }
 }

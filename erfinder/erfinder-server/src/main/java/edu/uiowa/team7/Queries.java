@@ -111,34 +111,49 @@ public class Queries {
         }
     }
 
+
+
     public static String[] GetUserInfo(String userID) throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("SELECT perm, firstn, email, phone, addr FROM users WHERE userid = ?");
+            PreparedStatement stmt = c.prepareStatement(
+                    "SELECT perm, firstn, lastn, legaln, dln, ssn, email, phone, addr, zip, dob, gender, contact FROM users WHERE userid = ?");
             stmt.setString(1, userID);
             ResultSet r = stmt.executeQuery();
             if (r.next()) {
-                return new String[] {
-                        r.getString("perm"),
-                        r.getString("firstn"),
-                        r.getString("email"),
-                        r.getString("phone"),
-                        r.getString("addr") // Added address
-                };
+                String[] info = new String[13];
+                for(int i = 0; i < 13; i++) {
+                    String val = r.getString(i + 1);
+                    info[i] = (val == null) ? "" : val;
+                }
+                return info;
             }
             return null;
         }
     }
 
-    // Update user info
-    public static boolean UpdateUserInfo(String userID, String email, String phone, String addr) throws SQLException {
+
+    public static boolean UpdateUserInfo(String userID, String firstn, String lastn, String legaln, String dln, String ssn, String email, String phone, String addr, String zip, String dob, String gender, String contact) throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("UPDATE users SET email = ?, phone = ?, addr = ? WHERE userid = ?");
-            stmt.setString(1, email);
-            stmt.setString(2, phone);
-            stmt.setString(3, userID);
-            stmt.setString(4, userID);
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
+            PreparedStatement stmt = c.prepareStatement(
+                    "UPDATE users SET firstn=?, lastn=?, legaln=?, dln=?, ssn=?, email=?, phone=?, addr=?, zip=?, dob=?, gender=?, contact=? WHERE userid=?");
+            stmt.setString(1, firstn); stmt.setString(2, lastn); stmt.setString(3, legaln);
+            stmt.setString(4, dln); stmt.setString(5, ssn); stmt.setString(6, email);
+            stmt.setString(7, phone); stmt.setString(8, addr); stmt.setString(9, zip);
+            stmt.setString(10, dob); stmt.setString(11, gender); stmt.setString(12, contact);
+            stmt.setString(13, userID);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+
+    public static boolean UpdatePassword(String userID, String newPassword) throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement(
+                    "UPDATE users SET passhash = UNHEX(SHA2(CONCAT(?, salt), 256)) WHERE userid = ?"
+            );
+            stmt.setString(1, newPassword);
+            stmt.setString(2, userID);
+            return stmt.executeUpdate() > 0;
         }
     }
 }
