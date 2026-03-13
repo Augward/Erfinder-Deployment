@@ -44,7 +44,7 @@ public class Security {
                 .from("token", GenerateJWT(username, device))
                 .httpOnly(true)
                 .path("/")
-                .secure(true)
+                .secure(false)
                 .sameSite("Strict")
                 .maxAge(Duration.ofMillis(Configuration.TokenLife()))
                 .build().toString();
