@@ -16,7 +16,7 @@
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>Web Application Starter Project</title>
+    <title>ERFinder - Login</title>
 
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
@@ -31,7 +31,7 @@
 <!-- to create a completely dynamic UI.        -->
 <!--                                           -->
 <body>
-    <p id="page">Login</p>
+    <p id="page" style="display:none;">Login</p>
 
 <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
 <noscript>
@@ -41,29 +41,30 @@
     </div>
 </noscript>
 
-<h1>Log In</h1>
+    <div class="top-nav">
+        <h1 class="brand-title"><span style="font-size: 0.8em; margin-right: 15px;">🚑</span> ERFinder</h1>
+        <div class="nav-links"><a href="index.html">Home</a></div>
+    </div>
 
-<table align="center">
-    <tr>
-        <td colspan="2" style="font-weight:bold;">Validate:</td>
-    </tr>
-    <tr>
-        <td id="userIDContainer"></td>
-    </tr>
-    <tr>
-        <td id="passwordContainer"></td>
-        <td id="sendButtonContainer"></td>
-    </tr>
-    <tr>
-        <td colspan="2" style="color:red;" id="responseContainer"></td>
-    </tr>
-    <tr>
-        <td colspan="2" style="color:red;"><a href="forgot.html">Forgot Password</a></td>
-    </tr>
-    <tr>
-        <td colspan="2" style="color:red;">Need an account? Request one <a href="register.html">here.</a></td>
-    </tr>
-</table>
+    <div class="page-title-bar">User Access</div>
+
+    <div class="content-container">
+        <div class="panel" style="max-width: 400px; margin: 0 auto; text-align: center;">
+            <h2 style="margin-top: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Log In</h2>
+            <table style="margin: 20px auto; text-align: left;">
+                <tr><td colspan="2" style="font-weight:bold; padding-bottom: 5px;">Validate Credentials:</td></tr>
+                <tr><td id="userIDContainer" style="padding-bottom: 10px;"></td></tr>
+                <tr><td id="passwordContainer"></td><td id="sendButtonContainer"></td></tr>
+                <tr><td colspan="2" style="color:red; padding-top: 10px; font-weight: bold;" id="responseContainer"></td></tr>
+                <tr><td colspan="2" style="padding-top: 20px;"><a href="forgot.html" style="color: #00467f; font-weight: bold;">Forgot Password?</a></td></tr>
+                <tr><td colspan="2" style="padding-top: 10px;">Need an account? Request one <a href="register.html" style="color: #00467f; font-weight: bold;">here.</a></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 ERFinder | Team 7 Fundamentals of Software Engineering
+    </div>
 </body>
 <!-- I'm putting this here so it loads last! :) -->
 <script src="app/app.nocache.js"></script>

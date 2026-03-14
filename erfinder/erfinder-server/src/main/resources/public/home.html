@@ -1,26 +1,71 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
+
 <head>
-    <meta charset=UTF-8>
+    <meta charset="UTF-8">
     <link type="text/css" rel="stylesheet" href="erfinder.css">
     <title>ERFinder - Home</title>
 </head>
 
+
 <body>
-<p id="page">Home</p>
+<p id="page" style="display:none;">Home</p>
 
-<noscript>
-    <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-        Your web browser must have JavaScript enabled
-        in order for this application to display correctly.
+
+<div class="top-nav">
+    <h1 class="brand-title">
+        <span style="font-size: 0.8em; margin-right: 15px;">🚑</span> ERFinder
+    </h1>
+    <div class="nav-links">
+        <a href="info.html">Profile</a>
+        <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='index.html'); return false;">Logout</a>
     </div>
-</noscript>
+</div>
 
-<h1>Home Page</h1>
 
-<!-- The home page should go here!! :) -->
+<div class="page-title-bar" id="roleBar">
+    Dashboard - Role : Authenticating ...
+</div>
+
+
+<div class="content-container dashboard-grid">
+    <div class="panel" id="dynamicContent"></div>
+
+    <div class="panel">
+        <div class="map-placeholder" style="padding:0; overflow:hidden;">
+            <iframe width="100%" height="100%"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=-96.7,40.4,-90.1,43.5&amp;layer=mapnik"></iframe>
+        </div>
+    </div>
+</div>
+
+
+<div class="content-container dashboard-grid">
+    <div class="panel">
+        <h3>System Status</h3>
+        <p style="color: #166534; font-weight: bold;">✓ All Systems Operational</p>
+        <p style="color: #475569;">Live data feeds from regional ER facilities and ambulance carriers are currently syncing without delays.</p>
+    </div>
+
+    <div class="panel">
+        <h3>Quick Resources</h3>
+        <ul style="color: #00467f; line-height: 1.8;">
+            <li><a href="https://www.hhs.gov/hipaa/index.html" style="color: #00467f; text-decoration: none;">View Privacy Policy & HIPAA Compliance</a></li>
+            <li><a href="https://hhs.iowa.gov/" style="color: #00467f; text-decoration: none;">State Department of Health Portal</a></li>
+            <li><a href="#" style="color: #00467f; text-decoration: none;">Contact ERFinder Support Team</a></li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="footer">
+    &copy; 2026 ERFinder | Team 7 Fundamentals of Software Engineering
+</div>
+
 
 </body>
-<!-- I'm putting this here so it loads last! :) -->
+
+
 <script src="app/app.nocache.js"></script>
 </html>

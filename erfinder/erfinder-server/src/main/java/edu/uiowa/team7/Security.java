@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
-import javax.swing.text.html.Option;
 import java.security.KeyPair;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,7 +25,8 @@ public class Security {
     }
 
     public static String GetDevice(HttpServletRequest req) {
-        return req.getRequestedSessionId();
+        String ip = req.getRemoteAddr();
+        return ip != null ? ip : "unknown_device";
     }
 
     public static String GenerateJWT(String username, String device) {
@@ -44,7 +44,7 @@ public class Security {
                 .from("token", GenerateJWT(username, device))
                 .httpOnly(true)
                 .path("/")
-                .secure(true)
+                .secure(false)
                 .sameSite("Strict")
                 .maxAge(Duration.ofMillis(Configuration.TokenLife()))
                 .build().toString();

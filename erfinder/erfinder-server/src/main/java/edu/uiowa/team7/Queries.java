@@ -111,27 +111,91 @@ public class Queries {
         }
     }
 
+
+
+
     public static String[] GetUserInfo(String userID) throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("SELECT first_name, email, phone FROM users WHERE user_id = ?");
+            PreparedStatement stmt = c.prepareStatement(
+                    "SELECT perm, firstn, lastn, legaln, dln, ssn, email, phone, addr, zip, dob, gender, contact FROM users WHERE userid = ?");
             stmt.setString(1, userID);
             ResultSet r = stmt.executeQuery();
             if (r.next()) {
-                return new String[] { r.getString("first_name"), r.getString("email"), r.getString("phone") };
+                String[] info = new String[13];
+                for(int i = 0; i < 13; i++) {
+                    String val = r.getString(i + 1);
+                    info[i] = (val == null) ? "" : val;
+                }
+                return info;
             }
             return null;
         }
     }
 
-    // Update user info
-    public static boolean UpdateUserInfo(String userID, String email, String phone) throws SQLException {
+    public static boolean UpdateUserInfo(String userID, String firstn, String lastn, String legaln, String dln, String ssn, String email, String phone, String addr, String zip, String dob, String gender, String contact) throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("UPDATE users SET email = ?, phone = ? WHERE user_id = ?");
-            stmt.setString(1, email);
-            stmt.setString(2, phone);
-            stmt.setString(3, userID);
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
+            PreparedStatement stmt = c.prepareStatement(
+                    "UPDATE users SET firstn=?, lastn=?, legaln=?, dln=?, ssn=?, email=?, phone=?, addr=?, zip=?, dob=?, gender=?, contact=? WHERE userid=?");
+            stmt.setString(1, firstn); stmt.setString(2, lastn); stmt.setString(3, legaln);
+            stmt.setString(4, dln); stmt.setString(5, ssn); stmt.setString(6, email);
+            stmt.setString(7, phone); stmt.setString(8, addr); stmt.setString(9, zip);
+            stmt.setString(10, dob); stmt.setString(11, gender); stmt.setString(12, contact);
+            stmt.setString(13, userID);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+
+    public static boolean UpdatePassword(String userID, String newPassword) throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement(
+                    "UPDATE users SET passhash = UNHEX(SHA2(CONCAT(?, salt), 256)) WHERE userid = ?"
+            );
+            stmt.setString(1, newPassword);
+            stmt.setString(2, userID);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public static void DeleteUser(String userID) throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement("DELETE FROM users WHERE userid = ?");
+            stmt.setString(1, userID);
+            stmt.executeUpdate();
+        }
+    }
+
+
+    public static String GetPendingUsers() throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement("SELECT userid, perm FROM registration");
+            ResultSet r = stmt.executeQuery();
+            StringBuilder sb = new StringBuilder();
+            while (r.next()) {
+                sb.append(r.getString("userid")).append(":").append(r.getString("perm")).append(",");
+            }
+            if (sb.length() > 0) sb.setLength(sb.length() - 1);
+            return sb.toString();
+        }
+    }
+
+    public static boolean ApproveUser(String targetUserID) throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement insertStmt = c.prepareStatement(
+                    "INSERT INTO users (perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer) " +
+                            "SELECT perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer " +
+                            "FROM registration WHERE userid = ?"
+            );
+            insertStmt.setString(1, targetUserID);
+            int inserted = insertStmt.executeUpdate();
+
+            if (inserted > 0) {
+                PreparedStatement deleteStmt = c.prepareStatement("DELETE FROM registration WHERE userid = ?");
+                deleteStmt.setString(1, targetUserID);
+                deleteStmt.executeUpdate();
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -114,7 +114,7 @@ public class StatusController {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
 
         // if there is no token / token is expired, it won't be valid
-        if (!result.IsValid()) {
+        if (result.IsValid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return "Not Logged In!";
         }
@@ -124,40 +124,5 @@ public class StatusController {
 
         // this method returns the userID embedded in the token
         return result.UserID();
-    }
-
-    @GetMapping("/api/myinfo")
-    public String GetMyInfo(HttpServletRequest request, HttpServletResponse response) {
-        Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return "Not logged in";
-        }
-        try {
-            String[] info = Queries.GetUserInfo(result.UserID());
-            if (info != null) {
-                return info[0] + "," + info[1] + "," + info[2];
-            }
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-        return "Error loading data";
-    }
-
-    @GetMapping("/api/updateinfo")
-    public void UpdateInfo(HttpServletRequest request, HttpServletResponse response) {
-        Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return;
-        }
-        try {
-            String email = B64Decode(request.getParameter("email"));
-            String phone = B64Decode(request.getParameter("phone"));
-            Queries.UpdateUserInfo(result.UserID(), email, phone);
-            response.setStatus(HttpStatus.OK.value());
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
     }
 }

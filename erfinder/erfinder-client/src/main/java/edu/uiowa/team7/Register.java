@@ -123,7 +123,7 @@ public class Register {
 
         wrapper.add(form);
 
-        RootPanel.get().add(wrapper);
+        RootPanel.get("registerContainer").add(wrapper);
     }
 
     //when user hits submit button the code then checks the entries of stuffs:
