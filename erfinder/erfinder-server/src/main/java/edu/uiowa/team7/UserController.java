@@ -19,7 +19,7 @@ public class UserController {
     @GetMapping("/api/myinfo")
     public String GetMyInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return "Not logged in"; }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return "Not logged in"; }
         try {
             String[] info = Queries.GetUserInfo(result.UserID());
             if (info != null) {
@@ -32,7 +32,7 @@ public class UserController {
     @GetMapping("/api/updateinfo")
     public void UpdateInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             Queries.UpdateUserInfo(
                     result.UserID(),
@@ -50,7 +50,7 @@ public class UserController {
     @GetMapping("/api/updatepassword")
     public void UpdatePassword(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             String newPass = B64Decode(request.getParameter("newpass"));
             Queries.UpdatePassword(result.UserID(), newPass);
@@ -63,7 +63,7 @@ public class UserController {
     @GetMapping("/api/deleteaccount")
     public void DeleteAccount(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             String pass = B64Decode(request.getParameter("password"));
 
@@ -80,7 +80,7 @@ public class UserController {
     @GetMapping("/api/pendingusers")
     public String GetPendingUsers(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
         try {
             return Queries.GetPendingUsers();
         } catch (Exception e) {
@@ -92,7 +92,7 @@ public class UserController {
     @GetMapping("/api/approveuser")
     public void ApproveUser(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             String target = B64Decode(request.getParameter("target"));
             if (Queries.ApproveUser(target)) {
