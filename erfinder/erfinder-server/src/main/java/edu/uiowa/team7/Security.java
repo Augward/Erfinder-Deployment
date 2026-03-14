@@ -26,7 +26,8 @@ public class Security {
     }
 
     public static String GetDevice(HttpServletRequest req) {
-        return req.getRequestedSessionId();
+        String ip = req.getRemoteAddr();
+        return ip != null ? ip : "unknown_device";
     }
 
     public static String GenerateJWT(String username, String device) {

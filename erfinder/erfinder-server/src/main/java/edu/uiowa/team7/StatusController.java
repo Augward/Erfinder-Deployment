@@ -145,7 +145,6 @@ public class StatusController {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
         if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
-            // Update all standard profile info
             Queries.UpdateUserInfo(
                     result.UserID(),
                     B64Decode(request.getParameter("firstn")), B64Decode(request.getParameter("lastn")),
@@ -155,13 +154,20 @@ public class StatusController {
                     B64Decode(request.getParameter("zip")), B64Decode(request.getParameter("dob")),
                     B64Decode(request.getParameter("gender")), B64Decode(request.getParameter("contact"))
             );
+            response.setStatus(HttpStatus.OK.value());
+        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
+    }
 
-            // Check if they typed a new password to update
+    @GetMapping("/api/updatepassword")
+    public void UpdatePassword(HttpServletRequest request, HttpServletResponse response) {
+        Security.TokenParseResult result = Security.ParseRequestJWT(request);
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        try {
             String newPass = B64Decode(request.getParameter("newpass"));
-            if (newPass != null && !newPass.trim().isEmpty()) {
-                Queries.UpdatePassword(result.UserID(), newPass);
-            }
+            Queries.UpdatePassword(result.UserID(), newPass);
 
+            // Wipe the cookie to force logout
+            response.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
             response.setStatus(HttpStatus.OK.value());
         } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
     }
