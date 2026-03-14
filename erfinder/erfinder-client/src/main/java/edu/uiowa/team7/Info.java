@@ -3,6 +3,7 @@ package edu.uiowa.team7;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 public class Info {
@@ -21,6 +22,7 @@ public class Info {
     private final PasswordTextBox passwordBox = new PasswordTextBox();
 
     private final Button toggleEditBtn;
+    private final Button updatePassBtn;
     private final Label statusLabel;
     private boolean isEditing = false;
 
@@ -29,24 +31,26 @@ public class Info {
                 addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox};
         for (TextBox box : boxes) { box.addStyleName("form-input"); }
         setFieldsReadOnly(true);
+        passwordBox.setReadOnly(false); // Password should always be editable
 
         toggleEditBtn = new Button("Edit Profile");
         toggleEditBtn.addStyleName("btn");
+
+        updatePassBtn = new Button("Update Password");
+        updatePassBtn.addStyleName("btn");
+
         statusLabel = new Label("Loading...");
 
-        RootPanel.get("firstnContainer").add(firstnBox);
-        RootPanel.get("lastnContainer").add(lastnBox);
-        RootPanel.get("legalnContainer").add(legalnBox);
-        RootPanel.get("dobContainer").add(dobBox);
-        RootPanel.get("emailContainer").add(emailBox);
-        RootPanel.get("phoneContainer").add(phoneBox);
-        RootPanel.get("addrContainer").add(addrBox);
-        RootPanel.get("zipContainer").add(zipBox);
-        RootPanel.get("dlnContainer").add(dlnBox);
-        RootPanel.get("ssnContainer").add(ssnBox);
-        RootPanel.get("contactContainer").add(contactBox);
-        RootPanel.get("genderContainer").add(genderBox);
+        RootPanel.get("firstnContainer").add(firstnBox); RootPanel.get("lastnContainer").add(lastnBox);
+        RootPanel.get("legalnContainer").add(legalnBox); RootPanel.get("dobContainer").add(dobBox);
+        RootPanel.get("emailContainer").add(emailBox); RootPanel.get("phoneContainer").add(phoneBox);
+        RootPanel.get("addrContainer").add(addrBox); RootPanel.get("zipContainer").add(zipBox);
+        RootPanel.get("dlnContainer").add(dlnBox); RootPanel.get("ssnContainer").add(ssnBox);
+        RootPanel.get("contactContainer").add(contactBox); RootPanel.get("genderContainer").add(genderBox);
+
         RootPanel.get("passwordContainer").add(passwordBox);
+        RootPanel.get("passwordContainer").add(updatePassBtn); // Add button directly under password
+
         RootPanel.get("btnContainer").add(toggleEditBtn);
         RootPanel.get("statusContainer").add(statusLabel);
 
@@ -57,17 +61,20 @@ public class Info {
                 if (!isEditing) {
                     isEditing = true;
                     setFieldsReadOnly(false);
+                    passwordBox.setReadOnly(false);
                     toggleEditBtn.setText("Save Changes");
-                } else {
-                    saveUpdatedInfo();
-                }
+                } else { saveUpdatedInfo(); }
             }
+        });
+
+        updatePassBtn.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) { updatePassword(); }
         });
     }
 
     private void setFieldsReadOnly(boolean readOnly) {
         TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox,
-                addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox};
+                addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox};
         for (TextBox box : boxes) { box.setReadOnly(readOnly); }
     }
 
@@ -85,7 +92,6 @@ public class Info {
                             phoneBox.setText(data[7]); addrBox.setText(data[8]);
                             zipBox.setText(data[9]); dobBox.setText(data[10]);
                             genderBox.setText(data[11]); contactBox.setText(data[12]);
-                            passwordBox.setText("");
                             statusLabel.setText("");
                         }
                     } else { statusLabel.setText("Session expired. Please log in."); }
@@ -106,8 +112,7 @@ public class Info {
                 "&ssn=" + App.B64Encode(ssnBox.getText()) + "&email=" + App.B64Encode(emailBox.getText()) +
                 "&phone=" + App.B64Encode(phoneBox.getText()) + "&addr=" + App.B64Encode(addrBox.getText()) +
                 "&zip=" + App.B64Encode(zipBox.getText()) + "&dob=" + App.B64Encode(dobBox.getText()) +
-                "&gender=" + App.B64Encode(genderBox.getText()) + "&contact=" + App.B64Encode(contactBox.getText()) +
-                "&newpass=" + App.B64Encode(passwordBox.getText());
+                "&gender=" + App.B64Encode(genderBox.getText()) + "&contact=" + App.B64Encode(contactBox.getText());
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
         try {
@@ -117,7 +122,6 @@ public class Info {
                     if (response.getStatusCode() == 200) {
                         statusLabel.getElement().getStyle().setColor("green");
                         statusLabel.setText("Profile updated successfully!");
-                        passwordBox.setText("");
                         isEditing = false;
                         setFieldsReadOnly(true);
                         toggleEditBtn.setText("Edit Profile");
@@ -130,6 +134,34 @@ public class Info {
                     toggleEditBtn.setEnabled(true);
                     statusLabel.getElement().getStyle().setColor("red");
                     statusLabel.setText("Server connection error.");
+                }
+            });
+        } catch (RequestException e) { e.printStackTrace(); }
+    }
+
+    private void updatePassword() {
+        String newPass = passwordBox.getText();
+        if (newPass == null || newPass.trim().isEmpty()) {
+            statusLabel.getElement().getStyle().setColor("red");
+            statusLabel.setText("Please enter a new password first.");
+            return;
+        }
+
+        updatePassBtn.setEnabled(false);
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/updatepassword?newpass=" + App.B64Encode(newPass));
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() == 200) {
+                        Window.Location.assign("index.html"); // Redirects and forces re-login
+                    } else {
+                        updatePassBtn.setEnabled(true);
+                        statusLabel.setText("Failed to update password.");
+                    }
+                }
+                public void onError(Request request, Throwable exception) {
+                    updatePassBtn.setEnabled(true);
+                    statusLabel.setText("Server error.");
                 }
             });
         } catch (RequestException e) { e.printStackTrace(); }
