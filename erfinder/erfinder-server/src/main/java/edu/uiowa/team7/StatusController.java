@@ -114,7 +114,7 @@ public class StatusController {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
 
         // if there is no token / token is expired, it won't be valid
-        if (!result.IsValid()) {
+        if (result.IsValid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return "Not Logged In!";
         }
@@ -124,70 +124,5 @@ public class StatusController {
 
         // this method returns the userID embedded in the token
         return result.UserID();
-    }
-
-
-
-
-    @GetMapping("/api/myinfo")
-    public String GetMyInfo(HttpServletRequest request, HttpServletResponse response) {
-        Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return "Not logged in"; }
-        try {
-            String[] info = Queries.GetUserInfo(result.UserID());
-            if (info != null) {
-                return String.join(",", info);
-            }
-        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
-        return "Error loading data";
-    }
-
-    @GetMapping("/api/updateinfo")
-    public void UpdateInfo(HttpServletRequest request, HttpServletResponse response) {
-        Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
-        try {
-            Queries.UpdateUserInfo(
-                    result.UserID(),
-                    B64Decode(request.getParameter("firstn")), B64Decode(request.getParameter("lastn")),
-                    B64Decode(request.getParameter("legaln")), B64Decode(request.getParameter("dln")),
-                    B64Decode(request.getParameter("ssn")), B64Decode(request.getParameter("email")),
-                    B64Decode(request.getParameter("phone")), B64Decode(request.getParameter("addr")),
-                    B64Decode(request.getParameter("zip")), B64Decode(request.getParameter("dob")),
-                    B64Decode(request.getParameter("gender")), B64Decode(request.getParameter("contact"))
-            );
-            response.setStatus(HttpStatus.OK.value());
-        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
-    }
-
-    @GetMapping("/api/updatepassword")
-    public void UpdatePassword(HttpServletRequest request, HttpServletResponse response) {
-        Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
-        try {
-            String newPass = B64Decode(request.getParameter("newpass"));
-            Queries.UpdatePassword(result.UserID(), newPass);
-
-            // Wipe the cookie to force logout
-            response.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
-            response.setStatus(HttpStatus.OK.value());
-        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
-    }
-
-    @GetMapping("/api/deleteaccount")
-    public void DeleteAccount(HttpServletRequest request, HttpServletResponse response) {
-        Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
-        try {
-            String pass = B64Decode(request.getParameter("password"));
-            // Verify password before deleting
-            if (Queries.ValidateCredentials(result.UserID(), pass)) {
-                Queries.DeleteUser(result.UserID());
-                response.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
-                response.setStatus(HttpStatus.OK.value());
-            } else {
-                response.setStatus(HttpStatus.FORBIDDEN.value());
-            }
-        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
     }
 }

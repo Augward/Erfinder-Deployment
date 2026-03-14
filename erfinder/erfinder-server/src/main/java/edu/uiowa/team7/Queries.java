@@ -164,4 +164,38 @@ public class Queries {
             stmt.executeUpdate();
         }
     }
+
+
+    public static String GetPendingUsers() throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement("SELECT userid, perm FROM registration");
+            ResultSet r = stmt.executeQuery();
+            StringBuilder sb = new StringBuilder();
+            while (r.next()) {
+                sb.append(r.getString("userid")).append(":").append(r.getString("perm")).append(",");
+            }
+            if (sb.length() > 0) sb.setLength(sb.length() - 1);
+            return sb.toString();
+        }
+    }
+
+    public static boolean ApproveUser(String targetUserID) throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement insertStmt = c.prepareStatement(
+                    "INSERT INTO users (perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer) " +
+                            "SELECT perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer " +
+                            "FROM registration WHERE userid = ?"
+            );
+            insertStmt.setString(1, targetUserID);
+            int inserted = insertStmt.executeUpdate();
+
+            if (inserted > 0) {
+                PreparedStatement deleteStmt = c.prepareStatement("DELETE FROM registration WHERE userid = ?");
+                deleteStmt.setString(1, targetUserID);
+                deleteStmt.executeUpdate();
+                return true;
+            }
+            return false;
+        }
+    }
 }

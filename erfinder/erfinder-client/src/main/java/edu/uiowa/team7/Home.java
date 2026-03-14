@@ -1,5 +1,6 @@
 package edu.uiowa.team7;
 
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
@@ -29,10 +30,22 @@ public class Home {
                         dynamicLayout.clear();
                         dynamicLayout.add(new HTML("<h2>Welcome, " + firstName + "</h2>"));
 
-                        if (role.equals("PENDING")) { buildPendingView(); }
-                        else if (role.equals("ADMIN")) { buildAdminView(); }
-                        else if (role.equals("DOCTOR") || role.equals("NURSE") || role.equals("EMT")) { buildMedicalView(); }
-                        else { buildPatientView(); }
+                        switch (role) {
+                            case "PENDING":
+                                buildPendingView();
+                                break;
+                            case "ADMIN":
+                                buildAdminView();
+                                break;
+                            case "DOCTOR":
+                            case "NURSE":
+                            case "EMT":
+                                buildMedicalView();
+                                break;
+                            default:
+                                buildPatientView();
+                                break;
+                        }
                     } else {
                         dynamicLayout.clear();
                         dynamicLayout.add(new HTML("<h2 style='color:red;'>Session expired. Please log in.</h2>"));
@@ -101,17 +114,66 @@ public class Home {
         dynamicLayout.add(new HTML("<h3>Pending User Approvals</h3>"));
         dynamicLayout.add(new Label("The following accounts are awaiting verification:"));
 
-        FlexTable approvalTable = new FlexTable();
+        final FlexTable approvalTable = new FlexTable();
         approvalTable.setWidth("100%");
-        approvalTable.addStyleName("form-input"); // Borrowing border style
+        approvalTable.addStyleName("form-input");
         approvalTable.setHTML(0, 0, "<b>User ID</b>");
         approvalTable.setHTML(0, 1, "<b>Role Requested</b>");
         approvalTable.setHTML(0, 2, "<b>Action</b>");
 
-        approvalTable.setText(1, 0, "JohnDoe");
-        approvalTable.setText(1, 1, "Patient");
-        approvalTable.setWidget(1, 2, new Button("Approve"));
-
         dynamicLayout.add(approvalTable);
+
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/pendingusers");
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() == 200 && !response.getText().isEmpty()) {
+                        String[] users = response.getText().split(",");
+                        int row = 1;
+                        for (String u : users) {
+                            String[] parts = u.split(":");
+                            if (parts.length == 2) {
+                                final String uid = parts[0];
+                                String role = parts[1];
+
+                                approvalTable.setText(row, 0, uid);
+                                approvalTable.setText(row, 1, role);
+
+                                Button approveBtn = new Button("Approve");
+                                approveBtn.addStyleName("btn");
+                                approveBtn.addClickHandler(event -> approveUser(uid));
+                                approvalTable.setWidget(row, 2, approveBtn);
+                                row++;
+                            }
+                        }
+                    } else {
+                        dynamicLayout.add(new HTML("<p style='color:green; font-weight:bold;'>No pending users at this time.</p>"));
+                    }
+                }
+                public void onError(Request request, Throwable exception) {
+                    dynamicLayout.add(new HTML("<p style='color:red;'>Failed to load users.</p>"));
+                }
+            });
+        } catch (RequestException e) { e.printStackTrace(); }
+    }
+
+    private void approveUser(final String targetID) {
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/approveuser?target=" + App.B64Encode(targetID));
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() == 200) {
+                        com.google.gwt.user.client.Window.alert("User " + targetID + " approved successfully!");
+                        dynamicLayout.clear();
+                        loadDashboard();
+                    } else {
+                        com.google.gwt.user.client.Window.alert("Failed to approve user.");
+                    }
+                }
+                public void onError(Request request, Throwable exception) {
+                    com.google.gwt.user.client.Window.alert("Server connection error.");
+                }
+            });
+        } catch (RequestException e) { e.printStackTrace(); }
     }
 }

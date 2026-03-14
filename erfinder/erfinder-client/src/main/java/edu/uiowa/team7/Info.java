@@ -1,7 +1,5 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
@@ -69,23 +67,17 @@ public class Info {
 
         fetchCurrentInfo();
 
-        toggleEditBtn.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                if (!isEditing) {
-                    isEditing = true;
-                    setFieldsReadOnly(false);
-                    toggleEditBtn.setText("Save Changes");
-                } else { saveUpdatedInfo(); }
-            }
+        toggleEditBtn.addClickHandler(event -> {
+            if (!isEditing) {
+                isEditing = true;
+                setFieldsReadOnly(false);
+                toggleEditBtn.setText("Save Changes");
+            } else { saveUpdatedInfo(); }
         });
 
-        updatePassBtn.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) { updatePassword(); }
-        });
+        updatePassBtn.addClickHandler(event -> updatePassword());
 
-        deleteAccountBtn.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) { deleteAccount(); }
-        });
+        deleteAccountBtn.addClickHandler(event -> deleteAccount());
     }
 
     private void setFieldsReadOnly(boolean readOnly) {
