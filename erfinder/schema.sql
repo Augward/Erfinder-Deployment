@@ -38,13 +38,13 @@ CREATE TABLE `registration` (
   `firstn` varchar(32) NOT NULL,
   `lastn` varchar(32) DEFAULT NULL,
   `legaln` varchar(128) NOT NULL,
-  `dln` int DEFAULT NULL,
-  `ssn` int DEFAULT NULL,
-  `phone` int DEFAULT NULL,
-  `contact` int DEFAULT NULL,
+  `dln` varchar(20) DEFAULT NULL,
+  `ssn` varchar(20) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `contact` varchar(20) DEFAULT NULL,
   `email` varchar(128) NOT NULL,
   `addr` varchar(256) NOT NULL,
-  `zip` int DEFAULT NULL,
+  `zip` varchar(20) DEFAULT NULL,
   `dob` date DEFAULT NULL,
   `gender` varchar(32) DEFAULT NULL,
   `secquestion` varchar(64) DEFAULT NULL,
@@ -69,13 +69,13 @@ CREATE TABLE `users` (
   `firstn` varchar(32) NOT NULL,
   `lastn` varchar(32) DEFAULT NULL,
   `legaln` varchar(128) NOT NULL,
-  `dln` int DEFAULT NULL,
-  `ssn` int DEFAULT NULL,
-  `phone` int DEFAULT NULL,
-  `contact` int DEFAULT NULL,
+  `dln` varchar(20) DEFAULT NULL,
+  `ssn` varchar(20) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `contact` varchar(20) DEFAULT NULL,
   `email` varchar(128) NOT NULL,
   `addr` varchar(256) NOT NULL,
-  `zip` int DEFAULT NULL,
+  `zip` varchar(20) DEFAULT NULL,
   `dob` date DEFAULT NULL,
   `gender` varchar(32) DEFAULT NULL,
   `secquestion` varchar(64) DEFAULT NULL,
@@ -126,18 +126,18 @@ BEGIN
         secanswer
 	)
     VALUES (
-		tuserid,
-		_hashed, 
-        _salt, 
-        "test",
-        "_testFN",
-        "_testLN",
-        "_testLegal",
-        "_testEmail",
-        "_testAddr",
+        tuserid,
+        _hashed,
+        _salt,
+        'test',
+        '_testFN',
+        '_testLN',
+        '_testLegal',
+        '_testEmail',
+        '_testAddr',
         tusersecq,
         _hashsq
-	);
+    );
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -201,7 +201,7 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `PurgeTestUsers`()
 BEGIN
 	DELETE FROM Users 
-    WHERE perm="test";
+    WHERE perm='test';
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
