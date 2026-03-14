@@ -3,11 +3,7 @@ html, body {
     margin: 0 !important;
     padding: 0 !important;
     width: 100%;
-}
-
-/* Sets background color and basics */
-body {
-    background-color: lightgrey;
+    background-color: lightgrey !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #1f2937;
     display: flex;
@@ -18,7 +14,7 @@ body {
 /* Header & Footer Bars */
 .top-nav {
     background-color: #00467f;
-    padding: 45px 40px;
+    padding: 25px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -29,8 +25,10 @@ body {
 /* White large title */
 .brand-title {
     color: white;
-    font-size: 3em;
+    font-size: 2.5em;
     margin: 0;
+    display: flex;
+    align-items: center;
 }
 
 /* Keeps links same color to contrast background */
@@ -78,11 +76,11 @@ body {
 .hero-image {
     position: relative;
     width: 100%;
-    height: 350px;
+    height: 300px;
     background-color: #00467f;
     overflow: hidden;
     border-bottom: 4px solid #002244;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
 }
 
 /* Full-width, opaque background */
@@ -107,7 +105,7 @@ body {
 
 .content-container {
     max-width: 1200px;
-    margin: 40px auto 60px auto;
+    margin: 20px auto 60px auto;
     padding: 0 20px;
     width: 100%;
     box-sizing: border-box;

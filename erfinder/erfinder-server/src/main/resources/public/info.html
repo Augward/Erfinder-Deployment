@@ -10,11 +10,13 @@
 
 
 <body>
-<p id="page">Info</p>
+<p id="page" style="display:none;">Info</p>
 
 
 <div class="top-nav">
-    <h1 class="brand-title">ERFinder Profile</h1>
+    <h1 class="brand-title">
+        <span style="font-size: 0.8em; margin-right: 15px;">🚑</span> ERFinder
+    </h1>
     <div class="nav-links">
         <a href="home.html">Dashboard</a>
         <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='index.html'); return false;">Logout</a>
@@ -28,35 +30,45 @@
 
 
 <div class="content-container">
-    <div class="panel">
-        <div id="statusContainer" style="color:red; margin-bottom:15px; font-weight:bold;"></div>
+    <div id="statusContainer" style="margin-bottom:15px; font-weight:bold; text-align: center;"></div>
 
+    <div class="panel" style="margin-bottom: 30px;">
+        <h3 style="margin-top: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Personal Information</h3>
         <div class="profile-grid">
-            <div class="form-row"><label>First Name</label><div id="firstnContainer"></div></div>
+            <div class="form-row"><label>First Name <span style="color:red;">*</span></label><div id="firstnContainer"></div></div>
             <div class="form-row"><label>Last Name</label><div id="lastnContainer"></div></div>
-
-            <div class="form-row"><label>Full Legal Name</label><div id="legalnContainer"></div></div>
-            <div class="form-row"><label>Date of Birth (YYYY-MM-DD)</label><div id="dobContainer"></div></div>
-
-            <div class="form-row"><label>Email Address</label><div id="emailContainer"></div></div>
+            <div class="form-row"><label>Full Legal Name <span style="color:red;">*</span></label><div id="legalnContainer"></div></div>
+            <div class="form-row"><label>Date of Birth (YYYY-MM-DD) <span style="color:red;">*</span></label><div id="dobContainer"></div></div>
+            <div class="form-row"><label>Email Address <span style="color:red;">*</span></label><div id="emailContainer"></div></div>
             <div class="form-row"><label>Phone Number (XXX-XXX-XXXX)</label><div id="phoneContainer"></div></div>
-
-            <div class="form-row"><label>Physical Address</label><div id="addrContainer"></div></div>
+            <div class="form-row"><label>Physical Address <span style="color:red;">*</span></label><div id="addrContainer"></div></div>
             <div class="form-row"><label>Zip Code</label><div id="zipContainer"></div></div>
-
             <div class="form-row"><label>Driver's License #</label><div id="dlnContainer"></div></div>
             <div class="form-row"><label>SSN (XXX-XX-XXXX)</label><div id="ssnContainer"></div></div>
-
-            <div class="form-row"><label>Emergency Contact (XXX-XXX-XXXX)</label><div id="contactContainer"></div></div>
+            <div class="form-row"><label>Emergency Contact</label><div id="contactContainer"></div></div>
             <div class="form-row"><label>Gender</label><div id="genderContainer"></div></div>
-
-            <div class="form-row" style="grid-column: 1 / -1; border-top: 2px solid #cbd5e1; padding-top: 15px;">
-                <label>Change Password (You Will Be Logged Out After Entering New Password)</label>
-                <div id="passwordContainer"></div>
-            </div>
         </div>
-
         <div id="btnContainer" style="margin-top: 20px; text-align: right;"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom: 30px;">
+        <h3 style="margin-top: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Security: Change Password</h3>
+        <p style="color: #475569; font-size: 0.9em;">You will be required to log back in after changing your password.</p>
+        <div class="form-row" style="max-width: 400px;">
+            <label>New Password</label>
+            <div id="passwordContainer"></div>
+            <div id="passwordUpdateBtnContainer" style="margin-top: 10px; text-align: right;"></div>
+        </div>
+    </div>
+
+    <div class="panel" style="border: 2px solid #fca5a5;">
+        <h3 style="margin-top: 0; color: #dc2626;">Danger Zone: Delete Account</h3>
+        <p style="color: #475569; font-size: 0.9em;">Confirm your current password to permanently delete your ERFinder account. This action cannot be undone.</p>
+        <div class="form-row" style="max-width: 400px;">
+            <label>Current Password</label>
+            <div id="deletePassContainer"></div>
+            <div id="deleteAccountBtnContainer" style="margin-top: 10px; text-align: right;"></div>
+        </div>
     </div>
 </div>
 

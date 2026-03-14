@@ -10,11 +10,13 @@
 
 
 <body>
-<p id="page">Home</p>
+<p id="page" style="display:none;">Home</p>
 
 
 <div class="top-nav">
-    <h1 class="brand-title">ERFinder Dashboard</h1>
+    <h1 class="brand-title">
+        <span style="font-size: 0.8em; margin-right: 15px;">🚑</span> ERFinder
+    </h1>
     <div class="nav-links">
         <a href="info.html">Profile</a>
         <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='index.html'); return false;">Logout</a>
@@ -23,14 +25,12 @@
 
 
 <div class="page-title-bar" id="roleBar">
-    Role : Loading Role ...
+    Role : Authenticating ...
 </div>
 
 
 <div class="content-container dashboard-grid">
-    <div class="panel" id="dynamicContent">
-        Loading Dynamic Area Depending on Role ...
-    </div>
+    <div class="panel" id="dynamicContent"></div>
 
     <div class="panel">
         <div class="map-placeholder" style="padding:0; overflow:hidden;">
@@ -43,13 +43,18 @@
 
 <div class="content-container dashboard-grid">
     <div class="panel">
-        <h3>More To Come ...</h3>
-        <p>PLACEHOLDER</p>
+        <h3>System Status</h3>
+        <p style="color: #166534; font-weight: bold;">✓ All Systems Operational</p>
+        <p style="color: #475569;">Live data feeds from regional ER facilities and ambulance carriers are currently syncing without delays.</p>
     </div>
 
     <div class="panel">
-        <h3>More To Come ...</h3>
-        <p>PLACEHOLDER</p>
+        <h3>Quick Resources</h3>
+        <ul style="color: #00467f; line-height: 1.8;">
+            <li><a href="https://www.hhs.gov/hipaa/index.html" style="color: #00467f; text-decoration: none;">View Privacy Policy & HIPAA Compliance</a></li>
+            <li><a href="https://hhs.iowa.gov/" style="color: #00467f; text-decoration: none;">State Department of Health Portal</a></li>
+            <li><a href="#" style="color: #00467f; text-decoration: none;">Contact ERFinder Support Team</a></li>
+        </ul>
     </div>
 </div>
 

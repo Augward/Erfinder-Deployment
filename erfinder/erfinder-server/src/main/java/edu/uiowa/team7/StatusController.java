@@ -126,6 +126,9 @@ public class StatusController {
         return result.UserID();
     }
 
+
+
+
     @GetMapping("/api/myinfo")
     public String GetMyInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
@@ -133,7 +136,6 @@ public class StatusController {
         try {
             String[] info = Queries.GetUserInfo(result.UserID());
             if (info != null) {
-                // Joins all 8 fields with commas
                 return String.join(",", info);
             }
         } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
@@ -169,6 +171,23 @@ public class StatusController {
             // Wipe the cookie to force logout
             response.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
             response.setStatus(HttpStatus.OK.value());
+        } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
+    }
+
+    @GetMapping("/api/deleteaccount")
+    public void DeleteAccount(HttpServletRequest request, HttpServletResponse response) {
+        Security.TokenParseResult result = Security.ParseRequestJWT(request);
+        if (!result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        try {
+            String pass = B64Decode(request.getParameter("password"));
+            // Verify password before deleting
+            if (Queries.ValidateCredentials(result.UserID(), pass)) {
+                Queries.DeleteUser(result.UserID());
+                response.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
+                response.setStatus(HttpStatus.OK.value());
+            } else {
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+            }
         } catch (Exception e) { response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()); }
     }
 }

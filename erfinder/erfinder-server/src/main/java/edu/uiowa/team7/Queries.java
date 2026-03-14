@@ -113,6 +113,7 @@ public class Queries {
 
 
 
+
     public static String[] GetUserInfo(String userID) throws SQLException {
         try(Connection c = GetConnection()) {
             PreparedStatement stmt = c.prepareStatement(
@@ -130,7 +131,6 @@ public class Queries {
             return null;
         }
     }
-
 
     public static boolean UpdateUserInfo(String userID, String firstn, String lastn, String legaln, String dln, String ssn, String email, String phone, String addr, String zip, String dob, String gender, String contact) throws SQLException {
         try(Connection c = GetConnection()) {
@@ -154,6 +154,14 @@ public class Queries {
             stmt.setString(1, newPassword);
             stmt.setString(2, userID);
             return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public static void DeleteUser(String userID) throws SQLException {
+        try(Connection c = GetConnection()) {
+            PreparedStatement stmt = c.prepareStatement("DELETE FROM users WHERE userid = ?");
+            stmt.setString(1, userID);
+            stmt.executeUpdate();
         }
     }
 }

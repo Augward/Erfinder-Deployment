@@ -19,25 +19,35 @@ public class Info {
     private final TextBox ssnBox = new TextBox();
     private final TextBox contactBox = new TextBox();
     private final TextBox genderBox = new TextBox();
+
     private final PasswordTextBox passwordBox = new PasswordTextBox();
+    private final PasswordTextBox deletePassBox = new PasswordTextBox();
 
     private final Button toggleEditBtn;
     private final Button updatePassBtn;
+    private final Button deleteAccountBtn;
     private final Label statusLabel;
     private boolean isEditing = false;
 
     public Info() {
         TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox,
-                addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox};
+                addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox, deletePassBox};
         for (TextBox box : boxes) { box.addStyleName("form-input"); }
         setFieldsReadOnly(true);
-        passwordBox.setReadOnly(false); // Password should always be editable
+        passwordBox.setReadOnly(false);
+        deletePassBox.setReadOnly(false);
 
         toggleEditBtn = new Button("Edit Profile");
         toggleEditBtn.addStyleName("btn");
 
         updatePassBtn = new Button("Update Password");
         updatePassBtn.addStyleName("btn");
+
+        deleteAccountBtn = new Button("Delete Account");
+        deleteAccountBtn.addStyleName("btn");
+
+        deleteAccountBtn.getElement().getStyle().setBackgroundColor("#fee2e2");
+        deleteAccountBtn.getElement().getStyle().setColor("#dc2626");
 
         statusLabel = new Label("Loading...");
 
@@ -48,11 +58,14 @@ public class Info {
         RootPanel.get("dlnContainer").add(dlnBox); RootPanel.get("ssnContainer").add(ssnBox);
         RootPanel.get("contactContainer").add(contactBox); RootPanel.get("genderContainer").add(genderBox);
 
-        RootPanel.get("passwordContainer").add(passwordBox);
-        RootPanel.get("passwordContainer").add(updatePassBtn); // Add button directly under password
-
         RootPanel.get("btnContainer").add(toggleEditBtn);
         RootPanel.get("statusContainer").add(statusLabel);
+
+        RootPanel.get("passwordContainer").add(passwordBox);
+        RootPanel.get("passwordUpdateBtnContainer").add(updatePassBtn);
+
+        RootPanel.get("deletePassContainer").add(deletePassBox);
+        RootPanel.get("deleteAccountBtnContainer").add(deleteAccountBtn);
 
         fetchCurrentInfo();
 
@@ -61,7 +74,6 @@ public class Info {
                 if (!isEditing) {
                     isEditing = true;
                     setFieldsReadOnly(false);
-                    passwordBox.setReadOnly(false);
                     toggleEditBtn.setText("Save Changes");
                 } else { saveUpdatedInfo(); }
             }
@@ -69,6 +81,10 @@ public class Info {
 
         updatePassBtn.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) { updatePassword(); }
+        });
+
+        deleteAccountBtn.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) { deleteAccount(); }
         });
     }
 
@@ -127,7 +143,7 @@ public class Info {
                         toggleEditBtn.setText("Edit Profile");
                     } else {
                         statusLabel.getElement().getStyle().setColor("red");
-                        statusLabel.setText("Failed to update database.");
+                        statusLabel.setText("Failed to update database. Ensure all * required fields are filled.");
                     }
                 }
                 public void onError(Request request, Throwable exception) {
@@ -146,14 +162,13 @@ public class Info {
             statusLabel.setText("Please enter a new password first.");
             return;
         }
-
         updatePassBtn.setEnabled(false);
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/updatepassword?newpass=" + App.B64Encode(newPass));
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     if (response.getStatusCode() == 200) {
-                        Window.Location.assign("index.html"); // Redirects and forces re-login
+                        Window.Location.assign("index.html");
                     } else {
                         updatePassBtn.setEnabled(true);
                         statusLabel.setText("Failed to update password.");
@@ -161,6 +176,33 @@ public class Info {
                 }
                 public void onError(Request request, Throwable exception) {
                     updatePassBtn.setEnabled(true);
+                    statusLabel.setText("Server error."); }
+            });
+        } catch (RequestException e) { e.printStackTrace(); }
+    }
+
+    private void deleteAccount() {
+        String pass = deletePassBox.getText();
+        if (pass == null || pass.trim().isEmpty()) {
+            statusLabel.getElement().getStyle().setColor("red"); statusLabel.setText("Enter current password to delete account."); return;
+        }
+        if (!Window.confirm("Are you ABSOLUTELY sure? This will wipe your account.")) return;
+
+        deleteAccountBtn.setEnabled(false);
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/deleteaccount?password=" + App.B64Encode(pass));
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() == 200) {
+                        Window.Location.assign("index.html");
+                    } else {
+                        deleteAccountBtn.setEnabled(true);
+                        statusLabel.getElement().getStyle().setColor("red");
+                        statusLabel.setText("Incorrect password. Account not deleted.");
+                    }
+                }
+                public void onError(Request request, Throwable exception) {
+                    deleteAccountBtn.setEnabled(true);
                     statusLabel.setText("Server error.");
                 }
             });
