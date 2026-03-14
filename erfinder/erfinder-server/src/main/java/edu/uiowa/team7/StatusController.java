@@ -114,7 +114,7 @@ public class StatusController {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
 
         // if there is no token / token is expired, it won't be valid
-        if (result.IsValid()) {
+        if (!result.IsValid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return "Not Logged In!";
         }
