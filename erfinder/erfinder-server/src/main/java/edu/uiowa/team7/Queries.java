@@ -1,6 +1,7 @@
 package edu.uiowa.team7;
 
 import java.sql.*;
+import java.util.Map;
 import java.util.Optional;
 
 public class Queries {
@@ -8,22 +9,16 @@ public class Queries {
     private static Connection SQLConnection;
 
     public static Connection GetConnection() {
-        if (SQLConnection != null)
-        {
+        if (SQLConnection != null) {
             try {
                 if (!SQLConnection.isClosed()) {
                     return SQLConnection;
                 }
             } catch (Exception ignored) {}
         }
-
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver")
-                    .getDeclaredConstructor().newInstance();
-            // this should be file-driven. But one step at a time!
-            SQLConnection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost/erfinder?" +
-                            "user=root&password=insecure_password");
+            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+            SQLConnection = DriverManager.getConnection("jdbc:mysql://localhost/erfinder?user=root&password=insecure_password");
             return SQLConnection;
         } catch (SQLException ex) {
             PrintSQLException(ex);
@@ -40,8 +35,7 @@ public class Queries {
         System.out.println("VendorError: " + e.getErrorCode());
     }
 
-    public static boolean ValidateCredentials(String userID, String password)
-            throws SQLException, NullPointerException {
+    public static boolean ValidateCredentials(String userID, String password) throws SQLException, NullPointerException {
         try(Connection c = GetConnection()) {
             PreparedStatement stmt = c.prepareStatement("CALL ValidatePassword(?,?);");
             stmt.setString(1, userID);
@@ -58,8 +52,7 @@ public class Queries {
         }
     }
 
-    public static boolean ValidateSecurityAnswer(String userID, String answer)
-            throws SQLException, NullPointerException {
+    public static boolean ValidateSecurityAnswer(String userID, String answer) throws SQLException, NullPointerException {
         try(Connection c = GetConnection()) {
             PreparedStatement stmt = c.prepareStatement("CALL ValidateSecurityAnswer(?,?);");
             stmt.setString(1, userID);
@@ -76,8 +69,7 @@ public class Queries {
         }
     }
 
-    public static Optional<String> GetSecurityQuestion(String userID)
-            throws SQLException, NullPointerException {
+    public static Optional<String> GetSecurityQuestion(String userID) throws SQLException, NullPointerException {
         try (Connection c = GetConnection()) {
             PreparedStatement stmt = c.prepareStatement("CALL GetSecurityQuestion(?);");
             stmt.setString(1, userID);
@@ -114,6 +106,8 @@ public class Queries {
 
 
 
+
+
     public static String[] GetUserInfo(String userID) throws SQLException {
         try(Connection c = GetConnection()) {
             PreparedStatement stmt = c.prepareStatement(
@@ -145,7 +139,6 @@ public class Queries {
         }
     }
 
-
     public static boolean UpdatePassword(String userID, String newPassword) throws SQLException {
         try(Connection c = GetConnection()) {
             PreparedStatement stmt = c.prepareStatement(
@@ -164,7 +157,6 @@ public class Queries {
             stmt.executeUpdate();
         }
     }
-
 
     public static String GetPendingUsers() throws SQLException {
         try(Connection c = GetConnection()) {
@@ -196,6 +188,90 @@ public class Queries {
                 return true;
             }
             return false;
+        }
+    }
+
+
+
+
+
+    public static boolean UsernameExists(String username) throws Exception{
+        String sql = "SELECT (SELECT COUNT(*) FROM users WHERE userid = ?) + " +
+                "(SELECT COUNT(*) FROM registration WHERE userid = ?)";
+        try(Connection conn = GetConnection(); PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1, username);
+            stmt.setString(2, username);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
+    }
+
+    public static boolean EmailExists(String email) throws Exception{
+        String sql = "SELECT (SELECT COUNT(*) FROM users WHERE email = ?) + " +
+                "(SELECT COUNT(*) FROM registration WHERE email = ?)";
+        try(Connection conn = GetConnection(); PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1, email);
+            stmt.setString(2, email);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getInt(1)> 0;
+        }
+    }
+
+    public static boolean SSNExists(String ssn) throws Exception{
+        String sql = "SELECT (SELECT COUNT(*) FROM users WHERE ssn = ?) + " +
+                "(SELECT COUNT(*) FROM registration WHERE ssn = ?)";
+        try(Connection conn = GetConnection(); PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1, ssn);
+            stmt.setString(2, ssn);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
+    }
+
+    public static boolean LicenseExists(String license) throws Exception{
+        String sql = "SELECT (SELECT COUNT(*) FROM users WHERE dln = ?) + " +
+                "(SELECT COUNT(*) FROM registration WHERE dln = ?)";
+        try(Connection conn = GetConnection(); PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1,license);
+            stmt.setString(2, license);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
+    }
+
+    public static boolean insertReg(Map<String, String> data) throws SQLException{
+        String salt = java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sql = "INSERT INTO registration (userid, passhash, salt, secquestion, secanswer, firstn, lastn, legaln, phone, email, addr, zip, dob, gender, contact, dln, ssn, perm) " +
+                "VALUES (?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try(Connection conn = GetConnection(); PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setString(1, data.get("username"));
+            ps.setString(2, data.get("password"));
+            ps.setString(3, salt);
+            ps.setString(4, salt);
+            ps.setString(5, data.get("securityQuestion"));
+            ps.setString(6, data.get("securityAnswer"));
+            ps.setString(7, salt);
+            ps.setString(8, data.get("firstName"));
+            ps.setString(9, data.get("lastName"));
+            ps.setString(10, data.get("legalName"));
+            ps.setString(11, data.get("phone"));
+            ps.setString(12, data.get("email"));
+            ps.setString(13, data.get("address"));
+            ps.setString(14, data.get("zipcode"));
+            ps.setDate(15, java.sql.Date.valueOf(data.get("dob")));
+            ps.setString(16, data.get("gender"));
+            ps.setString(17, data.get("emergency"));
+            ps.setString(18, data.get("driversLicense"));
+            ps.setString(19, data.get("ssn"));
+            ps.setString(20, data.get("role"));
+            return ps.executeUpdate() > 0;
+        } catch(SQLException e){
+            PrintSQLException(e);
+            throw e;
         }
     }
 }
