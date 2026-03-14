@@ -25,7 +25,7 @@ public class Home {
                         String role = data[0].trim().toUpperCase();
                         String firstName = data[1];
 
-                        DOM.getElementById("roleBar").setInnerText("Role: " + role);
+                        DOM.getElementById("roleBar").setInnerText("Dashboard - Role: " + role);
                         dynamicLayout.clear();
                         dynamicLayout.add(new HTML("<h2>Welcome, " + firstName + "</h2>"));
 
