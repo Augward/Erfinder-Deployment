@@ -54,7 +54,7 @@ public class Login {
             try {
                 builder.sendRequest(null, new GetTokenResponse());
             } catch (RequestException e) {
-                e.printStackTrace();
+                response.setText("An unexpected error occured!");
             }
         }
     }

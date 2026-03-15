@@ -12,7 +12,8 @@ import org.eclipse.jetty.http.HttpStatus;
 
 public class App implements EntryPoint {
 
-	private static String userid = "";
+	// note :: keep around for nav-bar ??
+	//private static String userid = "";
 	private static boolean logged_in = false;
 
 	public enum Page {
@@ -112,7 +113,7 @@ public class App implements EntryPoint {
 		public void onResponseReceived(Request request, Response response) {
 			switch (response.getStatusCode()) {
 				case HttpStatus.OK_200:
-					userid = response.getText();
+					//userid = response.getText();
 					logged_in = true;
 					break;
 				case HttpStatus.UNAUTHORIZED_401:
