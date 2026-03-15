@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(properties = {
         "erfinder.login.max-attempts-in-period=10",
         "erfinder.login.clear-attempt-after-minutes=30",
-        "erfinder.login.timeout-period-minutes=300"
+        "erfinder.login.timeout-period-minutes=300",
+        "spring.datasource.url=jdbc:mysql://${DB_HOST:localhost}:3306/erfinder"
 })
 class ERFinderApplicationTests {
 

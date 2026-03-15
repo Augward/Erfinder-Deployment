@@ -1,10 +1,12 @@
 package edu.uiowa.team7;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 
 @SuppressWarnings({"java:S100", "java:S116", "java:S115"})
 public class Queries {
@@ -25,8 +27,14 @@ public class Queries {
             }
         }
         try {
+            // Check for CI/CD Environment Variable, default to localhost
+            String dbHost = System.getenv("DB_HOST");
+            if (dbHost == null || dbHost.trim().isEmpty()) {
+                dbHost = "localhost";
+            }
+
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-            SQLConnection = DriverManager.getConnection("jdbc:mysql://localhost/erfinder?user=root&password=insecure_password");
+            SQLConnection = DriverManager.getConnection("jdbc:mysql://" + dbHost + "/erfinder?user=root&password=insecure_password");
             return SQLConnection;
         } catch (SQLException ex) {
             PrintSQLException(ex);
@@ -35,6 +43,7 @@ public class Queries {
         }
         return null;
     }
+
 
     public static void PrintSQLException(SQLException e) {
         logger.error("SQLException: {}", e.getMessage());

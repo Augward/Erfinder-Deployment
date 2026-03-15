@@ -6,21 +6,19 @@ stages:
 
 test:
   stage: test
-
   services:
     - name: mysql:8.0
-      alias: localhost
-
   variables:
+
+    DB_HOST: "mysql"
     MYSQL_ROOT_PASSWORD: "insecure_password"
     MYSQL_DATABASE: "erfinder"
   before_script:
-
     - apt-get update && apt-get install -y default-mysql-client
 
-    - sleep 15
+    - sleep 25
 
-    - mysql -h 127.0.0.1 -u root -pinsecure_password erfinder < erfinder/schema.sql
+    - mysql -h mysql -u root -pinsecure_password erfinder < erfinder/schema.sql
   script:
     - cd erfinder
     - mvn clean test
