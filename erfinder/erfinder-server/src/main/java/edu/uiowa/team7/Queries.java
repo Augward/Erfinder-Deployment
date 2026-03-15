@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.Map;
 import java.util.Optional;
 
-@SuppressWarnings({"java:S100", "java:S116", "java:S115"})
+
 public class Queries {
 
     private static final Logger logger = LoggerFactory.getLogger(Queries.class);

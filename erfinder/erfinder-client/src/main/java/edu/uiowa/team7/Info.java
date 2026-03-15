@@ -1,6 +1,5 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
@@ -24,6 +23,7 @@ public class Info {
     // Fields - Security & Actions
     private final PasswordTextBox passwordBox = new PasswordTextBox();
     private final PasswordTextBox deletePassBox = new PasswordTextBox();
+
     private final Button toggleEditBtn;
     private final Button updatePassBtn;
     private final Button deleteAccountBtn;
@@ -43,10 +43,13 @@ public class Info {
 
         toggleEditBtn = new Button("Edit Profile");
         toggleEditBtn.addStyleName("btn");
+
         updatePassBtn = new Button("Update Password");
         updatePassBtn.addStyleName("btn");
+
         deleteAccountBtn = new Button("Delete Account");
         deleteAccountBtn.addStyleName("btn");
+
         deleteAccountBtn.getElement().getStyle().setBackgroundColor("#fee2e2");
         deleteAccountBtn.getElement().getStyle().setColor("#dc2626");
 
@@ -105,12 +108,18 @@ public class Info {
                     if (response.getStatusCode() == 200) {
                         String[] data = response.getText().split(",", -1);
                         if(data.length >= 13) {
-                            firstnBox.setText(data[1]); lastnBox.setText(data[2]);
-                            legalnBox.setText(data[3]); dlnBox.setText(data[4]);
-                            ssnBox.setText(data[5]); emailBox.setText(data[6]);
-                            phoneBox.setText(data[7]); addrBox.setText(data[8]);
-                            zipBox.setText(data[9]); dobBox.setText(data[10]);
-                            genderBox.setText(data[11]); contactBox.setText(data[12]);
+                            firstnBox.setText(data[1]);
+                            lastnBox.setText(data[2]);
+                            legalnBox.setText(data[3]);
+                            dlnBox.setText(data[4]);
+                            ssnBox.setText(data[5]);
+                            emailBox.setText(data[6]);
+                            phoneBox.setText(data[7]);
+                            addrBox.setText(data[8]);
+                            zipBox.setText(data[9]);
+                            dobBox.setText(data[10]);
+                            genderBox.setText(data[11]);
+                            contactBox.setText(data[12]);
                             statusLabel.setText("");
                         }
                     } else { statusLabel.setText("Session expired. Please log in."); }

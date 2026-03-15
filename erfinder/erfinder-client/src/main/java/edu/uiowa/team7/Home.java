@@ -1,6 +1,5 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;

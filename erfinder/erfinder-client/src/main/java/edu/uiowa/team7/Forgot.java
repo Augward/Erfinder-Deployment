@@ -2,10 +2,7 @@ package edu.uiowa.team7;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
@@ -36,9 +33,11 @@ public class Forgot {
         // UI Injection
         RootPanel.get("userIDContainer").add(userIDBox);
         RootPanel.get("submitID").add(submitID);
+
         RootPanel.get("questionContainer").add(questionLabel);
         RootPanel.get("answerContainer").add(answerBox);
         RootPanel.get("submitAnswer").add(submitAnswer);
+
         RootPanel.get("responseContainer").add(serverUpdates);
 
         // Click Handlers
@@ -69,6 +68,7 @@ public class Forgot {
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
                 case 200:
+                    // userid is response text
                     serverUpdates.setText("Found userID. Waiting for answer.");
                     questionLabel.setText(response.getText());
                     answerBox.setEnabled(true);
@@ -76,6 +76,7 @@ public class Forgot {
                     break;
                 case 404:
                 default:
+                    // not valid userid
                     serverUpdates.setText("Failed to find user with that UserID.");
                     userIDBox.setEnabled(true);
                     submitID.setEnabled(true);
@@ -126,7 +127,6 @@ public class Forgot {
 
         @Override
         public void onError(Request request, Throwable throwable) {
-            // SonarQube fix
             serverUpdates.setText("Network error occurred.");
         }
     }

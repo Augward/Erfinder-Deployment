@@ -54,7 +54,7 @@ public class Login {
             try {
                 builder.sendRequest(null, new GetTokenResponse());
             } catch (RequestException e) {
-                // SonarQube compliance?
+                // Compliance
             }
         }
     }
@@ -63,15 +63,18 @@ public class Login {
         public void onResponseReceived(Request request, Response received) {
             switch (received.getStatusCode()) {
                 case 200:
+                    // To home page
                     Window.Location.assign("home.html");
                     break;
                 case 404:
+                    // Error message
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
                     response.setText("Invalid credentials");
                     break;
                 case 500:
+                    // Internal error
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);

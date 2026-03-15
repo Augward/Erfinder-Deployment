@@ -1,42 +1,23 @@
-image: maven:3.9-eclipse-temurin-17
-
 stages:
   - test
   - sonarqube
 
 test:
   stage: test
-  services:
-    - name: mysql:8.0
-  variables:
-
-    DB_HOST: "mysql"
-    MYSQL_ROOT_PASSWORD: "insecure_password"
-    MYSQL_DATABASE: "erfinder"
-  before_script:
-    - apt-get update && apt-get install -y default-mysql-client
-
-    - sleep 25
-
-    - mysql -h mysql -u root -pinsecure_password erfinder < erfinder/schema.sql
   script:
     - cd erfinder
     - mvn clean test
-  artifacts:
-    paths:
-      - erfinder/**/target/
-    expire_in: 1 hour
 
 sonarqube:
   stage: sonarqube
+  image: maven:3.9.12-openjdk-19
   variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-    GIT_DEPTH: "0"
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   cache:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
   script:
-    - cd erfinder
-    - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.qualitygate.wait=true
+    - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar-Dsonar.qualitygate.wait=true
   allow_failure: false
