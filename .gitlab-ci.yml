@@ -32,7 +32,7 @@ test_backend:
     - mysql -h mysql -u root -pinsecure_password erfinder < schema.sql
   script:
 
-    - mvn test -pl erfinder-server -am
+    - mvn test -pl erfinder-server -am -e Dsurefire.useFile=false
 
 sonarqube_scan:
   stage: sonarqube
