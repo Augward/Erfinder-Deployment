@@ -1,7 +1,5 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
@@ -10,49 +8,51 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class Register {
 
-    //fields
-    final TextBox firstname = new TextBox();
-    final TextBox lastname = new TextBox();
-    final TextBox legalname = new TextBox();
-    final TextBox phoneNumber = new TextBox();
-    final TextBox email = new TextBox();
-    final TextBox username = new TextBox();
-    final PasswordTextBox password = new PasswordTextBox();
-    final TextBox address = new TextBox();
-    final TextBox zipcode = new TextBox();
-    final DateBox dob = new DateBox();
-    final ListBox gender = new ListBox();
-    final TextBox emergency = new TextBox();
-    final TextBox driversLicense = new TextBox();
-    final TextBox ssn = new TextBox();
-    final ListBox role = new ListBox();
-    final TextBox securityAns = new TextBox();
-    final ListBox securityQues = new ListBox();
+    // Fields
+    private final TextBox firstname = new TextBox();
+    private final TextBox lastname = new TextBox();
+    private final TextBox legalname = new TextBox();
+    private final TextBox phoneNumber = new TextBox();
+    private final TextBox email = new TextBox();
+    private final TextBox username = new TextBox();
+    private final PasswordTextBox password = new PasswordTextBox();
+    private final TextBox address = new TextBox();
+    private final TextBox zipcode = new TextBox();
+    private final DateBox dob = new DateBox();
+    private final ListBox gender = new ListBox();
+    private final TextBox emergency = new TextBox();
+    private final TextBox driversLicense = new TextBox();
+    private final TextBox ssn = new TextBox();
+    private final ListBox role = new ListBox();
+    private final TextBox securityAns = new TextBox();
+    private final ListBox securityQues = new ListBox();
 
-    final Label firstnameerror = new Label();
-    final Label lastnameerror = new Label();
-    final Label legalnameerror = new Label();
-    final Label phoneNumbererror = new Label();
-    final Label emailerror = new Label();
-    final Label usernameerror = new Label();
-    final Label passworderror = new Label();
-    final Label addresserror = new Label();
-    final Label zipcodeerror = new Label();
-    final Label doberror = new Label();
-    final Label gendererror = new Label();
-    final Label emergencyerror = new Label();
-    final Label driversLicenseerror = new Label();
-    final Label ssnerror = new Label();
-    final Label roleerror = new Label();
-    final Label securityAnserror = new Label();
-    final Label securityQueserror = new Label();
+    // Error Labels
+    private final Label firstnameerror = new Label();
+    private final Label lastnameerror = new Label();
+    private final Label legalnameerror = new Label();
+    private final Label phoneNumbererror = new Label();
+    private final Label emailerror = new Label();
+    private final Label usernameerror = new Label();
+    private final Label passworderror = new Label();
+    private final Label addresserror = new Label();
+    private final Label zipcodeerror = new Label();
+    private final Label doberror = new Label();
+    private final Label gendererror = new Label();
+    private final Label emergencyerror = new Label();
+    private final Label driversLicenseerror = new Label();
+    private final Label ssnerror = new Label();
+    private final Label roleerror = new Label();
+    private final Label securityAnserror = new Label();
+    private final Label securityQueserror = new Label();
 
-    //submit Button
-    Button submit = new Button("Submit");
+    // Submission Button
+    private final Button submit = new Button("Submit");
 
+    // Constructor
     public Register() {
 
-        //set error fields red
+        // Set error fields red
         firstnameerror.getElement().getStyle().setProperty("color", "red");
         lastnameerror.getElement().getStyle().setProperty("color", "red");
         legalnameerror.getElement().getStyle().setProperty("color", "red");
@@ -71,20 +71,16 @@ public class Register {
         securityAnserror.getElement().getStyle().setProperty("color", "red");
         securityQueserror.getElement().getStyle().setProperty("color", "red");
 
-
         VerticalPanel form = new VerticalPanel();
         form.setSpacing(30);
 
-
-        //Header
+        // Header Section
         Label header = new Label("ERFinder Account Signup");
         header.getElement().getStyle().setProperty("fontSize","20px");
         header.getElement().getStyle().setProperty("fontWeight","bold");
         form.add(header);
 
-
-        //Labels and Fields
-
+        // Roles
         form.add(new Label("Role"));
         role.addItem("Select Role: ", " ");
         role.addItem("Patient", "PATIENT");
@@ -97,57 +93,49 @@ public class Register {
         form.add(role);
         form.add(roleerror);
 
+        // Personal Information Fields
         form.add(new Label("First Name"));
         form.add(firstname);
         form.add(firstnameerror);
-
 
         form.add(new Label("Last Name"));
         form.add(lastname);
         form.add(lastnameerror);
 
-
         form.add(new Label("Full Legal Name"));
         form.add(legalname);
         form.add(legalnameerror);
-
 
         form.add(new Label("Phone Number"));
         form.add(phoneNumber);
         form.add(phoneNumbererror);
 
-
         form.add(new Label("Email"));
         form.add(email);
         form.add(emailerror);
 
-
+        // Account Details Fields
         form.add(new Label("Username"));
         form.add(username);
         form.add(usernameerror);
-
 
         form.add(new Label("Password"));
         form.add(password);
         form.add(passworderror);
 
-
         form.add(new Label("Address"));
         form.add(address);
         form.add(addresserror);
 
-
         form.add(new Label("ZipCode"));
         form.add(zipcode);
         form.add(zipcodeerror);
-
 
         form.add(new Label("Date of Birth (MM/DD/YYYY)"));
         DateTimeFormat format = DateTimeFormat.getFormat("MM/dd/yyyy");
         dob.setFormat(new DateBox.DefaultFormat(format));
         form.add(dob);
         form.add(doberror);
-
 
         form.add(new Label("Gender"));
         gender.addItem("Select Gender: ", " ");
@@ -159,21 +147,19 @@ public class Register {
         form.add(gender);
         form.add(gendererror);
 
-
         form.add(new Label("Emergency Contact's Phone Number"));
         form.add(emergency);
         form.add(emergencyerror);
-
 
         form.add(new Label("Driver's License Number"));
         form.add(driversLicense);
         form.add(driversLicenseerror);
 
-
         form.add(new Label("Social Security Number"));
         form.add(ssn);
         form.add(ssnerror);
 
+        // Security Configuration Fields
         form.add(new Label("Security Question"));
         securityQues.addItem("Select Security Question", " ");
         securityQues.addItem("What is your mother's maiden name?", "SQ1");
@@ -193,31 +179,28 @@ public class Register {
         form.add(securityAns);
         form.add(securityAnserror);
 
+        // Submit Button ClickHandler
+        submit.addClickHandler(clickEvent -> {
+            boolean valid = true;
 
-        //Button and ClickHandler
-        submit.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                boolean valid = true;
-
-                //make sure to clear all the error fields
-                roleerror.setText("");
-                firstnameerror.setText("");
-                lastnameerror.setText("");
-                legalnameerror.setText("");
-                phoneNumbererror.setText("");
-                emailerror.setText("");
-                addresserror.setText("");
-                zipcodeerror.setText("");
-                doberror.setText("");
-                gendererror.setText("");
-                emergencyerror.setText("");
-                usernameerror.setText("");
-                passworderror.setText("");
-                driversLicenseerror.setText("");
-                ssnerror.setText("");
-                securityQueserror.setText("");
-                securityAnserror.setText("");
+            // Clear error fields
+            roleerror.setText("");
+            firstnameerror.setText("");
+            lastnameerror.setText("");
+            legalnameerror.setText("");
+            phoneNumbererror.setText("");
+            emailerror.setText("");
+            addresserror.setText("");
+            zipcodeerror.setText("");
+            doberror.setText("");
+            gendererror.setText("");
+            emergencyerror.setText("");
+            usernameerror.setText("");
+            passworderror.setText("");
+            driversLicenseerror.setText("");
+            ssnerror.setText("");
+            securityQueserror.setText("");
+            securityAnserror.setText("");
 
                 //validate role
                 if(role.getSelectedIndex()==0){
@@ -337,7 +320,7 @@ public class Register {
                     valid = false;
                     ssnerror.setText("Social Security Number Must Be 9 Digits");
                 }
-                else if(ssn.getText().trim().startsWith("000") || ssn.getText().trim().substring(3,5).equals("00") || ssn.getText().trim().substring(5).equals("0000")){
+                else if(ssn.getText().trim().startsWith("000") || ssn.getText().trim().startsWith("00", 3) || ssn.getText().trim().substring(5).equals("0000")){
                     valid = false;
                     ssnerror.setText("Social Security Number Must Be Valid");
                 }
@@ -354,20 +337,17 @@ public class Register {
                     securityAnserror.setText("Security Answer is Required");
                 }
 
-                if(!valid){
-                    Window.alert("Not all Information is Valid. Can't Submit");
-                }
-                else{
-                    submit.setEnabled(false);
-                    checkExistingAccounts();
-                    //Window.alert("All Information is Valid. Ready to Submit");
-                }
+            if(!valid){
+                Window.alert("Not all Information is Valid. Can't Submit");
+            } else {
+                submit.setEnabled(false);
+                checkExistingAccounts();
             }
         });
 
         form.add(submit);
 
-        //form setup and adding to page
+        // Form setup and adding to page
         form.setWidth("300px");
 
         HorizontalPanel wrapper = new HorizontalPanel();
@@ -375,10 +355,10 @@ public class Register {
         wrapper.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         wrapper.add(form);
-
         RootPanel.get("registerContainer").add(wrapper);
     }
 
+    // Validation & Submission Methods
     private void checkExistingAccounts(){
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/register/check");
         builder.setHeader("Content-Type", "application/json");
@@ -395,8 +375,7 @@ public class Register {
                     if(res.getStatusCode() == 200){
                         String response = res.getText();
                         handleDuplicateResponse(response);
-                    }
-                    else{
+                    } else {
                         Window.alert("Server Error");
                     }
                 }
@@ -405,11 +384,9 @@ public class Register {
                 public void onError(Request req, Throwable e) {
                     submit.setEnabled(true);
                     Window.alert("Unable to Connect to Server");
-
                 }
             });
-        }
-        catch (RequestException e){
+        } catch (RequestException e){
             Window.alert("Request Failed");
         }
     }
@@ -438,6 +415,9 @@ public class Register {
 
         if(valid){
             submitRegistration();
+        } else {
+            submit.setEnabled(true);
+            Window.alert("Can't Submit Because Account Already Exists For Some Entered Fields");
         }
     }
 
@@ -448,7 +428,6 @@ public class Register {
         DateTimeFormat serverFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
         String dobFormatted = serverFormat.format(dob.getValue());
 
-        //build JSON with all fields
         String json = "{"
                 + "\"username\":\"" + username.getText().trim() + "\","
                 + "\"password\":\"" + password.getText().trim() + "\","
@@ -473,14 +452,16 @@ public class Register {
             builder.sendRequest(json, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
+                    submit.setEnabled(true);
                     if(response.getStatusCode() == 200){
-                        submit.setEnabled(true);
-                        Window.alert("Account Successfully Submitted!");
-                    }
-                    else{
-                        submit.setEnabled(true);
+                        String respText = response.getText();
+                        if(respText.contains("\"status\":\"success\"")){
+                            Window.alert("Account Successfully Submitted!");
+                        } else {
+                            Window.alert("Submission Failed: " + respText);
+                        }
+                    } else {
                         Window.alert("Server Error");
-
                     }
                 }
 
@@ -490,16 +471,9 @@ public class Register {
                     Window.alert("Unable to Connect to Server");
                 }
             });
-        }
-        catch(RequestException e) {
+        } catch(RequestException e) {
             submit.setEnabled(true);
             Window.alert("Request Failed");
-
         }
     }
-
-    //when user hits submit button the code then checks the entries of stuffs:
-    //if everything valid then page changes and says account pending. The information is put together and added
-    //to the pending users table in MYSQL for admin to approve or deny
-    //if something information is invalid then there is a message by the textbox in red explaining what was wrong
 }

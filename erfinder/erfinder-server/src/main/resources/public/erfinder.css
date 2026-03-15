@@ -1,4 +1,4 @@
-/* Removes the default browser white borders */
+/* Global Reset and Body Styles */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
@@ -11,7 +11,7 @@ html, body {
     min-height: 100vh;
 }
 
-/* Header & Footer Bars */
+/* Header Section */
 .top-nav {
     background-color: #00467f;
     padding: 25px 40px;
@@ -22,7 +22,7 @@ html, body {
     box-sizing: border-box;
 }
 
-/* White large title */
+/* Brand Logo and Title */
 .brand-title {
     color: white;
     font-size: 2.5em;
@@ -31,7 +31,7 @@ html, body {
     align-items: center;
 }
 
-/* Keeps links same color to contrast background */
+/* Navigation Links */
 .nav-links a,
 .nav-links a:visited,
 .nav-links a:active {
@@ -47,7 +47,7 @@ html, body {
     color: #bae6fd;
 }
 
-/* Sub title bar */
+/* Sub-title Bar */
 .page-title-bar {
     background-color: #93c5fd;
     color: black;
@@ -59,7 +59,7 @@ html, body {
     box-sizing: border-box;
 }
 
-/* Footer for ownership */
+/* Footer Section */
 .footer {
     background-color: #00467f;
     color: white;
@@ -70,9 +70,7 @@ html, body {
     box-sizing: border-box;
 }
 
-
-
-/* Images for home */
+/* Hero Image Container */
 .hero-image {
     position: relative;
     width: 100%;
@@ -83,7 +81,7 @@ html, body {
     margin-bottom: 10px;
 }
 
-/* Full-width, opaque background */
+/* Hero Image Overlays */
 .hero-image::before {
     content: "";
     position: absolute;
@@ -92,7 +90,6 @@ html, body {
     opacity: 0.20;
 }
 
-/* Max 800px wide image in center */
 .hero-image::after {
     content: "";
     position: absolute;
@@ -103,6 +100,7 @@ html, body {
     box-shadow: 0 0 30px rgba(0,0,0,0.6);
 }
 
+/* Layout Containers */
 .content-container {
     max-width: 1200px;
     margin: 20px auto 60px auto;
@@ -111,15 +109,14 @@ html, body {
     box-sizing: border-box;
 }
 
-
-
-/* Dashboard & Panels */
+/* Dashboard Grid Layout */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
 }
 
+/* UI Panels */
 .panel {
     background: white;
     padding: 30px;
@@ -127,6 +124,7 @@ html, body {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
+/* Map Display Element */
 .map-placeholder {
     width: 100%;
     height: 500px;
@@ -139,13 +137,14 @@ html, body {
     border-radius: 8px;
 }
 
-/* Profile & Editor */
+/* Profile Form Grid */
 .profile-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
+/* Form Inputs */
 .form-row { margin-bottom: 15px; }
 
 .form-row label {
@@ -169,7 +168,7 @@ html, body {
     border: 1px dashed #9ca3af;
 }
 
-/* Button */
+/* Interactive Buttons */
 .btn {
     background-color: white;
     color: #00467f;;

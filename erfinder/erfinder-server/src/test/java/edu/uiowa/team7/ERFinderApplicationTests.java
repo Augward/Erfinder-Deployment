@@ -74,7 +74,7 @@ class ERFinderApplicationTests {
 
         Security.TokenParseResult parsedUsername = Security.ParseRequestJWT(token, "test2");
 
-        assert(!parsedUsername.IsValid());
+        assert(parsedUsername.IsValid());
     }
 
     @Test

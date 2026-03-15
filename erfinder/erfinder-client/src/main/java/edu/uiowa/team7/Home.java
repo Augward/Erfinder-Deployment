@@ -1,13 +1,20 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
 public class Home {
+
+    private static final Logger logger = Logger.getLogger(Home.class.getName());
+
+    // Fields
     private final VerticalPanel dynamicLayout;
 
+    // Constructor
     public Home() {
         dynamicLayout = new VerticalPanel();
         dynamicLayout.setSpacing(10);
@@ -16,6 +23,7 @@ public class Home {
         loadDashboard();
     }
 
+    // API Data Loading
     private void loadDashboard() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/myinfo");
         try {
@@ -56,9 +64,10 @@ public class Home {
                     dynamicLayout.add(new HTML("<h2 style='color:red;'>Server Connection Error.</h2>"));
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 
+    // Role-Specific Views
     private void buildPendingView() {
         dynamicLayout.add(new HTML("<h3>Account Pending Approval</h3>"));
         dynamicLayout.add(new Label("Your account request is currently being reviewed. Please check back later."));
@@ -154,9 +163,10 @@ public class Home {
                     dynamicLayout.add(new HTML("<p style='color:red;'>Failed to load users.</p>"));
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 
+    // Admin Helper Action
     private void approveUser(final String targetID) {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/approveuser?target=" + App.B64Encode(targetID));
         try {
@@ -174,6 +184,6 @@ public class Home {
                     com.google.gwt.user.client.Window.alert("Server connection error.");
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 }

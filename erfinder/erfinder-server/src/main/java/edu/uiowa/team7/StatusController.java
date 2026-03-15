@@ -1,62 +1,57 @@
 package edu.uiowa.team7;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.*;
+import org.slf4j.*;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Base64;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class StatusController {
+
+    // Logger
+    private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
+
+    // Helpers
     private String B64Decode(String encoded) {
-        return new String(Base64.getDecoder().decode(encoded));
+        if (encoded == null) return "";
+        // URL fix
+        return new String(Base64.getDecoder().decode(encoded.replace(" ", "+")));
     }
 
+    // System Check Endpoint
     @GetMapping(value = "/api/status", produces = "application/json")
     public String getStatus() {
         return "{\"message\": \"ER Finder Backend is live and connected to MySQL!\"}";
     }
 
+    // Authentication Entry Point (Login)
     @GetMapping(value ="/api/gettoken")
-    public void GetToken(
-            HttpServletRequest req, // what was received
-            HttpServletResponse res // what is being sent
-    ) {
+    public void GetToken(HttpServletRequest req, HttpServletResponse res) {
         try {
-            // grabs the userID and password parameters from the GET request
             String userID = B64Decode(req.getParameter("userID"));
             String password = B64Decode(req.getParameter("password"));
 
-            // sends to MySQL server, and leaves if not valid
             if (!Queries.ValidateCredentials(userID, password)) {
                 res.setStatus(HttpStatus.NOT_FOUND.value());
                 return;
             }
 
-            // using 'device' as a generic term. 'session' is more accurate, probably.
             String device = Security.GetDevice(req);
-
-            // adds the token as a cookie in the response
             res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieFresh(userID, device));
             res.setStatus(HttpStatus.OK.value());
 
         } catch (Exception e) {
-            // THERE WAS AN ERROR!! OH NO!!
-            //  remove cookies, if there were any
+            logger.error("Error during GetToken authentication", e);
             res.getHeaders(HttpHeaders.SET_COOKIE).clear();
-            // then tell the client that there was an error:
-            res.setStatus(HttpStatus.NOT_FOUND.value());
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
+    // Forgot Password - Question
     @GetMapping("/api/usersecq")
-    public String GetSecurityQuestion(
-            HttpServletRequest req, // what was received
-            HttpServletResponse res // what is being sent
-    ) {
+    public String GetSecurityQuestion(HttpServletRequest req, HttpServletResponse res) {
         try {
             String userid = B64Decode(req.getParameter("userid"));
             Optional<String> secq = Queries.GetSecurityQuestion(userid);
@@ -66,63 +61,53 @@ public class StatusController {
             }
             return secq.get();
         } catch (Exception e) {
-            res.setStatus(HttpStatus.NOT_FOUND.value());
+            logger.error("Error retrieving security question", e);
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             return "";
         }
     }
 
+    // Forgot Password - Answer
     @GetMapping("/api/userseca")
-    public String GetTokenFromSecq(
-            HttpServletRequest req, // what was received
-            HttpServletResponse res // what is being sent
-    ) {
+    public String GetTokenFromSecq(HttpServletRequest req, HttpServletResponse res) {
         String userID = B64Decode(req.getParameter("userid"));
         String ans = B64Decode(req.getParameter("answer"));
         try {
-
             if (!Queries.ValidateSecurityAnswer(userID, ans)) {
                 res.setStatus(HttpStatus.NOT_FOUND.value());
-                return "no sql error";
+                return "Unauthorized";
             }
 
             String device = Security.GetDevice(req);
             res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieFresh(userID, device));
             res.setStatus(HttpStatus.OK.value());
-            return "good";
+            return "Authorized";
         } catch (Exception e) {
+            logger.error("Error during security answer validation", e);
             res.getHeaders(HttpHeaders.SET_COOKIE).clear();
             res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return e.getMessage();
+            return "Server Error";
         }
     }
 
+    // Session Termination
     @GetMapping("/api/logout")
     public void Logout(HttpServletResponse res) {
-        // creates a cookie that is already expired
-        // this is the proper way to 'delete' a cookie
         res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
         res.setStatus(HttpStatus.OK.value());
     }
 
-
+    // JWT Verification Check
     @GetMapping("/api/username")
-    public String GetUsernameInToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
-        // looks at cookie data in the request
+    public String GetUsernameInToken(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
 
-        // if there is no token / token is expired, it won't be valid
-        if (!result.IsValid()) {
+        if (result.IsValid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return "Not Logged In!";
         }
 
-        // un-expired tokens get refreshed after some time
         result.TryRefreshToken(request, response);
-
-        // this method returns the userID embedded in the token
         return result.UserID();
     }
 }

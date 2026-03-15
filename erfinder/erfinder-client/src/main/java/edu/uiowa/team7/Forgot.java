@@ -2,15 +2,13 @@ package edu.uiowa.team7;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.eclipse.jetty.http.HttpStatus;
 
 public class Forgot {
+
+    // Fields
     private final TextBox userIDBox;
     private final Button submitID;
     private final Label questionLabel;
@@ -18,9 +16,8 @@ public class Forgot {
     private final Button submitAnswer;
     private final Label serverUpdates;
 
-
+    // Constructor
     public Forgot() {
-
         userIDBox = new TextBox();
         submitID = new Button("Next");
 
@@ -30,10 +27,10 @@ public class Forgot {
 
         serverUpdates = new Label();
 
-
         answerBox.setEnabled(false);
         submitAnswer.setEnabled(false);
 
+        // UI Injection
         RootPanel.get("userIDContainer").add(userIDBox);
         RootPanel.get("submitID").add(submitID);
 
@@ -43,11 +40,12 @@ public class Forgot {
 
         RootPanel.get("responseContainer").add(serverUpdates);
 
-
+        // Click Handlers
         submitID.addClickHandler(new SubmitUserID());
         submitAnswer.addClickHandler(new SubmitAnswer());
     }
 
+    // API Handlers
     private class SubmitUserID implements ClickHandler {
         @Override
         public void onClick(ClickEvent clickEvent) {
@@ -56,12 +54,10 @@ public class Forgot {
             serverUpdates.setText("Fetching question...");
 
             RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
-                    "/api/usersecq?userid="+ App.B64Encode(userIDBox.getText()));
-
+                    "/api/usersecq?userid=" + App.B64Encode(userIDBox.getText()));
             try {
                 builder.sendRequest(null, new RetrieveUserSecq());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 serverUpdates.setText("Client Error. Try reloading page.");
             }
         }
@@ -71,14 +67,15 @@ public class Forgot {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
-                case HttpStatus.OK_200:
+                case 200:
                     // userid is response text
                     serverUpdates.setText("Found userID. Waiting for answer.");
                     questionLabel.setText(response.getText());
                     answerBox.setEnabled(true);
                     submitAnswer.setEnabled(true);
                     break;
-                case HttpStatus.NOT_FOUND_404:
+                case 404:
+                default:
                     // not valid userid
                     serverUpdates.setText("Failed to find user with that UserID.");
                     userIDBox.setEnabled(true);
@@ -100,16 +97,13 @@ public class Forgot {
             submitAnswer.setEnabled(false);
 
             RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
-                    "api/userseca?userid="+
-                            App.B64Encode(userIDBox.getText())+
-                            "&answer="+
-                            App.B64Encode(answerBox.getText())
+                    "api/userseca?userid=" + App.B64Encode(userIDBox.getText()) +
+                            "&answer=" + App.B64Encode(answerBox.getText())
             );
 
             try {
                 builder.sendRequest(null, new GetTokenResponse());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 serverUpdates.setText("Client Error. Try reloading page.");
             }
         }
@@ -119,18 +113,21 @@ public class Forgot {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
-                case HttpStatus.OK_200:
+                case 200:
                     Window.Location.assign("home.html");
                     break;
-                case HttpStatus.NOT_FOUND_404:
+                case 404:
+                default:
                     serverUpdates.setText("Incorrect");
+                    submitAnswer.setEnabled(true);
+                    answerBox.setEnabled(true);
                     break;
             }
         }
 
         @Override
         public void onError(Request request, Throwable throwable) {
-
+            serverUpdates.setText("Network error occurred.");
         }
     }
 }

@@ -1,20 +1,23 @@
+# Application Configuration Properties
 erfinder:
   login:
     max-attempts-in-period: 10
     clear-attempt-after-minutes: 30
     timeout-period-minutes: 300
 
-
+# Server Properties
 server:
   forward-headers-strategy: framework
   port: 8080
 
+# Spring Boot Configuration
 spring:
   main:
     banner-mode: off
   application:
     name: erfinder
 
+  # Database Connection Settings
   datasource:
     url: jdbc:mysql://localhost:3306/erfinder
     username: root
@@ -24,23 +27,28 @@ spring:
       hibernate:
         ddl-auto: update
 
+  # Development Tools
   devtools:
     restart:
       additional-exclude: launcherDir/**
     add-properties: false
 
+  # Serialization
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
 
+  # Console Output
   output:
     ansi:
       enabled: detect
 
+  # File Upload Limits
   servlet:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
 
+  # Web Resource Handling
   web:
     resources:
       static-locations: classpath:/launcherDir/,classpath:/public/
@@ -51,6 +59,7 @@ spring:
 
 debug: false
 
+# Logging Configuration
 logging:
   level:
     web: info

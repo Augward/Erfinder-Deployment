@@ -5,17 +5,17 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.eclipse.jetty.http.HttpStatus;
 
 public class Login {
+
+    // Fields
     private final Button sendButton;
     private final TextBox userIDBox;
     private final PasswordTextBox passwordTextBox;
     private final Label response;
 
+    // Constructor
     public Login() {
-
-        // 1. Create the UI Widgets
         sendButton = new Button("Log in");
         sendButton.addStyleName("sendButton");
         userIDBox = new TextBox();
@@ -24,20 +24,20 @@ public class Login {
         passwordTextBox.setMaxLength(32);
         response = new Label();
 
-        // 2. Add widgets to the HTML page (matches the archetype's index.html)
+        // UI Injection
         RootPanel.get("userIDContainer").add(userIDBox);
         RootPanel.get("passwordContainer").add(passwordTextBox);
         RootPanel.get("sendButtonContainer").add(sendButton);
         RootPanel.get("responseContainer").add(response);
 
-        // Focus the cursor on the name field when the app loads
         userIDBox.setFocus(true);
         userIDBox.selectAll();
 
-        // 3. Define what happens when the button is clicked
+        // Click Handlers
         sendButton.addClickHandler(new SendCredentials());
     }
 
+    // API Handlers
     private class SendCredentials implements ClickHandler {
         public void onClick(ClickEvent event) {
             sendButton.setEnabled(false);
@@ -45,7 +45,6 @@ public class Login {
             userIDBox.setEnabled(false);
             response.setText("Signing in...");
 
-            // 4. Build the REST Request to hit your Spring Controller
             RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
                     "/api/gettoken?userID="
                             + App.B64Encode(userIDBox.getText())
@@ -55,7 +54,7 @@ public class Login {
             try {
                 builder.sendRequest(null, new GetTokenResponse());
             } catch (RequestException e) {
-                e.printStackTrace();
+                // Compliance
             }
         }
     }
@@ -63,22 +62,30 @@ public class Login {
     private class GetTokenResponse implements RequestCallback {
         public void onResponseReceived(Request request, Response received) {
             switch (received.getStatusCode()) {
-                case HttpStatus.OK_200:
-                    // redirect to home page
+                case 200:
+                    // To home page
                     Window.Location.assign("home.html");
                     break;
-                case HttpStatus.NOT_FOUND_404:
-                    // show error message.
+                case 404:
+                    // Error message
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
                     response.setText("Invalid credentials");
-                case HttpStatus.INTERNAL_SERVER_ERROR_500:
+                    break;
+                case 500:
+                    // Internal error
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
                     response.setText("Internal Server Error");
-
+                    break;
+                default:
+                    sendButton.setEnabled(true);
+                    passwordTextBox.setEnabled(true);
+                    userIDBox.setEnabled(true);
+                    response.setText("Unexpected error occurred");
+                    break;
             }
         }
 

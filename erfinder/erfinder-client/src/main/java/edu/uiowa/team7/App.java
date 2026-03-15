@@ -5,18 +5,18 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class App implements EntryPoint {
+
 	public enum Page {
 		Index,
-
 		Login,
 		Forgot,
-        Register,
-
+		Register,
 		Home,
 		Info,
 	}
 
-	public void SetPage() {
+	// Page Routing
+	public void setPage() {
 		Element label = RootPanel.get("page").getElement();
 		Page inner;
 		try {
@@ -27,32 +27,34 @@ public class App implements EntryPoint {
 		label.removeFromParent();
 
 		switch (inner) {
-			case Index:
-				Index.Build();
-				break;
-
 			case Login:
-				Login loginPage = new Login();
+				new Login();
 				break;
 			case Forgot:
-				Forgot forgotPage = new Forgot();
+				new Forgot();
 				break;
-            case Register:
-                Register registerPage = new Register();
-                break;
-
-            case Home:
-                Home homePage = new Home();
-                break;
-            case Info:
-                Info infoPage = new Info();
+			case Register:
+				new Register();
+				break;
+			case Home:
+				new Home();
+				break;
+			case Info:
+				new Info();
+				break;
+			case Index:
+			default: // Added default
+				Index.Build();
+				break;
 		}
 	}
 
+	// Initialization
 	public void onModuleLoad() {
-		SetPage();
+		setPage();
 	}
 
+	// Native JS Methods
 	public static native String B64Encode(String original) /*-{
 		return $wnd.btoa(original);
 	}-*/;
