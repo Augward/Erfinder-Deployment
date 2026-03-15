@@ -6,8 +6,11 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
 public class Home {
+
+    // Fields
     private final VerticalPanel dynamicLayout;
 
+    // Constructor
     public Home() {
         dynamicLayout = new VerticalPanel();
         dynamicLayout.setSpacing(10);
@@ -16,6 +19,7 @@ public class Home {
         loadDashboard();
     }
 
+    // API Data Loading
     private void loadDashboard() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/myinfo");
         try {
@@ -59,6 +63,7 @@ public class Home {
         } catch (RequestException e) { e.printStackTrace(); }
     }
 
+    // Role-Specific Views
     private void buildPendingView() {
         dynamicLayout.add(new HTML("<h3>Account Pending Approval</h3>"));
         dynamicLayout.add(new Label("Your account request is currently being reviewed. Please check back later."));
@@ -157,6 +162,7 @@ public class Home {
         } catch (RequestException e) { e.printStackTrace(); }
     }
 
+    // Admin Helper Action
     private void approveUser(final String targetID) {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/approveuser?target=" + App.B64Encode(targetID));
         try {

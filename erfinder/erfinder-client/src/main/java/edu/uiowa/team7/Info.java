@@ -1,10 +1,13 @@
 package edu.uiowa.team7;
 
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 public class Info {
+
+    // Fields - Form Inputs
     private final TextBox firstnBox = new TextBox();
     private final TextBox lastnBox = new TextBox();
     private final TextBox legalnBox = new TextBox();
@@ -18,15 +21,18 @@ public class Info {
     private final TextBox contactBox = new TextBox();
     private final TextBox genderBox = new TextBox();
 
+    // Fields - Security & Actions
     private final PasswordTextBox passwordBox = new PasswordTextBox();
     private final PasswordTextBox deletePassBox = new PasswordTextBox();
-
     private final Button toggleEditBtn;
     private final Button updatePassBtn;
     private final Button deleteAccountBtn;
     private final Label statusLabel;
+
+    // State Tracker
     private boolean isEditing = false;
 
+    // Constructor
     public Info() {
         TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox,
                 addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox, deletePassBox};
@@ -37,27 +43,28 @@ public class Info {
 
         toggleEditBtn = new Button("Edit Profile");
         toggleEditBtn.addStyleName("btn");
-
         updatePassBtn = new Button("Update Password");
         updatePassBtn.addStyleName("btn");
-
         deleteAccountBtn = new Button("Delete Account");
         deleteAccountBtn.addStyleName("btn");
-
         deleteAccountBtn.getElement().getStyle().setBackgroundColor("#fee2e2");
         deleteAccountBtn.getElement().getStyle().setColor("#dc2626");
 
         statusLabel = new Label("Loading...");
 
-        RootPanel.get("firstnContainer").add(firstnBox); RootPanel.get("lastnContainer").add(lastnBox);
-        RootPanel.get("legalnContainer").add(legalnBox); RootPanel.get("dobContainer").add(dobBox);
-        RootPanel.get("emailContainer").add(emailBox); RootPanel.get("phoneContainer").add(phoneBox);
-        RootPanel.get("addrContainer").add(addrBox); RootPanel.get("zipContainer").add(zipBox);
-        RootPanel.get("dlnContainer").add(dlnBox); RootPanel.get("ssnContainer").add(ssnBox);
-        RootPanel.get("contactContainer").add(contactBox); RootPanel.get("genderContainer").add(genderBox);
-
-        RootPanel.get("btnContainer").add(toggleEditBtn);
-        RootPanel.get("statusContainer").add(statusLabel);
+        // UI Injection
+        RootPanel.get("firstnContainer").add(firstnBox);
+        RootPanel.get("lastnContainer").add(lastnBox);
+        RootPanel.get("legalnContainer").add(legalnBox);
+        RootPanel.get("dobContainer").add(dobBox);
+        RootPanel.get("emailContainer").add(emailBox);
+        RootPanel.get("phoneContainer").add(phoneBox);
+        RootPanel.get("addrContainer").add(addrBox);
+        RootPanel.get("zipContainer").add(zipBox);
+        RootPanel.get("dlnContainer").add(dlnBox);
+        RootPanel.get("ssnContainer").add(ssnBox);
+        RootPanel.get("contactContainer").add(contactBox);
+        RootPanel.get("genderContainer").add(genderBox);
 
         RootPanel.get("passwordContainer").add(passwordBox);
         RootPanel.get("passwordUpdateBtnContainer").add(updatePassBtn);
@@ -65,6 +72,10 @@ public class Info {
         RootPanel.get("deletePassContainer").add(deletePassBox);
         RootPanel.get("deleteAccountBtnContainer").add(deleteAccountBtn);
 
+        RootPanel.get("btnContainer").add(toggleEditBtn);
+        RootPanel.get("statusContainer").add(statusLabel);
+
+        // API Fetch
         fetchCurrentInfo();
 
         toggleEditBtn.addClickHandler(event -> {
@@ -76,16 +87,16 @@ public class Info {
         });
 
         updatePassBtn.addClickHandler(event -> updatePassword());
-
         deleteAccountBtn.addClickHandler(event -> deleteAccount());
     }
 
+    // UI Helper Methods
     private void setFieldsReadOnly(boolean readOnly) {
-        TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox,
-                addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox};
+        TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox, addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox};
         for (TextBox box : boxes) { box.setReadOnly(readOnly); }
     }
 
+    // API Calls
     private void fetchCurrentInfo() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/myinfo");
         try {
@@ -159,16 +170,10 @@ public class Info {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) {
-                        Window.Location.assign("index.html");
-                    } else {
-                        updatePassBtn.setEnabled(true);
-                        statusLabel.setText("Failed to update password.");
-                    }
+                    if (response.getStatusCode() == 200) { Window.Location.assign("index.html"); }
+                    else { updatePassBtn.setEnabled(true); statusLabel.setText("Failed to update password."); }
                 }
-                public void onError(Request request, Throwable exception) {
-                    updatePassBtn.setEnabled(true);
-                    statusLabel.setText("Server error."); }
+                public void onError(Request request, Throwable exception) { updatePassBtn.setEnabled(true); statusLabel.setText("Server error."); }
             });
         } catch (RequestException e) { e.printStackTrace(); }
     }
@@ -176,7 +181,9 @@ public class Info {
     private void deleteAccount() {
         String pass = deletePassBox.getText();
         if (pass == null || pass.trim().isEmpty()) {
-            statusLabel.getElement().getStyle().setColor("red"); statusLabel.setText("Enter current password to delete account."); return;
+            statusLabel.getElement().getStyle().setColor("red");
+            statusLabel.setText("Enter current password to delete account.");
+            return;
         }
         if (!Window.confirm("Are you ABSOLUTELY sure? This will wipe your account.")) return;
 
@@ -185,9 +192,8 @@ public class Info {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) {
-                        Window.Location.assign("index.html");
-                    } else {
+                    if (response.getStatusCode() == 200) { Window.Location.assign("index.html"); }
+                    else {
                         deleteAccountBtn.setEnabled(true);
                         statusLabel.getElement().getStyle().setColor("red");
                         statusLabel.setText("Incorrect password. Account not deleted.");
