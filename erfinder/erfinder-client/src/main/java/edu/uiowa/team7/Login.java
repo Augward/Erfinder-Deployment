@@ -69,19 +69,19 @@ public class Login {
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Invalid credentials");
+                    response.setText("Invalid credentials.");
                     break;
                 case HttpStatus.INTERNAL_SERVER_ERROR_500:
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Internal Server Error");
+                    response.setText("Internal Server Error.");
                     break;
                 default:
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Unexpected error occurred");
+                    response.setText("Unexpected error occurred.");
                     break;
             }
         }

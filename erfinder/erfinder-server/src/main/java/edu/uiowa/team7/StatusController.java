@@ -104,7 +104,8 @@ public class StatusController {
 
         if (!result.IsValid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return "Not Logged In!";
+            response.setHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
+            return "-";
         }
 
         result.TryRefreshToken(request, response);

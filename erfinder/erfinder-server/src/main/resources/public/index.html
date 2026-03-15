@@ -14,12 +14,18 @@
 
 <div class="top-nav">
     <h1 class="brand-title">
-        <span style="font-size: 0.8em; margin-right: 15px;">🚑</span> ERFinder
+        <a href="index.html" style="font-size: 0.8em; margin-right: 15px;">🚑</a> ERFinder
     </h1>
 
-    <div class="nav-links">
-        <a href="login.html">Login</a>
-        <a href="register.html">Sign Up</a>
+    <div class="nav-links" id="navbar-no-auth" hidden>
+        <a id="nav-links-l" href="login.html">Login</a>
+        <a id="nav-links-r" href="register.html">Sign Up</a>
+    </div>
+
+    <div class="nav-links" id="navbar-yes-auth" hidden>
+        <a href="info.html">Profile</a>
+        <a href="home.html">Dashboard</a>
+        <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='index.html'); return false;">Logout</a>
     </div>
 </div>
 
