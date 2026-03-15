@@ -20,7 +20,7 @@ test:
 
     - sleep 15
 
-    - mysql -h localhost -u root -pinsecure_password erfinder < erfinder/schema.sql
+    - mysql -h 127.0.0.1 -u root -pinsecure_password erfinder < erfinder/schema.sql
   script:
     - cd erfinder
     - mvn clean test
