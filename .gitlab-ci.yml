@@ -1,3 +1,4 @@
+# 1
 image: maven:3.9-eclipse-temurin-17
 
 stages:
@@ -9,7 +10,7 @@ test:
   script:
     - cd erfinder
     - mvn clean test
-
+  # 2
   artifacts:
     paths:
       - erfinder/**/target/
@@ -25,6 +26,8 @@ sonarqube:
     paths:
       - .sonar/cache
   script:
+    # 3
     - cd erfinder
+    # 4
     - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.qualitygate.wait=true
   allow_failure: false
