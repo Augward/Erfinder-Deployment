@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest(properties = {
         "erfinder.login.max-attempts-in-period=10",
@@ -47,8 +46,6 @@ class ERFinderApplicationTests {
 
     @Test
     void testDatabaseConnectionAndNulls() throws SQLException {
-        assumeTrue(Queries.GetConnection() != null, "MySQL database is not active in this environment. Skipping.");
-
         assertNotNull(Queries.GetConnection());
         assertNull(Queries.GetUserInfo("UserThatWillNeverExist"));
         assertFalse(Queries.ValidateCredentials("FakeUser", "FakePass"));
@@ -56,8 +53,6 @@ class ERFinderApplicationTests {
 
     @Test
     void testRegistrationAndExistenceChecks() throws Exception {
-        assumeTrue(Queries.GetConnection() != null);
-
         Map<String, String> data = new HashMap<>();
         data.put("username", "testPending"); data.put("password", "SecurePass123!");
         data.put("securityQuestion", "SQ1"); data.put("securityAnswer", "Answer");
@@ -87,8 +82,6 @@ class ERFinderApplicationTests {
 
     @Test
     void testAdminApprovalPipeline() throws SQLException {
-        assumeTrue(Queries.GetConnection() != null);
-
         // Fake user to test logic
         try {
             Queries.GetConnection().createStatement().executeUpdate(
@@ -108,8 +101,6 @@ class ERFinderApplicationTests {
 
     @Test
     void testSecurityAndAuthentication() throws SQLException {
-        assumeTrue(Queries.GetConnection() != null);
-
         Queries.CreateTestUser("testAuthUser", "ValidPass", "SQ1", "MyAnswer");
 
         // Success paths
@@ -130,8 +121,6 @@ class ERFinderApplicationTests {
 
     @Test
     void testProfileUpdates() throws SQLException {
-        assumeTrue(Queries.GetConnection() != null);
-
         Queries.CreateTestUser("testUpdateUser", "pass", "q", "a");
 
         // Test update

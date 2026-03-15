@@ -1,4 +1,3 @@
-# 1
 image: maven:3.9-eclipse-temurin-17
 
 stages:
@@ -7,10 +6,24 @@ stages:
 
 test:
   stage: test
+
+  services:
+    - name: mysql:8.0
+      alias: localhost
+
+  variables:
+    MYSQL_ROOT_PASSWORD: "insecure_password"
+    MYSQL_DATABASE: "erfinder"
+  before_script:
+
+    - apt-get update && apt-get install -y default-mysql-client
+
+    - sleep 15
+
+    - mysql -h localhost -u root -pinsecure_password erfinder < erfinder/schema.sql
   script:
     - cd erfinder
     - mvn clean test
-  # 2
   artifacts:
     paths:
       - erfinder/**/target/
@@ -26,8 +39,6 @@ sonarqube:
     paths:
       - .sonar/cache
   script:
-    # 3
     - cd erfinder
-    # 4
     - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.qualitygate.wait=true
   allow_failure: false
