@@ -1,11 +1,15 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
 public class Home {
+
+    private static final Logger logger = Logger.getLogger(Home.class.getName());
 
     // Fields
     private final VerticalPanel dynamicLayout;
@@ -60,7 +64,7 @@ public class Home {
                     dynamicLayout.add(new HTML("<h2 style='color:red;'>Server Connection Error.</h2>"));
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 
     // Role-Specific Views
@@ -159,7 +163,7 @@ public class Home {
                     dynamicLayout.add(new HTML("<p style='color:red;'>Failed to load users.</p>"));
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 
     // Admin Helper Action
@@ -180,6 +184,6 @@ public class Home {
                     com.google.gwt.user.client.Window.alert("Server connection error.");
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 }

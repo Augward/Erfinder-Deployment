@@ -1,10 +1,10 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.eclipse.jetty.http.HttpStatus;
 
 public class Forgot {
 
@@ -33,9 +33,11 @@ public class Forgot {
         // UI Injection
         RootPanel.get("userIDContainer").add(userIDBox);
         RootPanel.get("submitID").add(submitID);
+
         RootPanel.get("questionContainer").add(questionLabel);
         RootPanel.get("answerContainer").add(answerBox);
         RootPanel.get("submitAnswer").add(submitAnswer);
+
         RootPanel.get("responseContainer").add(serverUpdates);
 
         // Click Handlers
@@ -65,14 +67,16 @@ public class Forgot {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
-                case HttpStatus.OK_200:
+                case 200:
+                    // userid is response text
                     serverUpdates.setText("Found userID. Waiting for answer.");
                     questionLabel.setText(response.getText());
                     answerBox.setEnabled(true);
                     submitAnswer.setEnabled(true);
                     break;
-                case HttpStatus.NOT_FOUND_404:
+                case 404:
                 default:
+                    // not valid userid
                     serverUpdates.setText("Failed to find user with that UserID.");
                     userIDBox.setEnabled(true);
                     submitID.setEnabled(true);
@@ -109,10 +113,10 @@ public class Forgot {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
-                case HttpStatus.OK_200:
+                case 200:
                     Window.Location.assign("home.html");
                     break;
-                case HttpStatus.NOT_FOUND_404:
+                case 404:
                 default:
                     serverUpdates.setText("Incorrect");
                     submitAnswer.setEnabled(true);
@@ -123,7 +127,6 @@ public class Forgot {
 
         @Override
         public void onError(Request request, Throwable throwable) {
-            // SonarQube fix
             serverUpdates.setText("Network error occurred.");
         }
     }

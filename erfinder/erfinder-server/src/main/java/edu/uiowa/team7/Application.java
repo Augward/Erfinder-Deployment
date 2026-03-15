@@ -1,5 +1,6 @@
 package edu.uiowa.team7;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -26,7 +27,8 @@ public class Application extends SpringBootServletInitializer {
 
   // Servlet Builder Configuration
   @Override
-  protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+  @NonNull
+  protected SpringApplicationBuilder configure(@NonNull SpringApplicationBuilder builder) {
     return builder.sources(Application.class);
   }
 

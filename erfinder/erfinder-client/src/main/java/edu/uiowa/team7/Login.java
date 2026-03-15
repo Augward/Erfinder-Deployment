@@ -1,6 +1,7 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
@@ -55,6 +56,7 @@ public class Login {
                 builder.sendRequest(null, new GetTokenResponse());
             } catch (RequestException e) {
                 response.setText("An unexpected error occured!");
+                // Compliance
             }
         }
     }

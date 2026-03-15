@@ -1,6 +1,5 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
@@ -9,7 +8,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class Register {
 
-    // Fields - SonarQube Fix: Enforced 'private' visibility encapsulation
+    // Fields
     private final TextBox firstname = new TextBox();
     private final TextBox lastname = new TextBox();
     private final TextBox legalname = new TextBox();
