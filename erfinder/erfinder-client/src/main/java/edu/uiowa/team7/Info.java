@@ -1,10 +1,15 @@
 package edu.uiowa.team7;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 public class Info {
+
+    private static final Logger logger = Logger.getLogger(Info.class.getName());
 
     // Fields - Form Inputs
     private final TextBox firstnBox = new TextBox();
@@ -126,7 +131,7 @@ public class Info {
                 }
                 public void onError(Request request, Throwable exception) { statusLabel.setText("Server connection error."); }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 
     private void saveUpdatedInfo() {
@@ -164,7 +169,7 @@ public class Info {
                     statusLabel.setText("Server connection error.");
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 
     private void updatePassword() {
@@ -184,7 +189,7 @@ public class Info {
                 }
                 public void onError(Request request, Throwable exception) { updatePassBtn.setEnabled(true); statusLabel.setText("Server error."); }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 
     private void deleteAccount() {
@@ -213,6 +218,6 @@ public class Info {
                     statusLabel.setText("Server error.");
                 }
             });
-        } catch (RequestException e) { e.printStackTrace(); }
+        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
 }
