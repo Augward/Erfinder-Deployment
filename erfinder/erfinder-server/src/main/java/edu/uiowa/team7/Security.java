@@ -1,21 +1,20 @@
 package edu.uiowa.team7;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
+import io.jsonwebtoken.*;
+import jakarta.servlet.http.*;
+import org.slf4j.*;
+import org.springframework.http.*;
 
 import java.security.KeyPair;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
-import java.util.Optional;
+import java.time.*;
+import java.util.*;
 
 public class Security {
+
+    // Logger
+    private static final Logger logger = LoggerFactory.getLogger(Security.class);
+
+    // Key Generation
     private static KeyPair pair;
     private static KeyPair GetPair() {
         if (pair == null) {
@@ -24,14 +23,16 @@ public class Security {
         return pair;
     }
 
+    // Session Tracking (Locks token to IP Address)
     public static String GetDevice(HttpServletRequest req) {
         String ip = req.getRemoteAddr();
         return ip != null ? ip : "unknown_device";
     }
 
+    // JWT Token Construction
     public static String GenerateJWT(String username, String device) {
         return Jwts.builder()
-                .claim("userid",username)
+                .claim("userid", username)
                 .claim("device", device)
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plusMillis(Configuration.TokenLife())))
@@ -39,12 +40,13 @@ public class Security {
                 .compact();
     }
 
+    // HTTP Cookie Builders
     public static String BuildJWTCookieFresh(String username, String device) {
         return ResponseCookie
                 .from("token", GenerateJWT(username, device))
                 .httpOnly(true)
                 .path("/")
-                .secure(false)
+                .secure(false) // Can be set True at some point
                 .sameSite("Strict")
                 .maxAge(Duration.ofMillis(Configuration.TokenLife()))
                 .build().toString();
@@ -61,6 +63,7 @@ public class Security {
                 .build().toString();
     }
 
+    // JWT Parsing and Validation Overloads
     public static TokenParseResult ParseRequestJWT(HttpServletRequest request) {
         Optional<String> token = GetToken(request);
         if (token.isEmpty()) {
@@ -74,10 +77,12 @@ public class Security {
         try {
             return new TokenParseResult(token, device);
         } catch (JwtException e) {
+            logger.warn("JWT Exception during manual parse: {}", e.getMessage());
             return new TokenParseResult();
         }
     }
 
+    // Internal Token Result Wrapper
     public static class TokenParseResult {
         private final boolean valid;
         private final boolean needsRefresh;
@@ -87,23 +92,23 @@ public class Security {
         public boolean NeedsRefresh() { return needsRefresh; }
         public String UserID() { return userid; }
 
+        // Core parsing logic
         public TokenParseResult(String token, String device) {
-
             String casted;
             boolean refresh;
             try {
-
                 Claims claims = Jwts.parser()
                         .verifyWith(pair.getPublic())
                         .require("device", device)
                         .build().parseSignedClaims(token).getPayload();
 
-                casted = (String)claims.get("userid");
+                casted = (String) claims.get("userid");
                 Date issuedAt = claims.getIssuedAt();
                 Instant refreshTime = issuedAt.toInstant().plusMillis(Configuration.TokenNoRefresh());
                 Instant now = Instant.now();
                 refresh = refreshTime.isBefore(now) && claims.getExpiration().after(Date.from(Instant.now()));
             } catch (JwtException ex) {
+                logger.warn("JWT validation failed (Expired or Tampered): {}", ex.getMessage());
                 userid = "";
                 needsRefresh = false;
                 valid = false;
@@ -114,12 +119,14 @@ public class Security {
             valid = true;
         }
 
+        // Empty Constructor
         public TokenParseResult() {
             userid = "";
             needsRefresh = false;
             valid = false;
         }
 
+        // Refresh Handler
         public void TryRefreshToken(HttpServletRequest req, HttpServletResponse res) {
             if (!valid || !needsRefresh) {
                 return;
@@ -128,6 +135,7 @@ public class Security {
         }
     }
 
+    // Helper Method: Extracts token from request cookies
     private static Optional<String> GetToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
