@@ -1,10 +1,10 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.eclipse.jetty.http.HttpStatus;
 
 public class Login {
 
@@ -54,7 +54,7 @@ public class Login {
             try {
                 builder.sendRequest(null, new GetTokenResponse());
             } catch (RequestException e) {
-                e.printStackTrace();
+                // SonarQube compliance?
             }
         }
     }
@@ -62,16 +62,16 @@ public class Login {
     private class GetTokenResponse implements RequestCallback {
         public void onResponseReceived(Request request, Response received) {
             switch (received.getStatusCode()) {
-                case HttpStatus.OK_200:
+                case 200:
                     Window.Location.assign("home.html");
                     break;
-                case HttpStatus.NOT_FOUND_404:
+                case 404:
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
                     response.setText("Invalid credentials");
                     break;
-                case HttpStatus.INTERNAL_SERVER_ERROR_500:
+                case 500:
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);

@@ -1,10 +1,13 @@
 package edu.uiowa.team7;
 
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.http.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.eclipse.jetty.http.HttpStatus;
 
 public class Forgot {
 
@@ -65,13 +68,13 @@ public class Forgot {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
-                case HttpStatus.OK_200:
+                case 200:
                     serverUpdates.setText("Found userID. Waiting for answer.");
                     questionLabel.setText(response.getText());
                     answerBox.setEnabled(true);
                     submitAnswer.setEnabled(true);
                     break;
-                case HttpStatus.NOT_FOUND_404:
+                case 404:
                 default:
                     serverUpdates.setText("Failed to find user with that UserID.");
                     userIDBox.setEnabled(true);
@@ -109,10 +112,10 @@ public class Forgot {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
-                case HttpStatus.OK_200:
+                case 200:
                     Window.Location.assign("home.html");
                     break;
-                case HttpStatus.NOT_FOUND_404:
+                case 404:
                 default:
                     serverUpdates.setText("Incorrect");
                     submitAnswer.setEnabled(true);
