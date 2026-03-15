@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.Map;
 import java.util.Optional;
 
-
+@SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 public class Queries {
 
     private static final Logger logger = LoggerFactory.getLogger(Queries.class);
@@ -168,7 +168,7 @@ public class Queries {
             while (r.next()) {
                 sb.append(r.getString("userid")).append(":").append(r.getString("perm")).append(",");
             }
-            if (sb.length() > 0) sb.setLength(sb.length() - 1);
+            if (!sb.isEmpty()) sb.setLength(sb.length() - 1);
             return sb.toString();
         }
     }
