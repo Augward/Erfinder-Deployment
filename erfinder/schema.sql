@@ -31,25 +31,25 @@ DROP TABLE IF EXISTS `registration`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `registration` (
-  `perm` varchar(8) NOT NULL,
-  `salt` char(8) DEFAULT NULL,
-  `userid` varchar(32) NOT NULL,
-  `passhash` binary(32) DEFAULT NULL,
-  `firstn` varchar(32) NOT NULL,
-  `lastn` varchar(32) DEFAULT NULL,
-  `legaln` varchar(128) NOT NULL,
-  `dln` varchar(20) DEFAULT NULL,
-  `ssn` varchar(20) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `contact` varchar(20) DEFAULT NULL,
-  `email` varchar(128) NOT NULL,
-  `addr` varchar(256) NOT NULL,
-  `zip` varchar(20) DEFAULT NULL,
-  `dob` date DEFAULT NULL,
-  `gender` varchar(32) DEFAULT NULL,
-  `secquestion` varchar(64) DEFAULT NULL,
-  `secanswer` binary(32) DEFAULT NULL,
-  UNIQUE KEY `userid` (`userid`)
+                                `perm` varchar(8) NOT NULL,
+                                `salt` char(8) DEFAULT NULL,
+                                `userid` varchar(32) NOT NULL,
+                                `passhash` binary(32) DEFAULT NULL,
+                                `firstn` varchar(32) NOT NULL,
+                                `lastn` varchar(32) DEFAULT NULL,
+                                `legaln` varchar(128) NOT NULL,
+                                `dln` varchar(20) DEFAULT NULL,
+                                `ssn` varchar(20) DEFAULT NULL,
+                                `phone` varchar(20) DEFAULT NULL,
+                                `contact` varchar(20) DEFAULT NULL,
+                                `email` varchar(128) NOT NULL,
+                                `addr` varchar(256) NOT NULL,
+                                `zip` varchar(20) DEFAULT NULL,
+                                `dob` date DEFAULT NULL,
+                                `gender` varchar(32) DEFAULT NULL,
+                                `secquestion` varchar(64) DEFAULT NULL,
+                                `secanswer` binary(32) DEFAULT NULL,
+                                UNIQUE KEY `userid` (`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -61,27 +61,27 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `perm` varchar(8) NOT NULL,
-  `salt` char(8) DEFAULT NULL,
-  `userid` varchar(32) NOT NULL,
-  `passhash` binary(32) DEFAULT NULL,
-  `firstn` varchar(32) NOT NULL,
-  `lastn` varchar(32) DEFAULT NULL,
-  `legaln` varchar(128) NOT NULL,
-  `dln` varchar(20) DEFAULT NULL,
-  `ssn` varchar(20) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `contact` varchar(20) DEFAULT NULL,
-  `email` varchar(128) NOT NULL,
-  `addr` varchar(256) NOT NULL,
-  `zip` varchar(20) DEFAULT NULL,
-  `dob` date DEFAULT NULL,
-  `gender` varchar(32) DEFAULT NULL,
-  `secquestion` varchar(64) DEFAULT NULL,
-  `secanswer` binary(32) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `userid` (`userid`)
+                         `id` int NOT NULL AUTO_INCREMENT,
+                         `perm` varchar(8) NOT NULL,
+                         `salt` char(8) DEFAULT NULL,
+                         `userid` varchar(32) NOT NULL,
+                         `passhash` binary(32) DEFAULT NULL,
+                         `firstn` varchar(32) NOT NULL,
+                         `lastn` varchar(32) DEFAULT NULL,
+                         `legaln` varchar(128) NOT NULL,
+                         `dln` varchar(20) DEFAULT NULL,
+                         `ssn` varchar(20) DEFAULT NULL,
+                         `phone` varchar(20) DEFAULT NULL,
+                         `contact` varchar(20) DEFAULT NULL,
+                         `email` varchar(128) NOT NULL,
+                         `addr` varchar(256) NOT NULL,
+                         `zip` varchar(20) DEFAULT NULL,
+                         `dob` date DEFAULT NULL,
+                         `gender` varchar(32) DEFAULT NULL,
+                         `secquestion` varchar(64) DEFAULT NULL,
+                         `secanswer` binary(32) DEFAULT NULL,
+                         PRIMARY KEY (`id`),
+                         UNIQUE KEY `userid` (`userid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -98,24 +98,24 @@ CREATE TABLE `users` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateTestUser`(
-	IN tuserid varchar(32),
+CREATE PROCEDURE `CreateTestUser`(
+    IN tuserid varchar(32),
     IN tuserpass varchar(32),
     IN tusersecq varchar(64),
     IN tuserseca varchar(32)
 )
 BEGIN
-	DECLARE _salt varchar(16);
-	DECLARE _hashed binary(32);
+    DECLARE _salt varchar(16);
+    DECLARE _hashed binary(32);
     DECLARE _hashsq binary(32);
     SELECT SUBSTR(MD5(RAND()), 1, 8) INTO _salt;
     CALL erfinder.GetHashedVersion(tuserpass, _salt, _hashed);
     CALL erfinder.GetHashedVersion(tuserseca, _salt, _hashsq);
-    
+
     INSERT INTO Users (
-		userid, 
-        passhash, 
-        salt, 
+        userid,
+        passhash,
+        salt,
         perm,
         firstn,
         lastn,
@@ -124,20 +124,20 @@ BEGIN
         addr,
         secquestion,
         secanswer
-	)
+    )
     VALUES (
-        tuserid,
-        _hashed,
-        _salt,
-        'test',
-        '_testFN',
-        '_testLN',
-        '_testLegal',
-        '_testEmail',
-        '_testAddr',
-        tusersecq,
-        _hashsq
-    );
+               tuserid,
+               _hashed,
+               _salt,
+               'test',
+               '_testFN',
+               '_testLN',
+               '_testLegal',
+               '_testEmail',
+               '_testAddr',
+               tusersecq,
+               _hashsq
+           );
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -154,13 +154,13 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GetHashedVersion`(
-	IN pass varchar(32),
+CREATE PROCEDURE `GetHashedVersion`(
+    IN pass varchar(32),
     IN salt char(8),
     OUT hashed binary(32)
 )
 BEGIN
-	SET hashed = UNHEX(SHA2(CONCAT(pass, salt),256));
+    SET hashed = UNHEX(SHA2(CONCAT(pass, salt),256));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -177,11 +177,11 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GetSecurityQuestion`(
-	IN tuserid varchar(32)
+CREATE PROCEDURE `GetSecurityQuestion`(
+    IN tuserid varchar(32)
 )
 BEGIN
-	SELECT secquestion FROM Users WHERE userid = tuserid;
+    SELECT secquestion FROM Users WHERE userid = tuserid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -198,9 +198,9 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `PurgeTestUsers`()
+CREATE PROCEDURE `PurgeTestUsers`()
 BEGIN
-	DELETE FROM Users 
+    DELETE FROM Users
     WHERE perm='test';
 END ;;
 DELIMITER ;
@@ -218,16 +218,16 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ValidatePassword`(
-	IN for_userid varchar(32),
+CREATE PROCEDURE `ValidatePassword`(
+    IN for_userid varchar(32),
     IN to_validate varchar(32)
 )
 BEGIN
-	DECLARE db_salt char(8);
+    DECLARE db_salt char(8);
     DECLARE db_pass binary(32);
     DECLARE _hashed binary(32);
-	SELECT salt, passhash INTO db_salt, db_pass
-		FROM Users WHERE userid = for_userid;
+    SELECT salt, passhash INTO db_salt, db_pass
+    FROM Users WHERE userid = for_userid;
     CALL GetHashedVersion(to_validate, db_salt, _hashed);
     SELECT _hashed = db_pass;
 END ;;
@@ -246,16 +246,16 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ValidateSecurity`(
-	IN for_userid varchar(32),
+CREATE PROCEDURE `ValidateSecurity`(
+    IN for_userid varchar(32),
     IN to_validate varchar(32)
 )
 BEGIN
-	DECLARE db_salt char(8);
+    DECLARE db_salt char(8);
     DECLARE db_ans binary(32);
     DECLARE _hashsq binary(32);
-	SELECT salt, secanswer INTO db_salt, db_ans
-		FROM Users WHERE userid = for_userid;
+    SELECT salt, secanswer INTO db_salt, db_ans
+    FROM Users WHERE userid = for_userid;
     CALL GetHashedVersion(to_validate, db_salt, _hashsq);
     SELECT _hashsq = db_ans;
 END ;;
@@ -274,16 +274,16 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ValidateSecurityAnswer`(
-	IN for_userid varchar(32),
+CREATE PROCEDURE `ValidateSecurityAnswer`(
+    IN for_userid varchar(32),
     IN to_validate varchar(32)
 )
 BEGIN
-	DECLARE db_salt char(8);
+    DECLARE db_salt char(8);
     DECLARE db_ans binary(32);
     DECLARE _hashsq binary(32);
-	SELECT salt, secanswer INTO db_salt, db_ans
-		FROM Users WHERE userid = for_userid;
+    SELECT salt, secanswer INTO db_salt, db_ans
+    FROM Users WHERE userid = for_userid;
     CALL GetHashedVersion(to_validate, db_salt, _hashsq);
     SELECT _hashsq = db_ans;
 END ;;
@@ -302,16 +302,16 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `ValidateSecurityQuestion`(
-	IN for_userid varchar(32),
+CREATE PROCEDURE `ValidateSecurityQuestion`(
+    IN for_userid varchar(32),
     IN to_validate varchar(32)
 )
 BEGIN
-	DECLARE db_salt char(8);
+    DECLARE db_salt char(8);
     DECLARE db_ans binary(32);
     DECLARE _hashsq binary(32);
-	SELECT salt, secanswer INTO db_salt, db_ans
-		FROM Users WHERE userid = for_userid;
+    SELECT salt, secanswer INTO db_salt, db_ans
+    FROM Users WHERE userid = for_userid;
     CALL GetHashedVersion(to_validate, db_salt, _hashsq);
     SELECT _hashsq = db_ans;
 END ;;
