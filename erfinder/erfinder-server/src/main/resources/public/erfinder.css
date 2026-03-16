@@ -1,34 +1,182 @@
-/** Add css rules here for your application. */
-
-
-/** Example rules used by the template application (remove for your app) */
-h1 {
-  font-size: 2em;
-  font-weight: bold;
-  color: #777777;
-  margin: 40px 0px 70px;
-  text-align: center;
+/* Global Reset and Body Styles */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    background-color: lightgrey !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1f2937;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.sendButton {
-  display: block;
-  font-size: 16pt;
+/* Header Section */
+.top-nav {
+    background-color: #00467f;
+    padding: 25px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
+/* Brand Logo and Title */
+.brand-title {
+    color: white;
+    font-size: 2.5em;
+    margin: 0;
+    display: flex;
+    align-items: center;
 }
 
-.dialogVPanel {
-  margin: 5px;
+/* Navigation Links */
+.nav-links a,
+.nav-links a:visited,
+.nav-links a:active {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: bold;
+    font-size: 1.2em;
+    transition: color 0.2s;
 }
 
-.serverResponseLabelError {
-  color: red;
+.nav-links a:hover {
+    color: #bae6fd;
 }
 
-/** Set ids using widget.getElement().setId("idOfElement") */
-#closeButton {
-  margin: 15px 6px 6px;
+/* Sub-title Bar */
+.page-title-bar {
+    background-color: #93c5fd;
+    color: black;
+    padding: 20px 40px;
+    font-size: 1.4em;
+    font-weight: bold;
+    border-bottom: 2px solid #60a5fa;
+    width: 100%;
+    box-sizing: border-box;
 }
+
+/* Footer Section */
+.footer {
+    background-color: #00467f;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Hero Image Container */
+.hero-image {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background-color: #00467f;
+    overflow: hidden;
+    border-bottom: 4px solid #002244;
+    margin-bottom: 10px;
+}
+
+/* Hero Image Overlays */
+.hero-image::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('HomeImage.jpg') center/cover no-repeat;
+    opacity: 0.20;
+}
+
+.hero-image::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('HomeImageFull.jpg') center/cover no-repeat;
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+}
+
+/* Layout Containers */
+.content-container {
+    max-width: 1200px;
+    margin: 20px auto 60px auto;
+    padding: 0 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* UI Panels */
+.panel {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Map Display Element */
+.map-placeholder {
+    width: 100%;
+    height: 500px;
+    background-color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    color: #475569;
+    border-radius: 8px;
+}
+
+/* Profile Form Grid */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Form Inputs */
+.form-row { margin-bottom: 15px; }
+
+.form-row label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #374151;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-input[readonly] {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border: 1px dashed #9ca3af;
+}
+
+/* Interactive Buttons */
+.btn {
+    background-color: white;
+    color: #00467f;;
+    border: 5px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn:hover { background-color: #00467f; }

@@ -1,0 +1,50 @@
+image: maven:3.9-eclipse-temurin-17
+
+variables:
+
+  MYSQL_DATABASE: erfinder
+  MYSQL_ROOT_PASSWORD: insecure_password
+  DB_HOST: mysql
+
+stages:
+  - build
+  - test
+  - sonarqube
+
+build_project:
+  stage: build
+  script:
+    - cd erfinder
+    - mvn clean install -DskipTests
+
+test_backend:
+  stage: test
+  services:
+    - name: mysql:8.0
+      alias: mysql
+  before_script:
+
+    - apt-get update && apt-get install -y default-mysql-client
+    - cd erfinder
+
+    - sleep 15
+
+    - mysql -h mysql -u root -pinsecure_password erfinder < schema.sql
+  script:
+
+    - mvn test -pl erfinder-server -am
+
+sonarqube_scan:
+  stage: sonarqube
+  services:
+    - name: mysql:8.0
+      alias: mysql
+  before_script:
+    - apt-get update && apt-get install -y default-mysql-client
+    - cd erfinder
+    - sleep 15
+    - mysql -h mysql -u root -pinsecure_password erfinder < schema.sql
+  script:
+
+    - mvn verify sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=ERFinder_Team7
+  allow_failure: true
