@@ -13,7 +13,6 @@ server:
 # Spring Boot Configuration
 spring:
   main:
-    web-application-type: none
     banner-mode: off
   application:
     name: erfinder

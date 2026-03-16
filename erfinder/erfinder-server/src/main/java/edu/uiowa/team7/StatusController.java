@@ -102,7 +102,7 @@ public class StatusController {
     public String GetUsernameInToken(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
 
-        if (result.IsValid()) {
+        if (!result.IsValid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return "Not Logged In!";
         }
