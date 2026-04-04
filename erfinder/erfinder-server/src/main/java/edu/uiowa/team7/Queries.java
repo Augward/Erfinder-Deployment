@@ -258,4 +258,32 @@ public class Queries {
             throw e;
         }
     }
+
+    public static boolean AddFacility(
+            String erName, String phone, String address, String zip, String traumaLevel,
+            String specialties, int bedAvailability, int waitTime, double latitude, double longitude
+    ) throws SQLException{
+        try(Connection conn = GetConnection();
+            CallableStatement stmt = conn.prepareCall("CALL add_facility(?,?,?,?,?,?,?,?,?,?,?)")){
+
+            stmt.setString(1, erName);
+            stmt.setString(2, phone);
+            stmt.setString(3, address);
+            stmt.setString(4, zip);
+            stmt.setString(5, traumaLevel);
+            stmt.setString(6, specialties);
+            stmt.setInt(7, bedAvailability);
+            stmt.setInt(8, waitTime);
+            stmt.setDouble(9, latitude);
+            stmt.setDouble(10, longitude);
+
+            stmt.execute();
+            return true;
+
+        }
+        catch(SQLException e){
+            PrintSQLException(e);
+            throw e;
+        }
+    }
 }
