@@ -264,7 +264,7 @@ public class Queries {
             String specialties, int bedAvailability, int waitTime, double latitude, double longitude
     ) throws SQLException{
         try(Connection conn = GetConnection();
-            CallableStatement stmt = conn.prepareCall("CALL add_facility(?,?,?,?,?,?,?,?,?,?,?)")){
+            CallableStatement stmt = conn.prepareCall("CALL add_facility(?,?,?,?,?,?,?,?,?,?)")){
 
             stmt.setString(1, erName);
             stmt.setString(2, phone);

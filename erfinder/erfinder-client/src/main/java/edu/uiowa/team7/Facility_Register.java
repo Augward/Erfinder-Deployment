@@ -1,6 +1,7 @@
 package edu.uiowa.team7;
 
 import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
@@ -218,7 +219,15 @@ public class Facility_Register extends VerticalPanel {
         }
         else{
             submitbtn.setEnabled(false);
-            String payload ="";
+            String payload = "ername=" + URL.encodeQueryString(ername.getText().trim()) +
+                            "&phonenum=" + URL.encodeQueryString(phonenum.getText().trim()) +
+                            "&address=" + URL.encodeQueryString(address.getText().trim()) +
+                            "&zip=" + URL.encodeQueryString(zip.getText().trim()) +
+                            "&traumalevel=" + URL.encodeQueryString(traumalevel.getSelectedItemText()) +
+                            "&specialties=" + URL.encodeQueryString(specialties.getText().trim()) +
+                            "&bedavail=" + URL.encodeQueryString(bedavail.getText().trim()) +
+                            "&waitTime=" + URL.encodeQueryString(waitTime.getText().trim());
+
             RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/api/addfacility");
             builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
             try{
