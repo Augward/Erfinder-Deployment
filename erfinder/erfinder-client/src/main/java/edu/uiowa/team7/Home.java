@@ -171,6 +171,12 @@ public class Home {
         facilityReg.addClickHandler(event -> registerFacility());
         dynamicLayout.add(facilityReg);
 
+        //ER FACILITY UPDATE STUFF
+        Button upFac = new Button("Update ER Facility");
+        upFac.addStyleName("btn");
+        upFac.addClickHandler(event -> updateFacility());
+        dynamicLayout.add(upFac);
+
     }
 
     // Admin Helper Action
@@ -197,6 +203,14 @@ public class Home {
     private void registerFacility(){
         dynamicLayout.clear();
         dynamicLayout.add(new Facility_Register(() -> {
+            dynamicLayout.clear();
+            loadDashboard();
+        }));
+    }
+
+    private void updateFacility(){
+        dynamicLayout.clear();
+        dynamicLayout.add(new FacilityUpdate(() -> {
             dynamicLayout.clear();
             loadDashboard();
         }));

@@ -396,4 +396,22 @@ END$$
 
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS update_facility;
+
+DELIMITER $$
+
+CREATE PROCEDURE update_facility(
+    IN p_facility_id INT,
+    IN p_beds INT,
+    IN p_wait_time INT)
+BEGIN
+    UPDATE facilities
+    SET bed_availability = p_beds,
+        waitTime_Minutes = p_wait_time
+    WHERE id = p_facility_id;
+END$$
+
+DELIMITER ;
+
+
 -- Dump completed on 2026-03-10 19:24:13

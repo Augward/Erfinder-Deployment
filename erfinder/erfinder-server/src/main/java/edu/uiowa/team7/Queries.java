@@ -286,4 +286,48 @@ public class Queries {
             throw e;
         }
     }
+
+    public static boolean UpdateFacility(int facilityId, int beds, int waitTime) throws SQLException{
+        try(Connection c = GetConnection(); CallableStatement stmt = c.prepareCall("CALL update_facility(?,?,?)")){
+            stmt.setInt(1, facilityId);
+            stmt.setInt(2, beds);
+            stmt.setInt(3, waitTime);
+
+            return stmt.executeUpdate() > 0;
+        }
+
+    }
+
+    public static String GetAllFacilitiesJSON() throws SQLException {
+
+        String sql =
+                "SELECT id, er_name, latitude, longitude, trauma_level, " +
+                        "specialties, bed_availability, waitTime_Minutes " +
+                        "FROM facilities";
+
+        try (Connection c = GetConnection();
+             Statement stmt = c.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            StringBuilder json = new StringBuilder("[");
+            while (rs.next()) {
+                json.append("{")
+                        .append("\"id\":").append(rs.getInt("id")).append(",")
+                        .append("\"name\":\"").append(rs.getString("er_name")).append("\",")
+                        .append("\"lat\":").append(rs.getDouble("latitude")).append(",")
+                        .append("\"lon\":").append(rs.getDouble("longitude")).append(",")
+                        .append("\"trauma\":\"").append(rs.getString("trauma_level")).append("\",")
+                        .append("\"specialties\":\"").append(rs.getString("specialties")).append("\",")
+                        .append("\"beds\":").append(rs.getInt("bed_availability")).append(",")
+                        .append("\"wait\":").append(rs.getInt("waitTime_Minutes"))
+                        .append("},");
+            }
+
+            if (json.length() > 1) {
+                json.setLength(json.length() - 1); // remove trailing comma
+            }
+            json.append("]");
+            return json.toString();
+        }
+    }
 }
