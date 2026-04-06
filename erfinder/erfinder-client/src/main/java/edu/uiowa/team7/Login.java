@@ -66,12 +66,15 @@ public class Login {
                     // To home page
                     Window.Location.assign("home.html");
                     break;
+                case 202:
+                    Window.Location.assign("pending.html");
                 case 404:
+                case 401:
                     // Error message
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Invalid credentials");
+                    response.setText("Invalid credentials or account not found");
                     break;
                 case 500:
                     // Internal error
