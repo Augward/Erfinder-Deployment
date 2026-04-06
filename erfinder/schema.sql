@@ -23,45 +23,16 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `erfinder` /*!40100 DEFAULT CHARACTER S
 
 USE `erfinder`;
 
---
--- Table structure for table `registration`
---
-
 DROP TABLE IF EXISTS `registration`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `registration` (
-                                `perm` varchar(8) NOT NULL,
-                                `salt` char(8) DEFAULT NULL,
-                                `userid` varchar(32) NOT NULL,
-                                `passhash` binary(32) DEFAULT NULL,
-                                `firstn` varchar(32) NOT NULL,
-                                `lastn` varchar(32) DEFAULT NULL,
-                                `legaln` varchar(128) NOT NULL,
-                                `dln` varchar(20) DEFAULT NULL,
-                                `ssn` varchar(20) DEFAULT NULL,
-                                `phone` varchar(20) DEFAULT NULL,
-                                `contact` varchar(20) DEFAULT NULL,
-                                `email` varchar(128) NOT NULL,
-                                `addr` varchar(256) NOT NULL,
-                                `zip` varchar(20) DEFAULT NULL,
-                                `dob` date DEFAULT NULL,
-                                `gender` varchar(32) DEFAULT NULL,
-                                `secquestion` varchar(64) DEFAULT NULL,
-                                `secanswer` binary(32) DEFAULT NULL,
-                                UNIQUE KEY `userid` (`userid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 --
 -- Table structure for table `users`
 --
-
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
                          `id` int NOT NULL AUTO_INCREMENT,
+                         `status` varchar(16) NOT NULL DEFAULT 'PENDING',
                          `perm` varchar(8) NOT NULL,
                          `salt` char(8) DEFAULT NULL,
                          `userid` varchar(32) NOT NULL,
@@ -226,10 +197,12 @@ BEGIN
     DECLARE db_salt char(8);
     DECLARE db_pass binary(32);
     DECLARE _hashed binary(32);
-    SELECT salt, passhash INTO db_salt, db_pass
+    DECLARE db_status varchar(16);
+
+    SELECT salt, passhash, status INTO db_salt, db_pass, db_status
     FROM Users WHERE userid = for_userid;
     CALL GetHashedVersion(to_validate, db_salt, _hashed);
-    SELECT _hashed = db_pass;
+    SELECT (_hashed = db_pass) AS is_valid, db_status AS status;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
