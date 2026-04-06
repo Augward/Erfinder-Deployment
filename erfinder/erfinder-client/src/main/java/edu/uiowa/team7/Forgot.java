@@ -114,7 +114,7 @@ public class Forgot {
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
                 case 200:
-                    Window.Location.assign("home.html");
+                    Window.Location.assign("reset.html");
                     break;
                 case 404:
                 default:
