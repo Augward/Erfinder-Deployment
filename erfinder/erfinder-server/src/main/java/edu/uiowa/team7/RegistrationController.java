@@ -13,18 +13,12 @@ public class RegistrationController {
     // Pre-Registration Validation Endpoint
     @PostMapping("/register/check")
     public Map<String, Boolean> checkExisting(@RequestBody Map<String, String> data) {
-        String username = data.get("username");
-        String email = data.get("email");
-        String ssn = data.get("ssn");
-        String driversLicense = data.get("driversLicense");
-
         Map<String, Boolean> result = new HashMap<>();
-
         try {
-            result.put("usernameExists", Queries.UsernameExists(username));
-            result.put("emailExists", Queries.EmailExists(email));
-            result.put("ssnExists", Queries.SSNExists(ssn));
-            result.put("licenseExists", Queries.LicenseExists(driversLicense));
+            result.put("usernameExists", Queries.FieldExists("userid", data.get("username")));
+            result.put("emailExists", Queries.FieldExists("email", data.get("email")));
+            result.put("ssnExists", Queries.FieldExists("ssn", data.get("ssn")));
+            result.put("licenseExists", Queries.FieldExists("dln", data.get("driversLicense")));
         } catch (Exception e) {
             logger.error("Database error during registration existence check", e);
             result.put("usernameExists", false);

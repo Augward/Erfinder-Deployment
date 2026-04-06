@@ -33,14 +33,22 @@ public class StatusController {
             String userID = B64Decode(req.getParameter("userID"));
             String password = B64Decode(req.getParameter("password"));
 
-            if (!Queries.ValidateCredentials(userID, password)) {
-                res.setStatus(HttpStatus.NOT_FOUND.value());
+            Queries.AuthResult auth = Queries.ValidateCredentials(userID, password);
+
+            if (!auth.isValid) {
+                res.setStatus(HttpStatus.UNAUTHORIZED.value()); // 401
                 return;
             }
 
             String device = Security.GetDevice(req);
             res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieFresh(userID, device));
-            res.setStatus(HttpStatus.OK.value());
+
+            // Routing Backbone: Return 202 for Pending, 200 for Approved
+            if ("PENDING".equalsIgnoreCase(auth.status)) {
+                res.setStatus(HttpStatus.ACCEPTED.value()); // 202
+            } else {
+                res.setStatus(HttpStatus.OK.value()); // 200
+            }
 
         } catch (Exception e) {
             logger.error("Error during GetToken authentication", e);

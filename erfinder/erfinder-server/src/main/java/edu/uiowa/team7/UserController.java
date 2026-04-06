@@ -83,7 +83,7 @@ public class UserController {
         try {
             String pass = B64Decode(request.getParameter("password"));
 
-            if (Queries.ValidateCredentials(result.UserID(), pass)) {
+            if (Queries.ValidateCredentials(result.UserID(), pass).isValid) {
                 Queries.DeleteUser(result.UserID());
                 response.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
                 response.setStatus(HttpStatus.OK.value());

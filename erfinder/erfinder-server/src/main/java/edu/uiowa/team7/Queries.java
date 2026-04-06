@@ -45,20 +45,30 @@ public class Queries {
         System.out.println("VendorError: " + e.getErrorCode());
     }
 
-    public static boolean ValidateCredentials(String userID, String password) throws SQLException, NullPointerException {
-        try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("CALL ValidatePassword(?,?);");
+
+    // Helper Class for Authentication
+    public static class AuthResult {
+        public final boolean isValid;
+        public final String status;
+        public AuthResult(boolean isValid, String status) {
+            this.isValid = isValid;
+            this.status = status;
+        }
+    }
+
+    // Authentication & Security
+    public static AuthResult ValidateCredentials(String userID, String password) throws SQLException {
+        try(Connection c = GetConnection(); PreparedStatement stmt = c.prepareStatement("CALL ValidatePassword(?,?);")) {
             stmt.setString(1, userID);
             stmt.setString(2, password);
             if (stmt.execute()) {
-                ResultSet r = stmt.getResultSet();
-                r.next();
-                boolean valid = r.getBoolean(1);
-                r.close();
-                stmt.close();
-                return valid;
+                try (ResultSet r = stmt.getResultSet()) {
+                    if (r.next()) {
+                        return new AuthResult(r.getBoolean("is_valid"), r.getString("status"));
+                    }
+                }
             }
-            return false;
+            return new AuthResult(false, null);
         }
     }
 
@@ -68,12 +78,9 @@ public class Queries {
             stmt.setString(1, userID);
             stmt.setString(2, answer);
             if (stmt.execute()) {
-                ResultSet r = stmt.getResultSet();
-                r.next();
-                boolean valid = r.getBoolean(1);
-                r.close();
-                stmt.close();
-                return valid;
+                try (ResultSet r = stmt.getResultSet()) {
+                    if (r.next()) return r.getBoolean(1);
+                }
             }
             return false;
         }
@@ -84,12 +91,9 @@ public class Queries {
             PreparedStatement stmt = c.prepareStatement("CALL GetSecurityQuestion(?);");
             stmt.setString(1, userID);
             if (stmt.execute()) {
-                ResultSet r = stmt.getResultSet();
-                r.next();
-                String question = r.getString(1);
-                r.close();
-                stmt.close();
-                return Optional.of(question);
+                try (ResultSet r = stmt.getResultSet()) {
+                    if (r.next()) return Optional.of(r.getString(1));
+                }
             }
         }
         return Optional.empty();
@@ -116,16 +120,19 @@ public class Queries {
     public static String[] GetUserInfo(String userID) throws SQLException {
         try(Connection c = GetConnection()) {
             PreparedStatement stmt = c.prepareStatement(
-                    "SELECT perm, firstn, lastn, legaln, dln, ssn, email, phone, addr, zip, dob, gender, contact FROM users WHERE userid = ?");
+                    "SELECT CASE WHEN status = 'PENDING' THEN 'PENDING' ELSE perm END as display_role, " +
+                            "firstn, lastn, legaln, dln, ssn, email, phone, addr, zip, dob, gender, contact " +
+                            "FROM users WHERE userid = ?");
             stmt.setString(1, userID);
-            ResultSet r = stmt.executeQuery();
-            if (r.next()) {
-                String[] info = new String[13];
-                for(int i = 0; i < 13; i++) {
-                    String val = r.getString(i + 1);
-                    info[i] = (val == null) ? "" : val;
+            try (ResultSet r = stmt.executeQuery()) {
+                if (r.next()) {
+                    String[] info = new String[13];
+                    for(int i = 0; i < 13; i++) {
+                        String val = r.getString(i + 1);
+                        info[i] = (val == null) ? "" : val;
+                    }
+                    return info;
                 }
-                return info;
             }
             return null;
         }
@@ -165,7 +172,7 @@ public class Queries {
 
     public static String GetPendingUsers() throws SQLException {
         try(Connection c = GetConnection()) {
-            PreparedStatement stmt = c.prepareStatement("SELECT userid, perm FROM registration");
+            PreparedStatement stmt = c.prepareStatement("SELECT userid, perm FROM users WHERE status = 'PENDING'");
             ResultSet r = stmt.executeQuery();
             StringBuilder sb = new StringBuilder();
             while (r.next()) {
@@ -177,22 +184,22 @@ public class Queries {
     }
 
     public static boolean ApproveUser(String targetUserID) throws SQLException {
-        try(Connection c = GetConnection()) {
-            PreparedStatement insertStmt = c.prepareStatement(
-                    "INSERT INTO users (perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer) " +
-                            "SELECT perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer " +
-                            "FROM registration WHERE userid = ?"
-            );
-            insertStmt.setString(1, targetUserID);
-            int inserted = insertStmt.executeUpdate();
+        try(Connection c = GetConnection(); PreparedStatement stmt = c.prepareStatement(
+                "UPDATE users SET status = 'APPROVED' WHERE userid = ? AND status = 'PENDING'")) {
+            stmt.setString(1, targetUserID);
+            return stmt.executeUpdate() > 0;
+        }
+    }
 
-            if (inserted > 0) {
-                PreparedStatement deleteStmt = c.prepareStatement("DELETE FROM registration WHERE userid = ?");
-                deleteStmt.setString(1, targetUserID);
-                deleteStmt.executeUpdate();
-                return true;
+    // Simplified Uniqueness Checks
+    public static boolean FieldExists(String field, String value) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users WHERE " + field + " = ?";
+        try(Connection conn = GetConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, value);
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getInt(1) > 0;
             }
-            return false;
         }
     }
 
@@ -246,8 +253,8 @@ public class Queries {
 
     public static boolean insertReg(Map<String, String> data) throws SQLException{
         String salt = java.util.UUID.randomUUID().toString().substring(0, 8);
-        String sql = "INSERT INTO registration (userid, passhash, salt, secquestion, secanswer, firstn, lastn, legaln, phone, email, addr, zip, dob, gender, contact, dln, ssn, perm) " +
-                "VALUES (?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (status, userid, passhash, salt, secquestion, secanswer, firstn, lastn, legaln, phone, email, addr, zip, dob, gender, contact, dln, ssn, perm) " +
+                "VALUES ('PENDING', ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try(Connection conn = GetConnection(); PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, data.get("username"));
             ps.setString(2, data.get("password"));
