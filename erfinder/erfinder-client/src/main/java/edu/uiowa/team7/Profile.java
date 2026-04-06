@@ -7,9 +7,9 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
-public class Info {
+public class Profile {
 
-    private static final Logger logger = Logger.getLogger(Info.class.getName());
+    private static final Logger logger = Logger.getLogger(Profile.class.getName());
 
     // Fields - Form Inputs
     private final TextBox firstnBox = new TextBox();
@@ -38,7 +38,7 @@ public class Info {
     private boolean isEditing = false;
 
     // Constructor
-    public Info() {
+    public Profile() {
         TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox,
                 addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox, deletePassBox};
         for (TextBox box : boxes) { box.addStyleName("form-input"); }

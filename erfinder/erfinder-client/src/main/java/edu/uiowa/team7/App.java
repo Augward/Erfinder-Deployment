@@ -7,12 +7,14 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class App implements EntryPoint {
 
 	public enum Page {
-		Index,
+		Landing,
 		Login,
 		Forgot,
-		Register,
+		Signup,
 		Home,
-		Info,
+		Profile,
+		Pending,
+		Reset
 	}
 
 	// Page Routing
@@ -22,7 +24,7 @@ public class App implements EntryPoint {
 		try {
 			inner = Page.valueOf(label.getInnerHTML());
 		} catch (IllegalArgumentException e) {
-			inner = Page.Index;
+			inner = Page.Landing;
 		}
 		label.removeFromParent();
 
@@ -33,18 +35,24 @@ public class App implements EntryPoint {
 			case Forgot:
 				new Forgot();
 				break;
-			case Register:
-				new Register();
+			case Signup:
+				new Signup();
 				break;
 			case Home:
 				new Home();
 				break;
-			case Info:
-				new Info();
+			case Profile:
+				new Profile();
 				break;
-			case Index:
+			case Pending:
+				new Pending();
+				break;
+			case Reset:
+				new Reset();
+				break;
+			case Landing:
 			default: // Added default
-				Index.Build();
+				Landing.Build();
 				break;
 		}
 	}

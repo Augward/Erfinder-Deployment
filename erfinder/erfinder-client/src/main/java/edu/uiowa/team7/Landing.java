@@ -1,6 +1,6 @@
 package edu.uiowa.team7;
 
-public class Index {
+public class Landing {
 
     // Utility Method
     public static void Build() {
