@@ -164,6 +164,19 @@ public class Home {
                 }
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+
+        //ER FACILITY REGISTER STUFF
+        Button facilityReg = new Button("Register ER Facility");
+        facilityReg.addStyleName("btn");
+        facilityReg.addClickHandler(event -> registerFacility());
+        dynamicLayout.add(facilityReg);
+
+        //ER FACILITY UPDATE STUFF
+        Button upFac = new Button("Update ER Facility");
+        upFac.addStyleName("btn");
+        upFac.addClickHandler(event -> updateFacility());
+        dynamicLayout.add(upFac);
+
     }
 
     // Admin Helper Action
@@ -185,5 +198,21 @@ public class Home {
                 }
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+    }
+
+    private void registerFacility(){
+        dynamicLayout.clear();
+        dynamicLayout.add(new Facility_Register(() -> {
+            dynamicLayout.clear();
+            loadDashboard();
+        }));
+    }
+
+    private void updateFacility(){
+        dynamicLayout.clear();
+        dynamicLayout.add(new FacilityUpdate(() -> {
+            dynamicLayout.clear();
+            loadDashboard();
+        }));
     }
 }
