@@ -13,16 +13,16 @@ server:
 # Spring Boot Configuration
 spring:
   main:
-    web-application-type: none
+
     banner-mode: off
   application:
     name: erfinder
 
   # Database Connection Settings
   datasource:
-    url: jdbc:mysql://localhost:3306/erfinder
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/erfinder
     username: root
-    password: insecure_password
+    password: ${MYSQL_ROOT_PASSWORD:insecure_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     jpa:
       hibernate:

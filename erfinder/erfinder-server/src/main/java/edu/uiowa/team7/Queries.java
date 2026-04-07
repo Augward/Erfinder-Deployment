@@ -23,16 +23,20 @@ public class Queries {
                 dbHost = "localhost";
             }
 
+            String dbPass = System.getenv("MYSQL_ROOT_PASSWORD");
+            if (dbPass == null || dbPass.trim().isEmpty()) {
+                dbPass = "insecure_password";
+            }
+
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-            SQLConnection = DriverManager.getConnection("jdbc:mysql://" + dbHost + "/erfinder?user=root&password=insecure_password");
+            SQLConnection = DriverManager.getConnection("jdbc:mysql://" + dbHost + "/erfinder?user=root&password=" + dbPass);
             return SQLConnection;
         } catch (SQLException ex) {
             PrintSQLException(ex);
-            assert (false);
+            throw new RuntimeException("Database connection failed", ex);
         } catch (Exception e) {
-            assert(false);
+            throw new RuntimeException("Unexpected error during connection", e);
         }
-        return null;
     }
 
     public static void PrintSQLException(SQLException e) {
