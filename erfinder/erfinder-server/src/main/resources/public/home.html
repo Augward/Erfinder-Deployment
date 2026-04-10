@@ -67,6 +67,9 @@
     let ER_MAP = null;
     let facilitiesLoaded = false;
     let ER_MARKERS = [];
+    let USER_LOCATION = null;
+    let USER_MARKER = null;
+    let FACILITIES_CACHE = [];
 
     function initLeafletSafely() {
         const m = document.getElementById('map');
@@ -91,6 +94,7 @@
             facilitiesLoaded = true;
             loadERFacilities();
             setInterval(loadERFacilities, 10000);
+            showUserLocation();
         }
     }
 
@@ -109,7 +113,9 @@
             .then(facilities => {
                 console.log('Facilities loaded:', facilities);
                 clearERMarkers();
+                FACILITIES_CACHE = facilities;
                 facilities.forEach(f => addERMarker(f));
+                recommendERs();
             })
             .catch(err => console.error('Failed to load facilities', err));
     }
@@ -147,6 +153,96 @@
     }
 </script>
 
+<script>
+    function showUserLocation() {
+        if (!navigator.geolocation) {
+            console.warn('Geolocation not supported');
+            return;
+        }
 
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                console.log('User location:', lat, lon);
+
+                USER_LOCATION = { lat, lon };
+
+                // Remove previous marker if any
+                if (USER_MARKER) {
+                    ER_MAP.removeLayer(USER_MARKER);
+                }
+
+                USER_MARKER = L.circleMarker([lat, lon], {
+                    radius: 8,
+                    color: '#991b1b',
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.9,
+                    weight: 2
+                }).addTo(ER_MAP);
+
+                USER_MARKER.bindPopup('<strong>Your Location</strong>');
+
+                ER_MAP.invalidateSize(true);
+                ER_MAP.setView([lat,lon], 13);
+
+                // After location is known, recommend ERs
+                recommendERs();
+            },
+            err => console.error('Location error:', err),
+            { enableHighAccuracy: true }
+        );
+    }
+</script>
+
+<script>
+    function distanceKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) *
+            Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2;
+
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+</script>
+
+<script>
+    function recommendERs() {
+        if (!USER_LOCATION || FACILITIES_CACHE.length === 0) return;
+
+        let bestFacility = null;
+        let bestDistance = Infinity;
+
+        FACILITIES_CACHE.forEach(f => {
+            const lat = Number(f.lat);
+            const lon = Number(f.lon);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+            const d = distanceKm(
+                USER_LOCATION.lat,
+                USER_LOCATION.lon,
+                lat,
+                lon
+            );
+
+            if (d < bestDistance) {
+                bestDistance = d;
+                bestFacility = f;
+            }
+        });
+
+        if (bestFacility) {
+            console.log(
+                `Recommended ER: ${bestFacility.name} (${bestDistance.toFixed(2)} km)`
+            );
+        }
+    }
+</script>
 
 </html>
