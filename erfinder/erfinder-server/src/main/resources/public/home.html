@@ -5,9 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <link type="text/css" rel="stylesheet" href="erfinder.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <title>ERFinder - Home</title>
 </head>
-
 
 <body>
 <p id="page" style="display:none;">Home</p>
@@ -31,8 +32,7 @@
 
     <div class="panel">
         <div class="map-placeholder" style="padding:0; overflow:hidden;">
-            <iframe width="100%" height="100%"
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=-96.7,40.4,-90.1,43.5&amp;layer=mapnik"></iframe>
+            <div id="map"></div>
         </div>
     </div>
 </div>
@@ -60,5 +60,40 @@
     &copy; 2026 ERFinder | Team 7 Fundamentals of Software Engineering
 </div>
 </body>
+
 <script src="app/app.nocache.js"></script>
+
+<script>
+    let ER_MAP = null;
+
+    function initLeafletSafely() {
+        const m = document.getElementById('map');
+        if (!m) return;
+
+        // Force dimensions (matches Test G behavior)
+        m.style.width = '100%';
+        m.style.height = '100%';
+
+        if (!ER_MAP) {
+            ER_MAP = L.map(m).setView([41.6611, -91.5302], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(ER_MAP);
+
+            L.marker([41.5868, -93.6250])
+                .addTo(ER_MAP)
+                .bindPopup('<b>Example ER</b><br>Des Moines, IA');
+        }
+
+        // Always re-sync after GWT layout
+        ER_MAP.invalidateSize(true);
+    }
+
+    // Let GWT finish rendering first
+    setTimeout(initLeafletSafely, 500);
+    setTimeout(initLeafletSafely, 1500);
+    setTimeout(initLeafletSafely, 3000);
+</script>
+
 </html>
