@@ -65,35 +65,73 @@
 
 <script>
     let ER_MAP = null;
+    let facilitiesLoaded = false;
 
     function initLeafletSafely() {
         const m = document.getElementById('map');
         if (!m) return;
 
-        // Force dimensions (matches Test G behavior)
         m.style.width = '100%';
         m.style.height = '100%';
 
         if (!ER_MAP) {
-            ER_MAP = L.map(m).setView([41.6611, -91.5302], 12);
+            ER_MAP = L.map(m).setView([41.8, -91.6], 9);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(ER_MAP);
 
-            L.marker([41.5868, -93.6250])
-                .addTo(ER_MAP)
-                .bindPopup('<b>Example ER</b><br>Des Moines, IA');
+            console.log('Map initialized');
         }
 
-        // Always re-sync after GWT layout
         ER_MAP.invalidateSize(true);
+
+        if (!facilitiesLoaded) {
+            facilitiesLoaded = true;
+            loadERFacilities();
+        }
     }
 
-    // Let GWT finish rendering first
     setTimeout(initLeafletSafely, 500);
     setTimeout(initLeafletSafely, 1500);
     setTimeout(initLeafletSafely, 3000);
+</script>
+
+
+<script>
+    function loadERFacilities() {
+        if (!ER_MAP) return;
+
+        fetch('/api/facilities')
+            .then(res => res.json())
+            .then(facilities => {
+                console.log('Facilities loaded:', facilities);
+                facilities.forEach(f => addERMarker(f));
+            })
+            .catch(err => console.error('Failed to load facilities', err));
+    }
+</script>
+
+<script>
+    function addERMarker(f) {
+        const lat = Number(f.lat);
+        const lon = Number(f.lon);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            console.warn('Invalid coordinates:', f);
+            return;
+        }
+
+        const marker = L.marker([lat, lon]).addTo(ER_MAP);
+
+        marker.bindPopup(`
+            <strong>${f.name}</strong><br/>
+            Trauma Level: ${f.trauma}<br/>
+            Specialties: ${f.specialties}<br/>
+            Beds Available: ${f.beds}<br/>
+            Wait Time: ${f.wait} minutes
+        `);
+    }
 </script>
 
 </html>
