@@ -66,6 +66,7 @@
 <script>
     let ER_MAP = null;
     let facilitiesLoaded = false;
+    let ER_MARKERS = [];
 
     function initLeafletSafely() {
         const m = document.getElementById('map');
@@ -89,6 +90,7 @@
         if (!facilitiesLoaded) {
             facilitiesLoaded = true;
             loadERFacilities();
+            setInterval(loadERFacilities, 10000);
         }
     }
 
@@ -106,6 +108,7 @@
             .then(res => res.json())
             .then(facilities => {
                 console.log('Facilities loaded:', facilities);
+                clearERMarkers();
                 facilities.forEach(f => addERMarker(f));
             })
             .catch(err => console.error('Failed to load facilities', err));
@@ -131,7 +134,19 @@
             Beds Available: ${f.beds}<br/>
             Wait Time: ${f.wait} minutes
         `);
+
+        ER_MARKERS.push(marker);
     }
 </script>
+
+
+<script>
+    function clearERMarkers() {
+        ER_MARKERS.forEach(marker => ER_MAP.removeLayer(marker));
+        ER_MARKERS = [];
+    }
+</script>
+
+
 
 </html>
