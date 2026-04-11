@@ -8,7 +8,6 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
-import org.eclipse.jetty.http.HttpStatus;
 
 public class App implements EntryPoint {
 
@@ -20,9 +19,11 @@ public class App implements EntryPoint {
 		Index,
 		Login,
 		Forgot,
-		Register,
+		Signup,
 		Home,
-		Info,
+		Profile,
+		Pending,
+		Reset
 	}
 
 	public static Page GetPage() {
@@ -71,21 +72,27 @@ public class App implements EntryPoint {
 			case Forgot:
 				new Forgot();
 				break;
-			case Register:
-				new Register();
+			case Signup:
+				new Signup();
 				break;
 			case Home:
 				new Home();
 				break;
-			case Info:
-				new Info();
+			case Profile:
+				new Profile();
 				break;
-			default:
-				new Index(logged_in);
+			case Pending:
+				new Pending();
+				break;
+			case Reset:
+				new Reset();
+				break;
+			case Landing:
+			default: // Added default
+				Landing.Build();
 				break;
 		}
 	}
-
 
 	// Initialization
 	public void onModuleLoad() {

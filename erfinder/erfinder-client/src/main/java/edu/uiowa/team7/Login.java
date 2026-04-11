@@ -5,7 +5,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.eclipse.jetty.http.HttpStatus;
 
 public class Login {
 
@@ -68,10 +67,15 @@ public class Login {
                     Window.Location.assign("home.html");
                     break;
                 case HttpStatus.NOT_FOUND_404:
+                case 202:
+                    Window.Location.assign("pending.html");
+                case 404:
+                case 401:
+                    // Error message
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Invalid credentials.");
+                    response.setText("Invalid credentials or account not found.");
                     break;
                 case HttpStatus.INTERNAL_SERVER_ERROR_500:
                     sendButton.setEnabled(true);

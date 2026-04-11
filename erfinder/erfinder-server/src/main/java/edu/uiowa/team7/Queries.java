@@ -22,11 +22,25 @@ public class Queries {
                 return SQLConnection;
             }
 
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            String dbHost = System.getenv("DB_HOST");
+            if (dbHost == null || dbHost.trim().isEmpty()) {
+                dbHost = "localhost";
+            }
 
-            String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
+            String dbPass = System.getenv("MYSQL_ERFINDER_PASSWORD");
+            if (dbPass == null || dbPass.trim().isEmpty()) {
+                dbPass = "insecure_password";
+            }
 
-            SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
+            String dbUser = System.getenv("MYSQL_ERFINDER_USER");
+            if (dbUser == null || dbUser.trim().isEmpty()) {
+                dbUser = "root";
+            }
+            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+            SQLConnection = DriverManager.getConnection("jdbc:mysql://" + dbHost + "/erfinder?user="+ dbUser + "&password=" + dbPass);
+
+            //String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
+            //SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
 
             return SQLConnection;
 
@@ -45,32 +59,49 @@ public class Queries {
         logger.error("VendorError: {}", e.getErrorCode());
     }
 
-    public static boolean ValidateCredentials(String userID, String password) throws SQLException {
-        try (Connection c = GetConnection();
-             CallableStatement stmt = c.prepareCall("CALL ValidatePassword(?,?);")) {
-            stmt.setString(1, userID);
-            stmt.setString(2, password);
-            stmt.execute();
-            ResultSet r = stmt.getResultSet();
-
-            if (r != null && r.next()) {
-                return r.getBoolean(1);
-            }
-
-            return false;
+    // Helper Class for Authentication
+    public static class AuthResult {
+        public final boolean isValid;
+        public final String status;
+        public AuthResult(boolean isValid, String status) {
+            this.isValid = isValid;
+            this.status = status;
         }
     }
 
-    public static boolean ValidateSecurityAnswer(String userID, String answer) throws SQLException {
-        try (Connection c = GetConnection();
-             CallableStatement stmt = c.prepareCall("CALL ValidateSecurityAnswer(?,?);")) {
+    public static AuthResult ValidateCredentials(String userID, String password) throws SQLException {
+        try (
+                Connection c = GetConnection();
+                CallableStatement stmt = c.prepareCall("CALL ValidatePassword(?,?);")
+        ) {
+            stmt.setString(1, userID);
+            stmt.setString(2, password);
+            if (stmt.execute()) {
+                try (ResultSet r = stmt.getResultSet()) {
+                    if (r.next()) {
+                        return new AuthResult(r.getBoolean("is_valid"), r.getString("status"));
+                    }
+                }
+            }
+            return new AuthResult(false, null);
+        }
+    }
+
+    public static boolean ValidateSecurityAnswer(
+            String userID, String answer
+    ) throws SQLException {
+        try (
+                Connection c = GetConnection();
+                CallableStatement stmt = c.prepareCall(
+                        "CALL ValidateSecurityAnswer(?,?);"
+                )
+        ) {
             stmt.setString(1, userID);
             stmt.setString(2, answer);
-            stmt.execute();
-            ResultSet r = stmt.getResultSet();
-
-            if (r != null && r.next()) {
-                return r.getBoolean(1);
+            if (stmt.execute()) {
+                try (ResultSet r = stmt.getResultSet()) {
+                    if (r.next()) return r.getBoolean(1);
+                }
             }
 
             return false;
@@ -109,9 +140,13 @@ public class Queries {
     }
 
     public static String[] GetUserInfo(String userID) throws SQLException {
-        try (Connection c = GetConnection();
-             CallableStatement stmt = c.prepareCall(
-                     "SELECT perm, firstn, lastn, legaln, dln, ssn, email, phone, addr, zip, dob, gender, contact FROM users WHERE userid = ?")) {
+        try (
+                Connection c = GetConnection();
+                CallableStatement stmt = c.prepareCall(
+                     "SELECT CASE WHEN status = 'PENDING' THEN 'PENDING' ELSE perm END as display_role, " +
+                             "firstn, lastn, legaln, dln, ssn, email, phone, addr, zip, dob, gender, contact " +
+                             "FROM users WHERE userid = ?")
+        ) {
             stmt.setString(1, userID);
             try (ResultSet r = stmt.executeQuery()) {
                 if (r.next()) {
@@ -160,7 +195,7 @@ public class Queries {
 
     public static String GetPendingUsers() throws SQLException {
         try (Connection c = GetConnection();
-             CallableStatement stmt = c.prepareCall("SELECT userid, perm FROM registration");
+             CallableStatement stmt = c.prepareCall("SELECT userid, perm FROM users WHERE status = 'PENDING'");
              ResultSet r = stmt.executeQuery()) {
             StringBuilder sb = new StringBuilder();
             while (r.next()) {
@@ -172,25 +207,25 @@ public class Queries {
     }
 
     public static boolean ApproveUser(String targetUserID) throws SQLException {
-        try (Connection c = GetConnection()) {
-            try (CallableStatement insertStmt = c.prepareCall(
-                    "INSERT INTO users (perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer) " +
-                            "SELECT perm, salt, userid, passhash, firstn, lastn, legaln, dln, ssn, phone, contact, email, addr, zip, dob, gender, secquestion, secanswer " +
-                            "FROM registration WHERE userid = ?")) {
-                insertStmt.setString(1, targetUserID);
-                int inserted = insertStmt.executeUpdate();
-
-                if (inserted > 0) {
-                    try (CallableStatement deleteStmt = c.prepareCall("DELETE FROM registration WHERE userid = ?")) {
-                        deleteStmt.setString(1, targetUserID);
-                        deleteStmt.executeUpdate();
-                    }
-                    return true;
-                }
-            }
-            return false;
+        try(Connection c = GetConnection(); PreparedStatement stmt = c.prepareStatement(
+                "UPDATE users SET status = 'APPROVED' WHERE userid = ? AND status = 'PENDING'")) {
+            stmt.setString(1, targetUserID);
+            return stmt.executeUpdate() > 0;
         }
     }
+    // Simplified Uniqueness Checks
+    // We can use string append here, as 'field' is determined server-side only.
+    public static boolean FieldExists(String field, String value) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users WHERE " + field + " = ?";
+        try(Connection conn = GetConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, value);
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getInt(1) > 0;
+            }
+        }
+    }
+    // todo:: remove these *Exists() functions, replace with FieldExists()
 
     public static boolean UsernameExists(String username) throws Exception {
         String sql = "SELECT (SELECT COUNT(*) FROM users WHERE userid = ?) + (SELECT COUNT(*) FROM registration WHERE userid = ?)";
@@ -232,26 +267,31 @@ public class Queries {
         }
     }
 
-    public static boolean insertReg(Map<String, String> data) throws SQLException {
-        byte[] saltBytes = new byte[4];
-        SECURE_RANDOM.nextBytes(saltBytes);
-        StringBuilder sb = new StringBuilder();
-        for (byte b : saltBytes) { sb.append(String.format("%02x", b)); }
-        String salt = sb.toString();
-
-        String sql = "INSERT INTO registration (userid, passhash, salt, secquestion, secanswer, firstn, lastn, legaln, phone, email, addr, zip, dob, gender, contact, dln, ssn, perm) " +
-                "VALUES (?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = GetConnection(); CallableStatement ps = conn.prepareCall(sql)) {
-            ps.setString(1, data.get("username")); ps.setString(2, data.get("password"));
-            ps.setString(3, salt); ps.setString(4, salt);
-            ps.setString(5, data.get("securityQuestion")); ps.setString(6, data.get("securityAnswer"));
-            ps.setString(7, salt); ps.setString(8, data.get("firstName"));
-            ps.setString(9, data.get("lastName")); ps.setString(10, data.get("legalName"));
-            ps.setString(11, data.get("phone")); ps.setString(12, data.get("email"));
-            ps.setString(13, data.get("address")); ps.setString(14, data.get("zipcode"));
-            ps.setDate(15, java.sql.Date.valueOf(data.get("dob"))); ps.setString(16, data.get("gender"));
-            ps.setString(17, data.get("emergency")); ps.setString(18, data.get("driversLicense"));
-            ps.setString(19, data.get("ssn")); ps.setString(20, data.get("role"));
+    public static boolean insertReg(Map<String, String> data) throws SQLException{
+        String salt = java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sql = "INSERT INTO users (status, userid, passhash, salt, secquestion, secanswer, firstn, lastn, legaln, phone, email, addr, zip, dob, gender, contact, dln, ssn, perm) " +
+                "VALUES ('PENDING', ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try(Connection conn = GetConnection(); PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setString(1, data.get("username"));
+            ps.setString(2, data.get("password"));
+            ps.setString(3, salt);
+            ps.setString(4, salt);
+            ps.setString(5, data.get("securityQuestion"));
+            ps.setString(6, data.get("securityAnswer"));
+            ps.setString(7, salt);
+            ps.setString(8, data.get("firstName"));
+            ps.setString(9, data.get("lastName"));
+            ps.setString(10, data.get("legalName"));
+            ps.setString(11, data.get("phone"));
+            ps.setString(12, data.get("email"));
+            ps.setString(13, data.get("address"));
+            ps.setString(14, data.get("zipcode"));
+            ps.setDate(15, java.sql.Date.valueOf(data.get("dob")));
+            ps.setString(16, data.get("gender"));
+            ps.setString(17, data.get("emergency"));
+            ps.setString(18, data.get("driversLicense"));
+            ps.setString(19, data.get("ssn"));
+            ps.setString(20, data.get("role"));
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             PrintSQLException(e);

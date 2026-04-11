@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
-public class Register {
+public class Signup {
 
     // Fields
     private final TextBox firstname = new TextBox();
@@ -50,7 +50,7 @@ public class Register {
     private final Button submit = new Button("Submit");
 
     // Constructor
-    public Register() {
+    public Signup() {
 
         // Set error fields red
         firstnameerror.getElement().getStyle().setProperty("color", "red");
