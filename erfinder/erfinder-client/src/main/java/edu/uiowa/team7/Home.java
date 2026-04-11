@@ -104,6 +104,7 @@ public class Home {
     private void buildMedicalView() {
         dynamicLayout.add(new HTML("<h3>Facility Status Update</h3>"));
 
+        /*
         ListBox statusBox = new ListBox();
         statusBox.addStyleName("form-input");
         statusBox.addItem("Accepting Patients (Normal Capacity)");
@@ -111,6 +112,12 @@ public class Home {
         statusBox.addItem("Divert (Critical Status)");
         dynamicLayout.add(new Label("Set Current ER Status:"));
         dynamicLayout.add(statusBox);
+        */
+
+        ListBox erselect = new ListBox();
+        erselect.addStyleName("form-input");
+        dynamicLayout.add(new Label("Select ER Facility:"));
+        dynamicLayout.add(erselect);
 
         TextBox waitTimeBox = new TextBox();
         waitTimeBox.addStyleName("form-input");
@@ -118,9 +125,31 @@ public class Home {
         dynamicLayout.add(new Label("Update Wait Time:"));
         dynamicLayout.add(waitTimeBox);
 
+
         Button updateBtn = new Button("Broadcast Update");
         updateBtn.addStyleName("btn");
+        updateBtn.addClickHandler(event->{
+            if(erselect.getSelectedIndex() == 0){
+                Window.alert("Please Select an ER");
+                return;
+            }
+
+            String waitTime = waitTimeBox.getText().trim();
+            if(!waitTime.matches("\\d+")){
+                Window.alert("Must Enter Valid Wait Time");
+                return;
+            }
+
+            String facilityId = erselect.getValue(erselect.getSelectedIndex());
+            int facilityid = Integer.parseInt(facilityId);
+            int waitMinutes = Integer.parseInt(waitTime);
+            sendWaitTimeUpdate(facilityid, waitMinutes);
+
+
+        });
         dynamicLayout.add(updateBtn);
+
+        FacilityUpdate.loadFacilities(erselect);
     }
 
     private void buildAdminView() {
@@ -222,4 +251,37 @@ public class Home {
 
     @JsMethod(namespace = JsPackage.GLOBAL)
     public static native void recommendERs();
+
+    private void sendWaitTimeUpdate(int facilityId, int waitMinutes){
+        String payload = "{"
+                        + "\"facilityId\":" + facilityId + ","
+                        + "\"waitTime\":" + waitMinutes
+                        + "}";
+
+        RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, "/api/updateWaitTime");
+        rb.setHeader("Content-Type", "application/json");
+        try{
+            rb.sendRequest(payload, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    if(response.getStatusCode() == 200){
+                        Window.alert("Wait Time Updated SuccessFully!!");
+                    }
+                    else{
+                        Window.alert("Update Failed (status " + response.getStatusCode() + ")");
+                    }
+                }
+
+                @Override
+                public void onError(Request request, Throwable throwable) {
+                    Window.alert("Server Error While Updating Wait Time");
+
+                }
+            });
+        }
+        catch(RequestException e){
+            Window.alert("Request Didn't Send");
+        }
+
+    }
 }
