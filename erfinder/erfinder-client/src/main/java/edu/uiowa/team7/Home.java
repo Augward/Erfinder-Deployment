@@ -5,7 +5,10 @@ import java.util.logging.Level;
 
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import jsinterop.annotations.JsMethod;
+import jsinterop.annotations.JsPackage;
 
 public class Home {
 
@@ -86,14 +89,15 @@ public class Home {
         dynamicLayout.add(new Label("Current Condition:"));
         dynamicLayout.add(injuryType);
 
-        TextBox zipBox = new TextBox();
-        zipBox.addStyleName("form-input");
-        zipBox.getElement().setPropertyString("placeholder", "Enter current Zip Code...");
-        dynamicLayout.add(new Label("Location:"));
-        dynamicLayout.add(zipBox);
+        //TextBox zipBox = new TextBox();
+        //zipBox.addStyleName("form-input");
+        //zipBox.getElement().setPropertyString("placeholder", "Enter current Zip Code...");
+        //dynamicLayout.add(new Label("Location:"));
+        //dynamicLayout.add(zipBox);
 
         Button searchBtn = new Button("Search Nearest ER");
         searchBtn.addStyleName("btn");
+        searchBtn.addClickHandler(event ->{ recommendERs();});
         dynamicLayout.add(searchBtn);
     }
 
@@ -215,4 +219,7 @@ public class Home {
             loadDashboard();
         }));
     }
+
+    @JsMethod(namespace = JsPackage.GLOBAL)
+    public static native void recommendERs();
 }

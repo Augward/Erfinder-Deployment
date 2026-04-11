@@ -115,7 +115,6 @@
                 clearERMarkers();
                 FACILITIES_CACHE = facilities;
                 facilities.forEach(f => addERMarker(f));
-                recommendERs();
             })
             .catch(err => console.error('Failed to load facilities', err));
     }
@@ -186,9 +185,6 @@
 
                 ER_MAP.invalidateSize(true);
                 ER_MAP.setView([lat,lon], 13);
-
-                // After location is known, recommend ERs
-                recommendERs();
             },
             err => console.error('Location error:', err),
             { enableHighAccuracy: true }
@@ -238,9 +234,12 @@
         });
 
         if (bestFacility) {
-            console.log(
-                `Recommended ER: ${bestFacility.name} (${bestDistance.toFixed(2)} km)`
-            );
+            L.popup().setLatLng([bestFacility.lat, bestFacility.lon])
+                .setContent(`
+                     <strong>Recommended ER</strong><br/>
+                     ${bestFacility.name}<br/>
+                     Distance: ${bestDistance.toFixed(2)} km<br/>
+                     Wait Time: ${bestFacility.wait} min`).openOn(ER_MAP);
         }
     }
 </script>
