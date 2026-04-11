@@ -67,7 +67,8 @@ class ERFinderApplicationTests {
     void testDatabaseConnectionAndNulls() throws SQLException {
         assertNotNull(Queries.GetConnection(), "The database connection should be successfully established.");
         assertNull(Queries.GetUserInfo("UserThatWillNeverExist"), "Fetching info for a fake user should return null.");
-        assertFalse(Queries.ValidateCredentials("FakeUser", "FakePass"), "Validating fake credentials should return false.");
+        Queries.AuthResult res = Queries.ValidateCredentials("FakeUser", "FakePass");
+        assertFalse(res.isValid, "Validating fake credentials should return false.");
     }
 
     @Test
@@ -133,11 +134,13 @@ class ERFinderApplicationTests {
         Queries.CreateTestUser("testAuthUser", "ValidPass", "SQ1", "MyAnswer");
 
         // Success paths
-        assertTrue(Queries.ValidateCredentials("testAuthUser", "ValidPass"), "Valid credentials should return true.");
+        Queries.AuthResult res1 = Queries.ValidateCredentials("testAuthUser", "ValidPass");
+        assertTrue(res1.isValid, "Valid credentials should return true.");
         assertTrue(Queries.ValidateSecurityAnswer("testAuthUser", "MyAnswer"), "Valid security answer should return true.");
 
         // Failure paths
-        assertFalse(Queries.ValidateCredentials("testAuthUser", "WrongPassword"), "Invalid password should return false.");
+        Queries.AuthResult res2 = Queries.ValidateCredentials("testAuthUser", "WrongPassword");
+        assertFalse(res2.isValid, "Invalid password should return false.");
         assertFalse(Queries.ValidateSecurityAnswer("testAuthUser", "WrongAnswer"), "Invalid security answer should return false.");
 
         Optional<String> sq = Queries.GetSecurityQuestion("testAuthUser");
@@ -167,11 +170,13 @@ class ERFinderApplicationTests {
 
         // Test password change
         assertTrue(Queries.UpdatePassword("testUpdateUser", "BrandNewPassword"), "Password update should return true.");
-        assertTrue(Queries.ValidateCredentials("testUpdateUser", "BrandNewPassword"), "New password should be valid.");
+        Queries.AuthResult res1 = Queries.ValidateCredentials("testUpdateUser", "BrandNewPassword");
+        assertTrue(res1.isValid, "New password should be valid.");
 
         // Test deletion
         Queries.DeleteUser("testUpdateUser");
-        assertFalse(Queries.ValidateCredentials("testUpdateUser", "BrandNewPassword"), "Deleted user should no longer be able to authenticate.");
+        Queries.AuthResult res2 = Queries.ValidateCredentials("testUpdateUser", "BrandNewPassword");
+        assertFalse(res2.isValid, "Deleted user should no longer be able to authenticate.");
     }
 
     @Test

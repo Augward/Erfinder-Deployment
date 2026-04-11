@@ -2,9 +2,9 @@ package edu.uiowa.team7;
 
 import com.google.gwt.user.client.ui.RootPanel;
 
-public class Index {
+public class Landing {
 
-    public Index(boolean logged_in) {
+    public Landing(boolean logged_in) {
         // the navbar should respond to log-in status
         if (logged_in) {
             RootPanel.get("navbar-yes-auth").getElement().removeAttribute("hidden");
@@ -13,4 +13,5 @@ public class Index {
             RootPanel.get("navbar-no-auth").getElement().removeAttribute("hidden");
         }
     }
+
 }

@@ -110,7 +110,7 @@ public class StatusController {
     public String GetUsernameInToken(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
 
-        if (!result.IsValid()) {
+        if (result.Invalid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
             return "-";

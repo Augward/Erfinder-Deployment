@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -368,6 +369,70 @@ public class Queries {
             }
             json.append("]");
             return json.toString();
+        }
+    }
+
+    public static String GetInsurancesJSON(String userid) throws SQLException {
+        try (
+                Connection c = GetConnection();
+                CallableStatement stmt = c.prepareCall(
+                        "SELECT * FROM insurances WHERE userid = ?"
+                );
+        ) {
+            // get all the member ids associated with the userid:
+            stmt.setString(1, userid);
+            try (ResultSet rs = stmt.executeQuery()) {
+                StringBuilder s = new StringBuilder();
+                s.append("{\"inss\":[");
+                while (rs.next()) {
+                    s.append("{\"member_id\":\"");
+                    s.append(rs.getString("member_id"));
+                    s.append("\",");
+                    // most of these are optional, so they get null-checks.
+                    AppendStrProperty(rs, "insurer_name", s);
+                    AppendIntProperty(rs, "policy_num", s);
+                    AppendIntProperty(rs, "group_num", s);
+                    AppendStrProperty(rs, "plan_type", s);
+                    AppendStrProperty(rs, "rx_bin", s);
+                    AppendStrProperty(rs, "rx_pcn", s);
+                    AppendStrProperty(rs, "rx_group", s);
+                    AppendStrProperty(rs, "rx_id", s);
+                    AppendStrProperty(rs, "customer_service_phone", s);
+
+                    Date start = rs.getDate("effective_date");
+                    if (!rs.wasNull()) {
+                        s.append("\"effective_date\":\"");
+                        s.append(start.toString());
+                        s.append("\",");
+                    }
+
+                    s.append("},");
+                }
+                s.append("]}");
+                return s.toString();
+            }
+        }
+    }
+
+    private static void AppendIntProperty(ResultSet rs, String prop, StringBuilder s) throws SQLException{
+        int value = rs.getInt(prop);
+        if (!rs.wasNull()) {
+            s.append("\"");
+            s.append(prop);
+            s.append("\":");
+            s.append(value);
+            s.append(",");
+        }
+    }
+
+    private static void AppendStrProperty(ResultSet rs, String prop, StringBuilder s) throws  SQLException {
+        String value = rs.getString(prop);
+        if (!rs.wasNull()) {
+            s.append("\"");
+            s.append(prop);
+            s.append("\":\"");
+            s.append(value);
+            s.append("\",");
         }
     }
 }

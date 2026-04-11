@@ -88,7 +88,7 @@ public class Security {
         private final boolean needsRefresh;
         private final String userid;
 
-        public boolean IsValid() { return !valid; }
+        public boolean Invalid() { return !valid; }
         // public boolean NeedsRefresh() { return needsRefresh; }
         public String UserID() { return userid; }
 

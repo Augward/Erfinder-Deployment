@@ -11,12 +11,17 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class App implements EntryPoint {
 
+	public static final int HTTP_OK_200 = 200;
+	public static final int HTTP_ACCEPTED_202 = 202;
+	public static final int HTTP_UNAUTHORIZED_401 = 401;
+	public static final int HTTP_NOT_FOUND_404 = 404;
+	public static final int HTTP_INTERNAL_SERVER_ERROR_500 = 500;
 	// note :: keep around for nav-bar ??
 	//private static String userid = "";
 	private static boolean logged_in = false;
 
 	public enum Page {
-		Index,
+		Landing,
 		Login,
 		Forgot,
 		Signup,
@@ -32,7 +37,7 @@ public class App implements EntryPoint {
 		try {
 			inner = Page.valueOf(label.getInnerHTML());
 		} catch (IllegalArgumentException e) {
-			inner = Page.Index;
+			inner = Page.Landing;
 		}
 		label.removeFromParent();
 		return inner;
@@ -40,17 +45,19 @@ public class App implements EntryPoint {
 
 	public static void TryRedirect(Page inner) {
 		switch (inner) {
-			case Index: // page should adapt based on sign-in
+			case Landing: // page should adapt based on sign-in
+			case Pending:
+			case Reset:
 				break;
 			// users already logged in shouldn't be on these::
 			case Login:
 			case Forgot:
-			case Register:
+			case Signup:
 				if (logged_in)
 					Window.Location.assign("home.html");
 				break;
 			// users should only be on these if logged in::
-			case Info:
+			case Profile:
 			case Home:
 				if (!logged_in)
 					Window.Location.assign("login.html");
@@ -89,7 +96,7 @@ public class App implements EntryPoint {
 				break;
 			case Landing:
 			default: // Added default
-				Landing.Build();
+				new Landing(logged_in);
 				break;
 		}
 	}
@@ -119,11 +126,11 @@ public class App implements EntryPoint {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			switch (response.getStatusCode()) {
-				case HttpStatus.OK_200:
+				case HTTP_OK_200:
 					//userid = response.getText();
 					logged_in = true;
 					break;
-				case HttpStatus.UNAUTHORIZED_401:
+				case HTTP_UNAUTHORIZED_401:
 					logged_in = false;
 					break;
 			}
