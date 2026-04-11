@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -13,7 +12,6 @@ import java.util.Optional;
 public class Queries {
 
     private static final Logger logger = LoggerFactory.getLogger(Queries.class);
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static Connection SQLConnection;
 
@@ -377,7 +375,7 @@ public class Queries {
                 Connection c = GetConnection();
                 CallableStatement stmt = c.prepareCall(
                         "SELECT * FROM insurances WHERE userid = ?"
-                );
+                )
         ) {
             // get all the member ids associated with the userid:
             stmt.setString(1, userid);
