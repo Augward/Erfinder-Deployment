@@ -520,7 +520,7 @@ public class InsuranceBox {
             if (this.box.getValue().equals(this.preEditDate)) {
                 return null;
             }
-            Date val = box.getValue();
+            //Date val = box.getValue();
             return fieldname+":"+App.B64Encode(box.getFormat().format(box,box.getValue()));
         }
 
