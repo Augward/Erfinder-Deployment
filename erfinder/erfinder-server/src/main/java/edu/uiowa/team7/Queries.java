@@ -1,6 +1,5 @@
 package edu.uiowa.team7;
 
-import org.aspectj.weaver.ast.Call;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -562,7 +561,6 @@ public class Queries {
             HashMap<String,String> map, String prop, StringBuilder s,
             List<ParamType> params, List<Object> values
     ) {
-        String cur = null;
         if (map.containsKey(prop)) {
             s.append(prop);
             s.append(" = ?, ");
@@ -574,7 +572,6 @@ public class Queries {
             HashMap<String,String> map, String prop, StringBuilder s,
             List<ParamType> params, List<Object> values
     ) {
-        String cur = null;
         if (map.containsKey(prop)) {
             s.append(prop);
             s.append(" = ?, ");

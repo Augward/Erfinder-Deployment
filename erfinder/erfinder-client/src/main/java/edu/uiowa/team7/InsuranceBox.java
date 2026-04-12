@@ -6,7 +6,6 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
-import org.eclipse.jetty.client.transport.HttpRequest;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -160,7 +159,7 @@ public class InsuranceBox {
                     f.SubmitEdit();
                 }
                 editing = false;
-                String res = BuildResult(fresh);
+                String res = BuildResult();
                 RequestBuilder req = new RequestBuilder(RequestBuilder.GET,
                         (fresh ? "/api/setinsurance?f=y&blob=" : "/api/setinsurance?f=n&blob=")+res);
                 try {
@@ -213,7 +212,7 @@ public class InsuranceBox {
         delButton.setText("No; Keep Info");
     }
 
-    public String BuildResult(boolean fresh) {
+    public String BuildResult() {
         StringBuilder b = new StringBuilder();
         for (InsuranceField f : fields) {
             String encoded = f.Encode();
@@ -529,6 +528,7 @@ public class InsuranceBox {
         }
         @Override
         public void SubmitEdit() {
+            preEditDate = box.getValue();
             this.box.setEnabled(false);
         }
         @Override

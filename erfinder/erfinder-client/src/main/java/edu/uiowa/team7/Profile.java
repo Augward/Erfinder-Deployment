@@ -1,14 +1,11 @@
 package edu.uiowa.team7;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.datepicker.client.DateBox;
 
 public class Profile {
 
@@ -28,7 +25,6 @@ public class Profile {
     private final TextBox contactBox = new TextBox();
     private final TextBox genderBox = new TextBox();
 
-    private final Label _TEMP_INS_BOX = new Label();
     private final HTMLPanel insPanel = new HTMLPanel("p","");
 
     // Fields - Security & Actions
@@ -89,7 +85,7 @@ public class Profile {
         RootPanel.get("btnContainer").add(toggleEditBtn);
         RootPanel.get("statusContainer").add(statusLabel);
 
-        HTMLPanel pan = HTMLPanel.wrap(RootPanel.get("insuranceListContainer").getElement());
+        //HTMLPanel pan = HTMLPanel.wrap(RootPanel.get("insuranceListContainer").getElement());
 
         // API Fetch
         fetchCurrentInfo();
