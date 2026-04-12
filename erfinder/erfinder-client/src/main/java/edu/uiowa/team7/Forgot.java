@@ -114,7 +114,9 @@ public class Forgot {
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
                 case 200:
-                    Window.Location.assign("reset.html");
+                    String token = response.getText();
+                    // Attach the token
+                    Window.Location.assign("reset.html?t=" + token + "&u=" + App.B64Encode(userIDBox.getText()));
                     break;
                 case 404:
                 default:

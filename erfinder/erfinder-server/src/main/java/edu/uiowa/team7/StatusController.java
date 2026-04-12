@@ -81,15 +81,20 @@ public class StatusController {
         String userID = B64Decode(req.getParameter("userid"));
         String ans = B64Decode(req.getParameter("answer"));
         try {
+            // Check answer
             if (!Queries.ValidateSecurityAnswer(userID, ans)) {
                 res.setStatus(HttpStatus.NOT_FOUND.value());
                 return "Unauthorized";
             }
 
-            String device = Security.GetDevice(req);
-            res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieFresh(userID, device));
+            // Answer is correct
+            String tempToken = java.util.UUID.randomUUID().toString();
+
             res.setStatus(HttpStatus.OK.value());
-            return "Authorized";
+
+            // Return the token string
+            return tempToken;
+
         } catch (Exception e) {
             logger.error("Error during security answer validation", e);
             res.getHeaders(HttpHeaders.SET_COOKIE).clear();

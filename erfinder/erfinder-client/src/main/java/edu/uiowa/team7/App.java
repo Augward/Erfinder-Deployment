@@ -47,21 +47,37 @@ public class App implements EntryPoint {
 		switch (inner) {
 			case Landing: // page should adapt based on sign-in
 			case Pending:
-			case Reset:
 				break;
+
 			// users already logged in shouldn't be on these::
+			case Reset:
+				if (logged_in) {
+					// Logged-in users should use the Profile page
+					Window.Location.assign("home.html");
+				} else {
+					// Logged-out users must have a token
+					String token = Window.Location.getParameter("t");
+					if (token == null || token.isEmpty()) {
+						// No token
+						Window.Location.assign("landing.html");
+					}
+				}
+				break;
+
 			case Login:
 			case Forgot:
 			case Signup:
 				if (logged_in)
 					Window.Location.assign("home.html");
 				break;
+
 			// users should only be on these if logged in::
 			case Profile:
 			case Home:
 				if (!logged_in)
 					Window.Location.assign("login.html");
 				break;
+
 			// realistically this script wouldn't be on unknown page,
 			// but just to be sure::
 			default:
