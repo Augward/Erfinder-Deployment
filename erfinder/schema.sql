@@ -413,5 +413,18 @@ END$$
 
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS updateWaitTime;
+
+DELIMITER $$
+
+CREATE PROCEDURE updateWaitTime(
+    IN p_facility_id INT,
+    IN p_wait_time INT)
+BEGIN
+    UPDATE facilities
+    SET waitTime_Minutes = p_wait_time
+    WHERE id = p_facility_id;
+END;
+
 
 -- Dump completed on 2026-03-10 19:24:13
