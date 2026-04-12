@@ -256,31 +256,44 @@ public class Queries {
         }
     }
 
-    public static boolean insertReg(Map<String, String> data) throws SQLException{
+    public static boolean insertReg(Map<String, String> data) throws SQLException {
         String salt = java.util.UUID.randomUUID().toString().substring(0, 8);
-        String sql = "INSERT INTO users (status, userid, passhash, salt, secquestion, secanswer, firstn, lastn, legaln, phone, email, addr, zip, dob, gender, contact, dln, ssn, perm) " +
-                "VALUES ('PENDING', ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, UNHEX(SHA2(CONCAT(?, ?), 256)), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try(Connection conn = GetConnection(); PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setString(1, data.get("username"));
-            ps.setString(2, data.get("password"));
-            ps.setString(3, salt);
-            ps.setString(4, salt);
-            ps.setString(5, data.get("securityQuestion"));
-            ps.setString(6, data.get("securityAnswer"));
-            ps.setString(7, salt);
-            ps.setString(8, data.get("firstName"));
-            ps.setString(9, data.get("lastName"));
-            ps.setString(10, data.get("legalName"));
-            ps.setString(11, data.get("phone"));
-            ps.setString(12, data.get("email"));
-            ps.setString(13, data.get("address"));
-            ps.setString(14, data.get("zipcode"));
-            ps.setDate(15, java.sql.Date.valueOf(data.get("dob")));
-            ps.setString(16, data.get("gender"));
-            ps.setString(17, data.get("emergency"));
-            ps.setString(18, data.get("driversLicense"));
-            ps.setString(19, data.get("ssn"));
-            ps.setString(20, data.get("role"));
+
+        // The column order here MUST perfectly match the CREATE TABLE definition
+        String sql = "INSERT INTO users (" +
+                "userid, status, perm, firstn, lastn, legaln, email, phone, addr, zip, dob, gender, contact, dln, ssn, secquestion, salt, passhash, secanswer" +
+                ") VALUES (" +
+                "?, 'PENDING', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNHEX(SHA2(CONCAT(?, ?), 256)), UNHEX(SHA2(CONCAT(?, ?), 256))" +
+                ")";
+
+        try (Connection conn = GetConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // The order here MUST perfectly match the ? marks in the VALUES clause above
+            ps.setString(1, data.get("username"));               // userid
+            ps.setString(2, data.get("role"));                   // perm
+            ps.setString(3, data.get("firstName"));              // firstn
+            ps.setString(4, data.get("lastName"));               // lastn
+            ps.setString(5, data.get("legalName"));              // legaln
+            ps.setString(6, data.get("email"));                  // email
+            ps.setString(7, data.get("phone"));                  // phone
+            ps.setString(8, data.get("address"));                // addr
+            ps.setString(9, data.get("zipcode"));                // zip
+            ps.setDate(10, java.sql.Date.valueOf(data.get("dob")));// dob
+            ps.setString(11, data.get("gender"));                // gender
+            ps.setString(12, data.get("emergency"));             // contact
+            ps.setString(13, data.get("driversLicense"));        // dln
+            ps.setString(14, data.get("ssn"));                   // ssn
+            ps.setString(15, data.get("securityQuestion"));      // secquestion
+            ps.setString(16, salt);                              // salt
+
+            // For passhash: UNHEX(SHA2(CONCAT(?, ?), 256))
+            ps.setString(17, data.get("password"));              // passhash part 1
+            ps.setString(18, salt);                              // passhash part 2
+
+            // For secanswer: UNHEX(SHA2(CONCAT(?, ?), 256))
+            ps.setString(19, data.get("securityAnswer"));        // secanswer part 1
+            ps.setString(20, salt);                              // secanswer part 2
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             PrintSQLException(e);
