@@ -17,6 +17,8 @@ public class Home {
     // Fields
     private final VerticalPanel dynamicLayout;
 
+    private CheckBox[] ESIBoxes = new CheckBox[4];
+
     // Constructor
     public Home() {
         dynamicLayout = new VerticalPanel();
@@ -78,6 +80,25 @@ public class Home {
 
     private void buildPatientView() {
         dynamicLayout.add(new HTML("<h3>Find Immediate Care</h3>"));
+        dynamicLayout.add(new HTML("<h4>Check all that apply:</h3>"));
+
+        HTMLPanel t = new HTMLPanel("table","");
+        String[] lines = {
+                "Require life-saving intervention now.",
+                "In a dangerous situation.",
+                "In severe pain.",
+                "Feel strange, disoriented, and/or lethargic."
+        };
+        HTMLPanel[] rows = new HTMLPanel[4];
+        for (int i = 0; i < 4; i ++) {
+            rows[i] = new HTMLPanel("tr", "");
+            rows[i].add(cw(new Label(lines[i])));
+            rows[i].add(cw(ESIBoxes[i] = new CheckBox()));
+            ESIBoxes[i].addClickHandler(event -> ESIBoxEvent());
+            t.add(rows[i]);
+        }
+
+        dynamicLayout.add(t);
 
         ListBox injuryType = new ListBox();
         injuryType.addStyleName("form-input");
@@ -99,6 +120,19 @@ public class Home {
         searchBtn.addStyleName("btn");
         searchBtn.addClickHandler(event ->{ recommendERs();});
         dynamicLayout.add(searchBtn);
+    }
+    private HTMLPanel cw(Widget w) {
+        HTMLPanel p = new HTMLPanel("td", "");
+        p.add(w);
+        return p;
+    }
+    private int EvalESI() {
+        if (ESIBoxes[0].getValue()) return 1;
+        for (int i = 1; i < 4; i ++) if (ESIBoxes[i].getValue()) return 2;
+        return 3;
+    }
+    private void ESIBoxEvent() {
+        logger.log(Level.INFO,"ESI: "+EvalESI());
     }
 
     private void buildMedicalView() {
