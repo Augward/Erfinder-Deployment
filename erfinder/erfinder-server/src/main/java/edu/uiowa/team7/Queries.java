@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.*;
 public class Queries {
 
     private static final Logger logger = LoggerFactory.getLogger(Queries.class);
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static Connection SQLConnection;
 
