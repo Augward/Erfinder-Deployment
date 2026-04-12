@@ -374,7 +374,7 @@ public class Queries {
     }
 
     public static boolean UpdateWaitTime(int facilityId, int waitTime) throws SQLException{
-        String sql = "{CALL updateWaitTime(?,?)}";
+        String sql = "CALL updateWaitTime(?,?)";
 
         try(Connection conn = GetConnection(); CallableStatement stmt = conn.prepareCall(sql)){
             stmt.setInt(1, facilityId);
