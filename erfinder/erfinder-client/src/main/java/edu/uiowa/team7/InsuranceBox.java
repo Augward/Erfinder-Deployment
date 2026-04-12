@@ -4,6 +4,7 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
 
@@ -491,6 +492,8 @@ public class InsuranceBox {
         public InsuranceDateField(String fieldname, String label) {
             super(fieldname, label);
             this.box.setEnabled(false);
+            DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
+            box.setFormat(new DateBox.DefaultFormat(format));
         }
 
         @Override
@@ -518,7 +521,7 @@ public class InsuranceBox {
                 return null;
             }
             Date val = box.getValue();
-            return fieldname+":"+App.B64Encode(val.getYear()+"-"+val.getMonth()+"-"+val.getDay());
+            return fieldname+":"+App.B64Encode(box.getFormat().format(box,box.getValue()));
         }
 
         @Override
@@ -528,7 +531,6 @@ public class InsuranceBox {
         }
         @Override
         public void SubmitEdit() {
-            preEditDate = box.getValue();
             this.box.setEnabled(false);
         }
         @Override

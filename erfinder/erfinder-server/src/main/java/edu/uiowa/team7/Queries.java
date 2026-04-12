@@ -1,5 +1,6 @@
 package edu.uiowa.team7;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.sql.*;
 import java.sql.Date;
+import java.text.DateFormat;
 import java.util.*;
 
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
@@ -466,7 +468,8 @@ public class Queries {
     enum ParamType {
         Str,
         Int,
-        Dec
+        Dec,
+        Dat
     }
 
     public static void SetInsurance(String userid, String blob, boolean fresh) throws Exception {
@@ -514,8 +517,13 @@ public class Queries {
         AddStrProperty(map, "rx_group", s, params, values);
         AddStrProperty(map, "rx_id", s, params, values);
         AddStrProperty(map, "customer_service_phone", s, params, values);
-        AddStrProperty(map, "effective_date", s, params, values);
-
+        //AddStrProperty(map, "effective_date", s, params, values);
+        if (map.containsKey("effective_date")) {
+            s.append("effective_date = ?, ");
+            params.add(ParamType.Dat);
+            values.add(StatusController.B64Decode(map.get("effective_date")));
+            logger.error(values.get(values.size() - 1).toString());
+        }
         AddIntProperty(map, "policy_num", s, params, values);
         AddIntProperty(map, "group_num", s, params, values);
 
@@ -531,7 +539,7 @@ public class Queries {
         //`insurer_name` = ?, `copay` = '30.13', `coinsurance` = '.15', `out_of_pocket_max` = '122.23' " +
 
 
-        s.append("WHERE (member_id = ?) and (userid = ?)");
+        s.append(" WHERE (member_id = ?) and (userid = ?)");
 
         logger.error(s.toString());
 
@@ -551,6 +559,10 @@ public class Queries {
                         break;
                     case Dec:
                         stmt.setBigDecimal(i,(BigDecimal) values.get(i-1));
+                        break;
+                    case Dat:
+                        //DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
+                        stmt.setDate(i, Date.valueOf(((String) values.get(i-1))));
                         break;
                 }
             }
