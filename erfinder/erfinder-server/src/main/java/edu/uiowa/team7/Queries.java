@@ -26,25 +26,10 @@ public class Queries {
                 return SQLConnection;
             }
 
-            String dbHost = System.getenv("DB_HOST");
-            if (dbHost == null || dbHost.trim().isEmpty()) {
-                dbHost = "localhost";
-            }
-
-            String dbPass = System.getenv("MYSQL_ERFINDER_PASSWORD");
-            if (dbPass == null || dbPass.trim().isEmpty()) {
-                dbPass = "insecure_password";
-            }
-
-            String dbUser = System.getenv("MYSQL_ERFINDER_USER");
-            if (dbUser == null || dbUser.trim().isEmpty()) {
-                dbUser = "root";
-            }
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-            SQLConnection = DriverManager.getConnection("jdbc:mysql://" + dbHost + "/erfinder?user="+ dbUser + "&password=" + dbPass);
 
-            //String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
-            //SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
+            String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
+            SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
 
             return SQLConnection;
 
