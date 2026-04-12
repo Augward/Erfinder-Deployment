@@ -5,9 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <link type="text/css" rel="stylesheet" href="erfinder.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <title>ERFinder - Home</title>
 </head>
-
 
 <body>
 <p id="page" style="display:none;">Home</p>
@@ -31,8 +32,7 @@
 
     <div class="panel">
         <div class="map-placeholder" style="padding:0; overflow:hidden;">
-            <iframe width="100%" height="100%"
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=-96.7,40.4,-90.1,43.5&amp;layer=mapnik"></iframe>
+            <div id="map"></div>
         </div>
     </div>
 </div>
@@ -60,5 +60,188 @@
     &copy; 2026 ERFinder | Team 7 Fundamentals of Software Engineering
 </div>
 </body>
+
 <script src="app/app.nocache.js"></script>
+
+<script>
+    let ER_MAP = null;
+    let facilitiesLoaded = false;
+    let ER_MARKERS = [];
+    let USER_LOCATION = null;
+    let USER_MARKER = null;
+    let FACILITIES_CACHE = [];
+
+    function initLeafletSafely() {
+        const m = document.getElementById('map');
+        if (!m) return;
+
+        m.style.width = '100%';
+        m.style.height = '100%';
+
+        if (!ER_MAP) {
+            ER_MAP = L.map(m).setView([41.8, -91.6], 9);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(ER_MAP);
+
+            console.log('Map initialized');
+        }
+
+        ER_MAP.invalidateSize(true);
+
+        if (!facilitiesLoaded) {
+            facilitiesLoaded = true;
+            loadERFacilities();
+            setInterval(loadERFacilities, 10000);
+            showUserLocation();
+        }
+    }
+
+    setTimeout(initLeafletSafely, 500);
+    setTimeout(initLeafletSafely, 1500);
+    setTimeout(initLeafletSafely, 3000);
+</script>
+
+
+<script>
+    function loadERFacilities() {
+        if (!ER_MAP) return;
+
+        fetch('/api/facilities')
+            .then(res => res.json())
+            .then(facilities => {
+                console.log('Facilities loaded:', facilities);
+                clearERMarkers();
+                FACILITIES_CACHE = facilities;
+                facilities.forEach(f => addERMarker(f));
+            })
+            .catch(err => console.error('Failed to load facilities', err));
+    }
+</script>
+
+<script>
+    function addERMarker(f) {
+        const lat = Number(f.lat);
+        const lon = Number(f.lon);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            console.warn('Invalid coordinates:', f);
+            return;
+        }
+
+        const marker = L.marker([lat, lon]).addTo(ER_MAP);
+
+        marker.bindPopup(`
+            <strong>${f.name}</strong><br/>
+            Trauma Level: ${f.trauma}<br/>
+            Specialties: ${f.specialties}<br/>
+            Beds Available: ${f.beds}<br/>
+            Wait Time: ${f.wait} minutes
+        `);
+
+        ER_MARKERS.push(marker);
+    }
+</script>
+
+
+<script>
+    function clearERMarkers() {
+        ER_MARKERS.forEach(marker => ER_MAP.removeLayer(marker));
+        ER_MARKERS = [];
+    }
+</script>
+
+<script>
+    function showUserLocation() {
+        if (!navigator.geolocation) {
+            console.warn('Geolocation not supported');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                console.log('User location:', lat, lon);
+
+                USER_LOCATION = { lat, lon };
+
+                // Remove previous marker if any
+                if (USER_MARKER) {
+                    ER_MAP.removeLayer(USER_MARKER);
+                }
+
+                USER_MARKER = L.circleMarker([lat, lon], {
+                    radius: 8,
+                    color: '#991b1b',
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.9,
+                    weight: 2
+                }).addTo(ER_MAP);
+
+                USER_MARKER.bindPopup('<strong>Your Location</strong>');
+
+                ER_MAP.invalidateSize(true);
+                ER_MAP.setView([lat,lon], 13);
+            },
+            err => console.error('Location error:', err),
+            { enableHighAccuracy: true }
+        );
+    }
+</script>
+
+<script>
+    function distanceKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) *
+            Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2;
+
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+</script>
+
+<script>
+    function recommendERs() {
+        if (!USER_LOCATION || FACILITIES_CACHE.length === 0) return;
+
+        let bestFacility = null;
+        let bestDistance = Infinity;
+
+        FACILITIES_CACHE.forEach(f => {
+            const lat = Number(f.lat);
+            const lon = Number(f.lon);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+            const d = distanceKm(
+                USER_LOCATION.lat,
+                USER_LOCATION.lon,
+                lat,
+                lon
+            );
+
+            if (d < bestDistance) {
+                bestDistance = d;
+                bestFacility = f;
+            }
+        });
+
+        if (bestFacility) {
+            L.popup().setLatLng([bestFacility.lat, bestFacility.lon])
+                .setContent(`
+                     <strong>Recommended ER</strong><br/>
+                     ${bestFacility.name}<br/>
+                     Distance: ${bestDistance.toFixed(2)} km<br/>
+                     Wait Time: ${bestFacility.wait} min`).openOn(ER_MAP);
+        }
+    }
+</script>
+
 </html>

@@ -34,7 +34,7 @@ public class FacilityUpdate extends VerticalPanel {
         add(backbtn);
         add(new HTML("<h3>Update ER Facility</h3>"));
         buildUI();
-        loadFacilities();
+        loadFacilities(facilityDrop);
     }
 
     private void buildUI(){
@@ -63,7 +63,7 @@ public class FacilityUpdate extends VerticalPanel {
 
     }
 
-    private void loadFacilities(){
+    public static void loadFacilities(ListBox box){
         RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, "/api/facilities");
         try{
             rb.sendRequest(null, new RequestCallback() {
@@ -82,8 +82,8 @@ public class FacilityUpdate extends VerticalPanel {
                         return;
                     }
 
-                    facilityDrop.clear();
-                    facilityDrop.addItem("Select Facility", "0");
+                    box.clear();
+                    box.addItem("Select Facility", "0");
 
                     for(int i = 0; i < arr.size(); i++) {
                         JSONObject obj = arr.get(i).isObject();
@@ -94,7 +94,7 @@ public class FacilityUpdate extends VerticalPanel {
                         int id = (int) obj.get("id").isNumber().doubleValue();
                         String name = obj.get("name").isString().stringValue();
 
-                        facilityDrop.addItem(name, String.valueOf(id));
+                        box.addItem(name, String.valueOf(id));
                     }
                 }
 
