@@ -166,4 +166,20 @@ public class UserController {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
+
+    @GetMapping("/api/rejectuser")
+    public ResponseEntity<String> rejectUser(@RequestParam("target") String b64Target) {
+        try {
+            // Decode the Base64 username that the frontend sent
+            String targetUserID = new String(Base64.getDecoder().decode(b64Target));
+
+            // Call the database to delete this user entirely
+            Queries.DeleteUser(targetUserID);
+
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database Error");
+        }
+    }
 }

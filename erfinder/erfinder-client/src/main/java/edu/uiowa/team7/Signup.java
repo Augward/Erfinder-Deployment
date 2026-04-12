@@ -432,7 +432,7 @@ public class Signup {
         String json = "{"
                 + "\"username\":\"" + username.getText().trim() + "\","
                 + "\"password\":\"" + password.getText().trim() + "\","
-                + "\"securityQuestion\":\"" + securityQues.getValue(securityQues.getSelectedIndex()) + "\","
+                + "\"securityQuestion\":\"" + securityQues.getItemText(securityQues.getSelectedIndex()) + "\","
                 + "\"securityAnswer\":\"" + securityAns.getText().trim() + "\","
                 + "\"firstName\":\"" + firstname.getText().trim() + "\","
                 + "\"lastName\":\"" + lastname.getText().trim() + "\","

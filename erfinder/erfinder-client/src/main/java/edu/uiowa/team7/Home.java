@@ -215,10 +215,22 @@ public class Home {
                                 approvalTable.setText(row, 0, uid);
                                 approvalTable.setText(row, 1, role);
 
+                                HorizontalPanel actions = new HorizontalPanel();
+                                actions.setSpacing(5);
+
                                 Button approveBtn = new Button("Approve");
                                 approveBtn.addStyleName("btn");
                                 approveBtn.addClickHandler(event -> approveUser(uid));
-                                approvalTable.setWidget(row, 2, approveBtn);
+
+                                Button rejectBtn = new Button("Reject");
+                                rejectBtn.addStyleName("btn");
+                                rejectBtn.getElement().getStyle().setProperty("backgroundColor", "#dc3545"); // Red button
+                                rejectBtn.addClickHandler(event -> rejectUser(uid));
+
+                                actions.add(approveBtn);
+                                actions.add(rejectBtn);
+
+                                approvalTable.setWidget(row, 2, actions);
                                 row++;
                             }
                         }
@@ -265,6 +277,26 @@ public class Home {
                 }
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+    }
+
+    private void rejectUser(final String targetID) {
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/rejectuser?target=" + App.B64Encode(targetID));
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() == 200) {
+                        Window.alert("User " + targetID + " has been rejected and removed.");
+                        dynamicLayout.clear();
+                        loadDashboard(); // Refresh the table
+                    } else {
+                        Window.alert("Failed to reject user.");
+                    }
+                }
+                public void onError(Request request, Throwable exception) {
+                    Window.alert("Server connection error.");
+                }
+            });
+        } catch (RequestException e) { logger.log(java.util.logging.Level.SEVERE, "An error occurred", e); }
     }
 
     private void registerFacility(){
