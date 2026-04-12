@@ -11,7 +11,8 @@ import java.sql.SQLException;
 @WebServlet({
         "/api/facilities",
         "/api/addfacility",
-        "/api/updateFacility"
+        "/api/updateFacility",
+        "/api/updateWaitTime"
 })
 public class FacilityController extends HttpServlet {
 
@@ -47,6 +48,9 @@ public class FacilityController extends HttpServlet {
 
             case "/api/updateFacility":
                 handleUpdateFacility(req, res);
+                break;
+            case "/api/updateWaitTime":
+                handleUpdateWaitTime(req, res);
                 break;
 
             default:
@@ -164,4 +168,73 @@ public class FacilityController extends HttpServlet {
             res.getWriter().write("Database error updating facility");
         }
     }
+
+    /* -------- POST /api/updateWaitTime -------- */
+    private void handleUpdateWaitTime(HttpServletRequest req, HttpServletResponse res)
+            throws IOException {
+
+        res.setContentType("text/plain");
+        res.setCharacterEncoding("UTF-8");
+
+        int facilityId;
+        int waitTime;
+
+        try {
+            // Read raw JSON body
+            String body = req.getReader().lines()
+                    .reduce("", (acc, line) -> acc + line);
+
+            body = body.replaceAll("[{}\"]", "");
+            String[] parts = body.split(",");
+
+            String idStr = null;
+            String waitStr = null;
+
+            for (String p : parts) {
+                String[] kv = p.split(":");
+                if (kv.length != 2) continue;
+
+                if (kv[0].trim().equals("facilityId")) {
+                    idStr = kv[1].trim();
+                } else if (kv[0].trim().equals("waitTime")) {
+                    waitStr = kv[1].trim();
+                }
+            }
+
+            if (idStr == null || waitStr == null) {
+                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                res.getWriter().write("Missing required fields");
+                return;
+            }
+
+            facilityId = Integer.parseInt(idStr);
+            waitTime = Integer.parseInt(waitStr);
+
+            if (waitTime < 0) throw new NumberFormatException();
+
+        } catch (Exception e) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            res.getWriter().write("Invalid JSON input");
+            return;
+        }
+
+        try {
+            boolean updated = Queries.UpdateWaitTime(facilityId, waitTime);
+
+            if (!updated) {
+                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                res.getWriter().write("No facility updated");
+                return;
+            }
+
+            res.setStatus(HttpServletResponse.SC_OK);
+            res.getWriter().write("OK");
+
+        } catch (SQLException e) {
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            res.getWriter().write("Database error updating wait time");
+        }
+    }
+
+
 }
