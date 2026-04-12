@@ -1,6 +1,7 @@
 package edu.uiowa.team7;
 
 import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -452,16 +453,19 @@ public class Signup {
             builder.sendRequest(json, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    submit.setEnabled(true);
+
                     if(response.getStatusCode() == 200){
                         String respText = response.getText();
                         if(respText.contains("\"status\":\"success\"")){
                             Window.alert("Account Successfully Submitted!");
+                            requestToken();
                         } else {
                             Window.alert("Submission Failed: " + respText);
+                            submit.setEnabled(true);
                         }
                     } else {
                         Window.alert("Server Error");
+                        submit.setEnabled(true);
                     }
                 }
 
@@ -474,6 +478,38 @@ public class Signup {
         } catch(RequestException e) {
             submit.setEnabled(true);
             Window.alert("Request Failed");
+        }
+    }
+
+    private void requestToken() {
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
+                "/api/gettoken?userID="
+                        + App.B64Encode(username.getText())
+                        + "&password="
+                        + App.B64Encode(password.getText())
+        );
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    switch (response.getStatusCode()) {
+                        case App.HTTP_OK_200:
+                            Window.Location.assign("home.html");
+                            break;
+                        default:
+                            Window.Location.assign("pending.html");
+                            break;
+                    }
+                }
+
+                @Override
+                public void onError(Request request, Throwable throwable) {
+                    Window.alert("An unexpected error occured!");
+                }
+            });
+        } catch (RequestException e) {
+            Window.alert("An unexpected error occured!");
+            // Compliance
         }
     }
 }
