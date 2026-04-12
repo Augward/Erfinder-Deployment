@@ -201,7 +201,7 @@ public class Profile {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) { Window.Location.assign("index.html"); }
+                    if (response.getStatusCode() == 200) { Window.Location.assign("landing.html"); }
                     else { updatePassBtn.setEnabled(true); statusLabel.setText("Failed to update password."); }
                 }
                 public void onError(Request request, Throwable exception) { updatePassBtn.setEnabled(true); statusLabel.setText("Server error."); }
@@ -223,7 +223,7 @@ public class Profile {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) { Window.Location.assign("index.html"); }
+                    if (response.getStatusCode() == 200) { Window.Location.assign("landing.html"); }
                     else {
                         deleteAccountBtn.setEnabled(true);
                         statusLabel.getElement().getStyle().setColor("red");

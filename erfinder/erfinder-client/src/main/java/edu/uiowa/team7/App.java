@@ -65,7 +65,7 @@ public class App implements EntryPoint {
 			// realistically this script wouldn't be on unknown page,
 			// but just to be sure::
 			default:
-				Window.Location.assign("index.html");
+				Window.Location.assign("landing.html");
 				break;
 		}
 	}
