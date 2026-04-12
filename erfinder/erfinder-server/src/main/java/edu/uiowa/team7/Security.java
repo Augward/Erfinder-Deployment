@@ -98,7 +98,7 @@ public class Security {
             boolean refresh;
             try {
                 Claims claims = Jwts.parser()
-                        .verifyWith(pair.getPublic())
+                        .verifyWith(GetPair().getPublic())
                         .require("device", device)
                         .build().parseSignedClaims(token).getPayload();
 

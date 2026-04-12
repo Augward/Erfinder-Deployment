@@ -1,12 +1,14 @@
 package edu.uiowa.team7;
 
+import org.aspectj.weaver.ast.Call;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.SecureRandom;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.util.Map;
-import java.util.Optional;
+import java.sql.Date;
+import java.util.*;
 
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 public class Queries {
@@ -370,7 +372,7 @@ public class Queries {
         }
     }
 
-    public static String GetInsurancesJSON(String userid) throws SQLException {
+    public static String GetInsurances(String userid) throws SQLException {
         try (
                 Connection c = GetConnection();
                 CallableStatement stmt = c.prepareCall(
@@ -381,44 +383,59 @@ public class Queries {
             stmt.setString(1, userid);
             try (ResultSet rs = stmt.executeQuery()) {
                 StringBuilder s = new StringBuilder();
-                s.append("{\"inss\":[");
+                boolean first = true;
                 while (rs.next()) {
-                    s.append("{\"member_id\":\"");
-                    s.append(rs.getString("member_id"));
-                    s.append("\",");
+                    if (first) {
+                        first = false;
+                    } else {
+                        s.append("|");
+                    }
+                    s.append("member_id:");
+                    s.append(B64Encode(rs.getString("member_id")));
+                    s.append(",");
                     // most of these are optional, so they get null-checks.
                     AppendStrProperty(rs, "insurer_name", s);
                     AppendIntProperty(rs, "policy_num", s);
                     AppendIntProperty(rs, "group_num", s);
+                    AppendDecProperty(rs, "copay", s);
+                    AppendDecProperty(rs, "coinsurance", s);
+                    AppendDecProperty(rs, "out_of_pocket_max", s);
                     AppendStrProperty(rs, "plan_type", s);
                     AppendStrProperty(rs, "rx_bin", s);
                     AppendStrProperty(rs, "rx_pcn", s);
                     AppendStrProperty(rs, "rx_group", s);
                     AppendStrProperty(rs, "rx_id", s);
                     AppendStrProperty(rs, "customer_service_phone", s);
-
                     Date start = rs.getDate("effective_date");
                     if (!rs.wasNull()) {
-                        s.append("\"effective_date\":\"");
-                        s.append(start.toString());
-                        s.append("\",");
+                        s.append("effective_date:");
+                        s.append(B64Encode(start.toString()));
                     }
-
-                    s.append("},");
                 }
-                s.append("]}");
                 return s.toString();
             }
         }
     }
 
+    private static String B64Encode(String s) {
+        return Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
+    }
+
     private static void AppendIntProperty(ResultSet rs, String prop, StringBuilder s) throws SQLException{
         int value = rs.getInt(prop);
         if (!rs.wasNull()) {
-            s.append("\"");
             s.append(prop);
-            s.append("\":");
+            s.append(":");
             s.append(value);
+            s.append(",");
+        }
+    }
+    private static void AppendDecProperty(ResultSet rs, String prop, StringBuilder s) throws SQLException{
+        BigDecimal value = rs.getBigDecimal(prop);
+        if (!rs.wasNull()) {
+            s.append(prop);
+            s.append(":");
+            s.append(value.multiply(BigDecimal.valueOf(100)).intValue());
             s.append(",");
         }
     }
@@ -426,11 +443,154 @@ public class Queries {
     private static void AppendStrProperty(ResultSet rs, String prop, StringBuilder s) throws  SQLException {
         String value = rs.getString(prop);
         if (!rs.wasNull()) {
-            s.append("\"");
             s.append(prop);
-            s.append("\":\"");
-            s.append(value);
-            s.append("\",");
+            s.append(":");
+            s.append(B64Encode(value));
+            s.append(",");
         }
     }
+
+
+    enum ParamType {
+        Str,
+        Int,
+        Dec
+    }
+
+    public static void SetInsurance(String userid, String blob, boolean fresh) throws Exception {
+        StringBuilder s = new StringBuilder();
+        s.append("UPDATE insurances SET ");
+
+        // determine what's here...
+        String[] pairs = blob.split(",");
+        HashMap<String,String> map = new HashMap<>();
+        for (String p : pairs) {
+            String[] div = p.split(":");
+            map.put(div[0],div[1]);
+        }
+        if (!map.containsKey("member_id")) {
+            throw new Exception("Blob didn't contain full primary key");
+        }
+        String member_id = StatusController.B64Decode(map.get("member_id"));
+        map.remove("member_id");
+
+        if (fresh) {
+            if (!map.containsKey("insurer_name")) {
+                throw new Exception("Fresh insurance doesn't have provider!");
+            }
+            String insurer_name = StatusController.B64Decode(map.get("insurer_name"));
+            // create the row
+            try (
+                    Connection c = GetConnection();
+                    CallableStatement stmt0 = c.prepareCall("INSERT INTO insurances (insurer_name, member_id, userid) VALUES (?,?,?);");
+            ) {
+                stmt0.setString(1,insurer_name);
+                stmt0.setString(2,member_id);
+                stmt0.setString(3,userid);
+                stmt0.execute();
+            }
+        }
+
+        // go through our expected parameters...
+
+        List<ParamType> params = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
+        AddStrProperty(map, "insurer_name", s, params, values);
+        AddStrProperty(map, "plan_type", s, params, values);
+        AddStrProperty(map, "rx_bin", s, params, values);
+        AddStrProperty(map, "rx_pcn", s, params, values);
+        AddStrProperty(map, "rx_group", s, params, values);
+        AddStrProperty(map, "rx_id", s, params, values);
+        AddStrProperty(map, "customer_service_phone", s, params, values);
+        AddStrProperty(map, "effective_date", s, params, values);
+
+        AddIntProperty(map, "policy_num", s, params, values);
+        AddIntProperty(map, "group_num", s, params, values);
+
+        AddDecimalProperty(map, "copay", s, params, values);
+        AddDecimalProperty(map, "coinsurance", s, params, values);
+        AddDecimalProperty(map, "out_of_pocket_max", s, params, values);
+
+        // need to remove the last comma
+        if (!params.isEmpty()) {
+            s.deleteCharAt(s.length() - 1);
+            s.deleteCharAt(s.length() - 1);
+        }
+        //`insurer_name` = ?, `copay` = '30.13', `coinsurance` = '.15', `out_of_pocket_max` = '122.23' " +
+
+
+        s.append("WHERE (member_id = ?) and (userid = ?)");
+
+        logger.error(s.toString());
+
+        try (
+                Connection c = GetConnection();
+                CallableStatement stmt = c.prepareCall(s.toString());
+        ) {
+            logger.error(""+stmt.getParameterMetaData().getParameterCount());
+            int i = 1;
+            for (; i <= params.size(); i++) {
+                switch (params.get(i-1)) {
+                    case Str:
+                        stmt.setString(i,(String) values.get(i-1));
+                        break;
+                    case Int:
+                        stmt.setInt(i,(int) values.get(i-1));
+                        break;
+                    case Dec:
+                        stmt.setBigDecimal(i,(BigDecimal) values.get(i-1));
+                        break;
+                }
+            }
+            stmt.setString(i++,member_id);
+            stmt.setString(i, userid);
+            stmt.execute();
+        }
+    }
+    private static void AddStrProperty(
+            HashMap<String,String> map, String prop, StringBuilder s,
+            List<ParamType> params, List<Object> values
+    ) {
+        if (map.containsKey(prop)) {
+            s.append(prop);
+            s.append(" = ?, ");
+            params.add(ParamType.Str);
+            values.add(StatusController.B64Decode(map.get(prop)));
+        }
+    }
+    private static void AddIntProperty(
+            HashMap<String,String> map, String prop, StringBuilder s,
+            List<ParamType> params, List<Object> values
+    ) {
+        String cur = null;
+        if (map.containsKey(prop)) {
+            s.append(prop);
+            s.append(" = ?, ");
+            params.add(ParamType.Int);
+            values.add(Integer.parseInt(map.get(prop)));
+        }
+    }
+    private static void AddDecimalProperty(
+            HashMap<String,String> map, String prop, StringBuilder s,
+            List<ParamType> params, List<Object> values
+    ) {
+        String cur = null;
+        if (map.containsKey(prop)) {
+            s.append(prop);
+            s.append(" = ?, ");
+            params.add(ParamType.Dec);
+            values.add(BigDecimal.valueOf(Integer.parseInt(map.get(prop))).divide(BigDecimal.valueOf(100)));
+        }
+    }
+
+    public static void DeleteInsurance(String userid, String member_id) throws SQLException {
+        try (Connection c = GetConnection();
+            CallableStatement stmt = c.prepareCall("DELETE FROM insurances WHERE (userid = ?) and (member_id = ?)");
+        ) {
+            stmt.setString(1, userid);
+            stmt.setString(2,member_id);
+            stmt.execute();
+        }
+    }
+
 }

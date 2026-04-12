@@ -120,6 +120,9 @@ public class App implements EntryPoint {
 	public static native String B64Encode(String original) /*-{
 		return $wnd.btoa(original);
 	}-*/;
+	public static native String B64Decode(String original) /*-{
+		return $wnd.atob(original);
+	}-*/;
 
 
 	private static class LoginCheck implements RequestCallback {

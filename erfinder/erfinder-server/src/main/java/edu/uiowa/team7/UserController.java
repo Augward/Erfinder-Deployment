@@ -61,14 +61,41 @@ public class UserController {
     @GetMapping("/api/getinsurances")
     public String GetInsurances(HttpServletRequest req, HttpServletResponse res) {
         Security.TokenParseResult result = Security.ParseRequestJWT(req);
-        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return "{}"; }
+        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
         try {
-            return Queries.GetInsurancesJSON(result.UserID());
+            return Queries.GetInsurances(result.UserID());
         } catch (Exception e) {
-            logger.error("Failed to grab insurances");
+            logger.error("Failed to grab insurances:" + e.getMessage());
             res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-        return "{}";
+        return "";
+    }
+
+    @GetMapping("/api/setinsurance")
+    public void SetInsurance(HttpServletRequest req, HttpServletResponse res) {
+        Security.TokenParseResult result = Security.ParseRequestJWT(req);
+        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return;}
+        try {
+            boolean fresh = req.getParameter("f").equals("y");
+            String blob = B64Decode(req.getParameter("blob"));
+            Queries.SetInsurance(result.UserID(), blob, fresh);
+        } catch (Exception e) {
+            logger.error("Failed to set insurance: " + e.getMessage());
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @GetMapping("/api/delinsurance")
+    public void DeleteInsurance(HttpServletRequest req, HttpServletResponse res) {
+        Security.TokenParseResult result = Security.ParseRequestJWT(req);
+        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return;}
+        try {
+            String blob = B64Decode(req.getParameter("blob"));
+            Queries.DeleteInsurance(result.UserID(), blob);
+        } catch (Exception e) {
+            logger.error("Failed to remove insurance info: " + e.getMessage());
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     // Security Updates

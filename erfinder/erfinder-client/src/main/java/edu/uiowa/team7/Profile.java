@@ -1,11 +1,14 @@
 package edu.uiowa.team7;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DateBox;
 
 public class Profile {
 
@@ -24,6 +27,9 @@ public class Profile {
     private final TextBox ssnBox = new TextBox();
     private final TextBox contactBox = new TextBox();
     private final TextBox genderBox = new TextBox();
+
+    private final Label _TEMP_INS_BOX = new Label();
+    private final HTMLPanel insPanel = new HTMLPanel("p","");
 
     // Fields - Security & Actions
     private final PasswordTextBox passwordBox = new PasswordTextBox();
@@ -83,8 +89,11 @@ public class Profile {
         RootPanel.get("btnContainer").add(toggleEditBtn);
         RootPanel.get("statusContainer").add(statusLabel);
 
+        HTMLPanel pan = HTMLPanel.wrap(RootPanel.get("insuranceListContainer").getElement());
+
         // API Fetch
         fetchCurrentInfo();
+        fetchInsurance();
 
         toggleEditBtn.addClickHandler(event -> {
             if (!isEditing) {
@@ -96,6 +105,11 @@ public class Profile {
 
         updatePassBtn.addClickHandler(event -> updatePassword());
         deleteAccountBtn.addClickHandler(event -> deleteAccount());
+
+
+        Button addInsurance = new Button("Add Insurance Source");
+        addInsurance.addClickHandler(event -> AddInsurance());
+        RootPanel.get("addInsuranceContainer").add(addInsurance);
     }
 
     // UI Helper Methods
@@ -132,6 +146,13 @@ public class Profile {
                 public void onError(Request request, Throwable exception) { statusLabel.setText("Server connection error."); }
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+    }
+
+    private void fetchInsurance() {
+        // get insurance info::
+        RequestBuilder b2 = new RequestBuilder(RequestBuilder.GET, "/api/getinsurances");
+        try { b2.sendRequest(null, new GetInsuranceInfoCallback()); }
+        catch (RequestException e) { logger.log(Level.SEVERE, "Could not grab insurances for user"); }
     }
 
     private void saveUpdatedInfo() {
@@ -220,4 +241,34 @@ public class Profile {
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
+
+    private class GetInsuranceInfoCallback implements RequestCallback {
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+            String tex = response.getText();
+            String[] ins = tex.split("\\|", -1);
+            insPanel.getElement().setAttribute("style", "\n" +
+                    "    background: lightgrey;\n" +
+                    "    padding: 30px;\n" +
+                    "    border-radius: 8px;\n" +
+                    "    box-shadow: 0 6px 12px rgba(0,0,0,0.15) inset;\n" +
+                    "\n\n" +
+                    "    display: flex;\n" +
+                    "    flex-direction: column;");
+            for (String in : ins) {
+                new InsuranceBox(in, insPanel);
+            }
+            RootPanel.get("insuranceListContainer").add(insPanel);
+        }
+
+        @Override
+        public void onError(Request request, Throwable throwable) {
+            //RootPanel.get("insuranceListContainer").getElement().setInnerText(":(");
+        }
+    }
+
+    private void AddInsurance() {
+        new InsuranceBox(insPanel);
+    }
+
 }

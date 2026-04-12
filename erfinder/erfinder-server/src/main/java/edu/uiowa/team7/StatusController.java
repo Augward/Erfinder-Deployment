@@ -14,7 +14,7 @@ public class StatusController {
     private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
     // Helpers
-    private String B64Decode(String encoded) {
+    public static String B64Decode(String encoded) {
         if (encoded == null) return "";
         // URL fix
         return new String(Base64.getDecoder().decode(encoded.replace(" ", "+")));
