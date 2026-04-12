@@ -17,7 +17,7 @@ public class Home {
     // Fields
     private final VerticalPanel dynamicLayout;
 
-    private CheckBox[] ESIBoxes = new CheckBox[4];
+    private final CheckBox[] ESIBoxes = new CheckBox[4];
 
     // Constructor
     public Home() {
@@ -132,7 +132,7 @@ public class Home {
         return 3;
     }
     private void ESIBoxEvent() {
-        logger.log(Level.INFO,"ESI: "+EvalESI());
+        //logger.log(Level.INFO,"ESI: "+EvalESI());
     }
 
     private void buildMedicalView() {
