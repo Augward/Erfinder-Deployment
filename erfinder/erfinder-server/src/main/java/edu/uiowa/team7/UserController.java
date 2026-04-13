@@ -23,7 +23,7 @@ public class UserController {
     @GetMapping("/api/myinfo")
     public String GetMyInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return "Not logged in"; }
+        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return "Not logged in"; }
         try {
             String[] info = Queries.GetUserInfo(result.UserID());
             if (info != null) {
@@ -40,7 +40,7 @@ public class UserController {
     @GetMapping("/api/updateinfo")
     public void UpdateInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             Queries.UpdateUserInfo(
                     result.UserID(),
@@ -58,11 +58,51 @@ public class UserController {
         }
     }
 
+    @GetMapping("/api/getinsurances")
+    public String GetInsurances(HttpServletRequest req, HttpServletResponse res) {
+        Security.TokenParseResult result = Security.ParseRequestJWT(req);
+        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
+        try {
+            return Queries.GetInsurances(result.UserID());
+        } catch (Exception e) {
+            logger.error("Failed to grab insurances:" + e.getMessage());
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+        return "";
+    }
+
+    @GetMapping("/api/setinsurance")
+    public void SetInsurance(HttpServletRequest req, HttpServletResponse res) {
+        Security.TokenParseResult result = Security.ParseRequestJWT(req);
+        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return;}
+        try {
+            boolean fresh = req.getParameter("f").equals("y");
+            String blob = B64Decode(req.getParameter("blob"));
+            Queries.SetInsurance(result.UserID(), blob, fresh);
+        } catch (Exception e) {
+            logger.error("Failed to set insurance: " + e.getMessage());
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @GetMapping("/api/delinsurance")
+    public void DeleteInsurance(HttpServletRequest req, HttpServletResponse res) {
+        Security.TokenParseResult result = Security.ParseRequestJWT(req);
+        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return;}
+        try {
+            String blob = B64Decode(req.getParameter("blob"));
+            Queries.DeleteInsurance(result.UserID(), blob);
+        } catch (Exception e) {
+            logger.error("Failed to remove insurance info: " + e.getMessage());
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
     // Security Updates
     @GetMapping("/api/updatepassword")
     public void UpdatePassword(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             String newPass = B64Decode(request.getParameter("newpass"));
             Queries.UpdatePassword(result.UserID(), newPass);
@@ -79,11 +119,11 @@ public class UserController {
     @GetMapping("/api/deleteaccount")
     public void DeleteAccount(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             String pass = B64Decode(request.getParameter("password"));
 
-            if (Queries.ValidateCredentials(result.UserID(), pass)) {
+            if (Queries.ValidateCredentials(result.UserID(), pass).isValid) {
                 Queries.DeleteUser(result.UserID());
                 response.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
                 response.setStatus(HttpStatus.OK.value());
@@ -100,7 +140,7 @@ public class UserController {
     @GetMapping("/api/pendingusers")
     public String GetPendingUsers(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
+        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
         try {
             return Queries.GetPendingUsers();
         } catch (Exception e) {
@@ -113,7 +153,7 @@ public class UserController {
     @GetMapping("/api/approveuser")
     public void ApproveUser(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.IsValid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
         try {
             String target = B64Decode(request.getParameter("target"));
             if (Queries.ApproveUser(target)) {
@@ -124,6 +164,22 @@ public class UserController {
         } catch (Exception e) {
             logger.error("Failed to approve user", e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @GetMapping("/api/rejectuser")
+    public ResponseEntity<String> rejectUser(@RequestParam("target") String b64Target) {
+        try {
+            // Decode the Base64 username that the frontend sent
+            String targetUserID = new String(Base64.getDecoder().decode(b64Target));
+
+            // Call the database to delete this user entirely
+            Queries.DeleteUser(targetUserID);
+
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database Error");
         }
     }
 }

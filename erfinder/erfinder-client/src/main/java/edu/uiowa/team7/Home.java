@@ -5,7 +5,10 @@ import java.util.logging.Level;
 
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import jsinterop.annotations.JsMethod;
+import jsinterop.annotations.JsPackage;
 
 public class Home {
 
@@ -13,6 +16,8 @@ public class Home {
 
     // Fields
     private final VerticalPanel dynamicLayout;
+
+    private final CheckBox[] ESIBoxes = new CheckBox[4];
 
     // Constructor
     public Home() {
@@ -75,6 +80,25 @@ public class Home {
 
     private void buildPatientView() {
         dynamicLayout.add(new HTML("<h3>Find Immediate Care</h3>"));
+        dynamicLayout.add(new HTML("<h4>Check all that apply:</h3>"));
+
+        HTMLPanel t = new HTMLPanel("table","");
+        String[] lines = {
+                "Require life-saving intervention now.",
+                "In a dangerous situation.",
+                "In severe pain.",
+                "Feel strange, disoriented, and/or lethargic."
+        };
+        HTMLPanel[] rows = new HTMLPanel[4];
+        for (int i = 0; i < 4; i ++) {
+            rows[i] = new HTMLPanel("tr", "");
+            rows[i].add(cw(new Label(lines[i])));
+            rows[i].add(cw(ESIBoxes[i] = new CheckBox()));
+            ESIBoxes[i].addClickHandler(event -> ESIBoxEvent());
+            t.add(rows[i]);
+        }
+
+        dynamicLayout.add(t);
 
         ListBox injuryType = new ListBox();
         injuryType.addStyleName("form-input");
@@ -86,20 +110,35 @@ public class Home {
         dynamicLayout.add(new Label("Current Condition:"));
         dynamicLayout.add(injuryType);
 
-        TextBox zipBox = new TextBox();
-        zipBox.addStyleName("form-input");
-        zipBox.getElement().setPropertyString("placeholder", "Enter current Zip Code...");
-        dynamicLayout.add(new Label("Location:"));
-        dynamicLayout.add(zipBox);
+        //TextBox zipBox = new TextBox();
+        //zipBox.addStyleName("form-input");
+        //zipBox.getElement().setPropertyString("placeholder", "Enter current Zip Code...");
+        //dynamicLayout.add(new Label("Location:"));
+        //dynamicLayout.add(zipBox);
 
         Button searchBtn = new Button("Search Nearest ER");
         searchBtn.addStyleName("btn");
+        searchBtn.addClickHandler(event ->{ recommendERs();});
         dynamicLayout.add(searchBtn);
+    }
+    private HTMLPanel cw(Widget w) {
+        HTMLPanel p = new HTMLPanel("td", "");
+        p.add(w);
+        return p;
+    }
+    private int EvalESI() {
+        if (ESIBoxes[0].getValue()) return 1;
+        for (int i = 1; i < 4; i ++) if (ESIBoxes[i].getValue()) return 2;
+        return 3;
+    }
+    private void ESIBoxEvent() {
+        //logger.log(Level.INFO,"ESI: "+EvalESI());
     }
 
     private void buildMedicalView() {
         dynamicLayout.add(new HTML("<h3>Facility Status Update</h3>"));
 
+        /*
         ListBox statusBox = new ListBox();
         statusBox.addStyleName("form-input");
         statusBox.addItem("Accepting Patients (Normal Capacity)");
@@ -107,6 +146,12 @@ public class Home {
         statusBox.addItem("Divert (Critical Status)");
         dynamicLayout.add(new Label("Set Current ER Status:"));
         dynamicLayout.add(statusBox);
+        */
+
+        ListBox erselect = new ListBox();
+        erselect.addStyleName("form-input");
+        dynamicLayout.add(new Label("Select ER Facility:"));
+        dynamicLayout.add(erselect);
 
         TextBox waitTimeBox = new TextBox();
         waitTimeBox.addStyleName("form-input");
@@ -114,9 +159,31 @@ public class Home {
         dynamicLayout.add(new Label("Update Wait Time:"));
         dynamicLayout.add(waitTimeBox);
 
+
         Button updateBtn = new Button("Broadcast Update");
         updateBtn.addStyleName("btn");
+        updateBtn.addClickHandler(event->{
+            if(erselect.getSelectedIndex() == 0){
+                Window.alert("Please Select an ER");
+                return;
+            }
+
+            String waitTime = waitTimeBox.getText().trim();
+            if(!waitTime.matches("\\d+")){
+                Window.alert("Must Enter Valid Wait Time");
+                return;
+            }
+
+            String facilityId = erselect.getValue(erselect.getSelectedIndex());
+            int facilityid = Integer.parseInt(facilityId);
+            int waitMinutes = Integer.parseInt(waitTime);
+            sendWaitTimeUpdate(facilityid, waitMinutes);
+
+
+        });
         dynamicLayout.add(updateBtn);
+
+        FacilityUpdate.loadFacilities(erselect);
     }
 
     private void buildAdminView() {
@@ -148,10 +215,22 @@ public class Home {
                                 approvalTable.setText(row, 0, uid);
                                 approvalTable.setText(row, 1, role);
 
+                                HorizontalPanel actions = new HorizontalPanel();
+                                actions.setSpacing(5);
+
                                 Button approveBtn = new Button("Approve");
                                 approveBtn.addStyleName("btn");
                                 approveBtn.addClickHandler(event -> approveUser(uid));
-                                approvalTable.setWidget(row, 2, approveBtn);
+
+                                Button rejectBtn = new Button("Reject");
+                                rejectBtn.addStyleName("btn");
+                                rejectBtn.getElement().getStyle().setProperty("backgroundColor", "#dc3545"); // Red button
+                                rejectBtn.addClickHandler(event -> rejectUser(uid));
+
+                                actions.add(approveBtn);
+                                actions.add(rejectBtn);
+
+                                approvalTable.setWidget(row, 2, actions);
                                 row++;
                             }
                         }
@@ -164,6 +243,19 @@ public class Home {
                 }
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+
+        //ER FACILITY REGISTER STUFF
+        Button facilityReg = new Button("Register ER Facility");
+        facilityReg.addStyleName("btn");
+        facilityReg.addClickHandler(event -> registerFacility());
+        dynamicLayout.add(facilityReg);
+
+        //ER FACILITY UPDATE STUFF
+        Button upFac = new Button("Update ER Facility");
+        upFac.addStyleName("btn");
+        upFac.addClickHandler(event -> updateFacility());
+        dynamicLayout.add(upFac);
+
     }
 
     // Admin Helper Action
@@ -185,5 +277,77 @@ public class Home {
                 }
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+    }
+
+    private void rejectUser(final String targetID) {
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/rejectuser?target=" + App.B64Encode(targetID));
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
+                    if (response.getStatusCode() == 200) {
+                        Window.alert("User " + targetID + " has been rejected and removed.");
+                        dynamicLayout.clear();
+                        loadDashboard(); // Refresh the table
+                    } else {
+                        Window.alert("Failed to reject user.");
+                    }
+                }
+                public void onError(Request request, Throwable exception) {
+                    Window.alert("Server connection error.");
+                }
+            });
+        } catch (RequestException e) { logger.log(java.util.logging.Level.SEVERE, "An error occurred", e); }
+    }
+
+    private void registerFacility(){
+        dynamicLayout.clear();
+        dynamicLayout.add(new Facility_Register(() -> {
+            dynamicLayout.clear();
+            loadDashboard();
+        }));
+    }
+
+    private void updateFacility(){
+        dynamicLayout.clear();
+        dynamicLayout.add(new FacilityUpdate(() -> {
+            dynamicLayout.clear();
+            loadDashboard();
+        }));
+    }
+
+    @JsMethod(namespace = JsPackage.GLOBAL)
+    public static native void recommendERs();
+
+    private void sendWaitTimeUpdate(int facilityId, int waitMinutes){
+        String payload = "{"
+                        + "\"facilityId\":" + facilityId + ","
+                        + "\"waitTime\":" + waitMinutes
+                        + "}";
+
+        RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, "/api/updateWaitTime");
+        rb.setHeader("Content-Type", "application/json");
+        try{
+            rb.sendRequest(payload, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    if(response.getStatusCode() == 200){
+                        Window.alert("Wait Time Updated SuccessFully!!");
+                    }
+                    else{
+                        Window.alert("Update Failed (status " + response.getStatusCode() + ")");
+                    }
+                }
+
+                @Override
+                public void onError(Request request, Throwable throwable) {
+                    Window.alert("Server Error While Updating Wait Time");
+
+                }
+            });
+        }
+        catch(RequestException e){
+            Window.alert("Request Didn't Send");
+        }
+
     }
 }

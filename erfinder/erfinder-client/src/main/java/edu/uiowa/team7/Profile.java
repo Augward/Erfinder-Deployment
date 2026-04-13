@@ -7,9 +7,9 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
-public class Info {
+public class Profile {
 
-    private static final Logger logger = Logger.getLogger(Info.class.getName());
+    private static final Logger logger = Logger.getLogger(Profile.class.getName());
 
     // Fields - Form Inputs
     private final TextBox firstnBox = new TextBox();
@@ -25,6 +25,8 @@ public class Info {
     private final TextBox contactBox = new TextBox();
     private final TextBox genderBox = new TextBox();
 
+    private final HTMLPanel insPanel = new HTMLPanel("p","");
+
     // Fields - Security & Actions
     private final PasswordTextBox passwordBox = new PasswordTextBox();
     private final PasswordTextBox deletePassBox = new PasswordTextBox();
@@ -38,7 +40,7 @@ public class Info {
     private boolean isEditing = false;
 
     // Constructor
-    public Info() {
+    public Profile() {
         TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox,
                 addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox, deletePassBox};
         for (TextBox box : boxes) { box.addStyleName("form-input"); }
@@ -83,8 +85,11 @@ public class Info {
         RootPanel.get("btnContainer").add(toggleEditBtn);
         RootPanel.get("statusContainer").add(statusLabel);
 
+        //HTMLPanel pan = HTMLPanel.wrap(RootPanel.get("insuranceListContainer").getElement());
+
         // API Fetch
         fetchCurrentInfo();
+        fetchInsurance();
 
         toggleEditBtn.addClickHandler(event -> {
             if (!isEditing) {
@@ -96,6 +101,11 @@ public class Info {
 
         updatePassBtn.addClickHandler(event -> updatePassword());
         deleteAccountBtn.addClickHandler(event -> deleteAccount());
+
+
+        Button addInsurance = new Button("Add Insurance Source");
+        addInsurance.addClickHandler(event -> AddInsurance());
+        RootPanel.get("addInsuranceContainer").add(addInsurance);
     }
 
     // UI Helper Methods
@@ -132,6 +142,13 @@ public class Info {
                 public void onError(Request request, Throwable exception) { statusLabel.setText("Server connection error."); }
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+    }
+
+    private void fetchInsurance() {
+        // get insurance info::
+        RequestBuilder b2 = new RequestBuilder(RequestBuilder.GET, "/api/getinsurances");
+        try { b2.sendRequest(null, new GetInsuranceInfoCallback()); }
+        catch (RequestException e) { logger.log(Level.SEVERE, "Could not grab insurances for user"); }
     }
 
     private void saveUpdatedInfo() {
@@ -184,7 +201,7 @@ public class Info {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) { Window.Location.assign("index.html"); }
+                    if (response.getStatusCode() == 200) { Window.Location.assign("landing.html"); }
                     else { updatePassBtn.setEnabled(true); statusLabel.setText("Failed to update password."); }
                 }
                 public void onError(Request request, Throwable exception) { updatePassBtn.setEnabled(true); statusLabel.setText("Server error."); }
@@ -206,7 +223,7 @@ public class Info {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) { Window.Location.assign("index.html"); }
+                    if (response.getStatusCode() == 200) { Window.Location.assign("landing.html"); }
                     else {
                         deleteAccountBtn.setEnabled(true);
                         statusLabel.getElement().getStyle().setColor("red");
@@ -220,4 +237,34 @@ public class Info {
             });
         } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
     }
+
+    private class GetInsuranceInfoCallback implements RequestCallback {
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+            String tex = response.getText();
+            String[] ins = tex.split("\\|", -1);
+            insPanel.getElement().setAttribute("style", "\n" +
+                    "    background: lightgrey;\n" +
+                    "    padding: 30px;\n" +
+                    "    border-radius: 8px;\n" +
+                    "    box-shadow: 0 6px 12px rgba(0,0,0,0.15) inset;\n" +
+                    "\n\n" +
+                    "    display: flex;\n" +
+                    "    flex-direction: column;");
+            for (String in : ins) {
+                new InsuranceBox(in, insPanel);
+            }
+            RootPanel.get("insuranceListContainer").add(insPanel);
+        }
+
+        @Override
+        public void onError(Request request, Throwable throwable) {
+            //RootPanel.get("insuranceListContainer").getElement().setInnerText(":(");
+        }
+    }
+
+    private void AddInsurance() {
+        new InsuranceBox(insPanel);
+    }
+
 }

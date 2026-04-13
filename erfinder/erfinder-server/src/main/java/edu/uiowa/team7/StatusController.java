@@ -14,7 +14,7 @@ public class StatusController {
     private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
     // Helpers
-    private String B64Decode(String encoded) {
+    public static String B64Decode(String encoded) {
         if (encoded == null) return "";
         // URL fix
         return new String(Base64.getDecoder().decode(encoded.replace(" ", "+")));
@@ -33,14 +33,22 @@ public class StatusController {
             String userID = B64Decode(req.getParameter("userID"));
             String password = B64Decode(req.getParameter("password"));
 
-            if (!Queries.ValidateCredentials(userID, password)) {
-                res.setStatus(HttpStatus.NOT_FOUND.value());
+            Queries.AuthResult auth = Queries.ValidateCredentials(userID, password);
+
+            if (!auth.isValid) {
+                res.setStatus(HttpStatus.UNAUTHORIZED.value()); // 401
                 return;
             }
 
             String device = Security.GetDevice(req);
             res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieFresh(userID, device));
-            res.setStatus(HttpStatus.OK.value());
+
+            // Routing Backbone: Return 202 for Pending, 200 for Approved
+            if ("PENDING".equalsIgnoreCase(auth.status)) {
+                res.setStatus(HttpStatus.ACCEPTED.value()); // 202
+            } else {
+                res.setStatus(HttpStatus.OK.value()); // 200
+            }
 
         } catch (Exception e) {
             logger.error("Error during GetToken authentication", e);
@@ -73,15 +81,20 @@ public class StatusController {
         String userID = B64Decode(req.getParameter("userid"));
         String ans = B64Decode(req.getParameter("answer"));
         try {
+            // Check answer
             if (!Queries.ValidateSecurityAnswer(userID, ans)) {
                 res.setStatus(HttpStatus.NOT_FOUND.value());
                 return "Unauthorized";
             }
 
-            String device = Security.GetDevice(req);
-            res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieFresh(userID, device));
+            // Answer is correct
+            String tempToken = java.util.UUID.randomUUID().toString();
+
             res.setStatus(HttpStatus.OK.value());
-            return "Authorized";
+
+            // Return the token string
+            return tempToken;
+
         } catch (Exception e) {
             logger.error("Error during security answer validation", e);
             res.getHeaders(HttpHeaders.SET_COOKIE).clear();
@@ -102,9 +115,10 @@ public class StatusController {
     public String GetUsernameInToken(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
 
-        if (!result.IsValid()) {
+        if (result.Invalid()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return "Not Logged In!";
+            response.setHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
+            return "-";
         }
 
         result.TryRefreshToken(request, response);

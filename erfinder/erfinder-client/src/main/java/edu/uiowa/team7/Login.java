@@ -54,6 +54,7 @@ public class Login {
             try {
                 builder.sendRequest(null, new GetTokenResponse());
             } catch (RequestException e) {
+                response.setText("An unexpected error occured!");
                 // Compliance
             }
         }
@@ -62,29 +63,30 @@ public class Login {
     private class GetTokenResponse implements RequestCallback {
         public void onResponseReceived(Request request, Response received) {
             switch (received.getStatusCode()) {
-                case 200:
-                    // To home page
+                case App.HTTP_OK_200:
                     Window.Location.assign("home.html");
                     break;
-                case 404:
+                case App.HTTP_ACCEPTED_202:
+                    Window.Location.assign("pending.html");
+                case App.HTTP_NOT_FOUND_404:
+                case App.HTTP_UNAUTHORIZED_401:
                     // Error message
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Invalid credentials");
+                    response.setText("Invalid credentials or account not found.");
                     break;
-                case 500:
-                    // Internal error
+                case App.HTTP_INTERNAL_SERVER_ERROR_500:
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Internal Server Error");
+                    response.setText("Internal Server Error.");
                     break;
                 default:
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);
-                    response.setText("Unexpected error occurred");
+                    response.setText("Unexpected error occurred.");
                     break;
             }
         }

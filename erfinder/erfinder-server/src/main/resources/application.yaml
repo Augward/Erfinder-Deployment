@@ -1,3 +1,4 @@
+
 # Application Configuration Properties
 erfinder:
   login:
@@ -19,9 +20,9 @@ spring:
 
   # Database Connection Settings
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:3306/erfinder
-    username: root
-    password: ${MYSQL_ROOT_PASSWORD:insecure_password}
+    url: jdbc:mysql://erfinder-erfinder.k.aivencloud.com:26268/defaultdb?sslMode=REQUIRED
+    username: avnadmin
+    password: AVNS_2kwhLT7ZoRaVQ6GpXiz
     driver-class-name: com.mysql.cj.jdbc.Driver
     jpa:
       hibernate:

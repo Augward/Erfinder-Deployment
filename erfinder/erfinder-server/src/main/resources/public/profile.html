@@ -10,16 +10,16 @@
 
 
 <body>
-<p id="page" style="display:none;">Info</p>
+<p id="page" style="display:none;">Profile</p>
 
 <div class="top-nav">
     <h1 class="brand-title">
-        <span style="font-size: 0.8em; margin-right: 15px;">🚑</span> ERFinder
+        <a href="landing.html" style="font-size: 0.8em; margin-right: 15px;">🚑</a> ERFinder
     </h1>
 
     <div class="nav-links">
         <a href="home.html">Dashboard</a>
-        <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='index.html'); return false;">Logout</a>
+        <a href="#" onclick="fetch('/api/logout').then(() => window.location.href='landing.html'); return false;">Logout</a>
     </div>
 </div>
 
@@ -46,6 +46,14 @@
             <div class="form-row"><label>Gender</label><div id="genderContainer"></div></div>
         </div>
         <div id="btnContainer" style="margin-top: 20px; text-align: right;"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom: 30px;">
+        <h3 style="margin-top: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Insurance Information:</h3>
+        <div class="insurance-list">
+            <p id="insuranceListContainer"></p>
+            <p id="addInsuranceContainer"></p>
+        </div>
     </div>
 
     <div class="panel" style="margin-bottom: 30px;">

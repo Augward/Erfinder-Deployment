@@ -88,7 +88,7 @@ public class Security {
         private final boolean needsRefresh;
         private final String userid;
 
-        public boolean IsValid() { return !valid; }
+        public boolean Invalid() { return !valid; }
         // public boolean NeedsRefresh() { return needsRefresh; }
         public String UserID() { return userid; }
 
@@ -98,7 +98,7 @@ public class Security {
             boolean refresh;
             try {
                 Claims claims = Jwts.parser()
-                        .verifyWith(pair.getPublic())
+                        .verifyWith(GetPair().getPublic())
                         .require("device", device)
                         .build().parseSignedClaims(token).getPayload();
 

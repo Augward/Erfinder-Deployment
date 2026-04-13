@@ -3,8 +3,8 @@ image: maven:3.9-eclipse-temurin-17
 variables:
 
   MYSQL_DATABASE: erfinder
-  MYSQL_ROOT_PASSWORD: insecure_password
   DB_HOST: mysql
+  MYSQL_ROOT_PASSWORD: insecure_password
 
 stages:
   - build
@@ -32,7 +32,7 @@ test_backend:
     - mysql -h mysql -u root -pinsecure_password erfinder < schema.sql
   script:
 
-    - mvn test -pl erfinder-server -am
+    - mvn test -pl erfinder-server -am -e
 
 sonarqube_scan:
   stage: sonarqube
