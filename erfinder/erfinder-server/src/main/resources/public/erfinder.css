@@ -188,3 +188,39 @@ html, body {
 }
 
 .btn:hover { background-color: #00467f; }
+
+
+.quick-access-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.emergency-btn {
+    background-color: #dc3545;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 25px 40px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.emergency-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+}
+
+.map-container {
+    width: 500px;
+    height: 300px;
+    border: 3px solid #0056b3;
+    border-radius: 12px;
+    background-color: #e2e8f0;
+}
