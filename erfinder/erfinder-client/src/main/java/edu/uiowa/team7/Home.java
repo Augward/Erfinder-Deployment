@@ -7,8 +7,6 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import jsinterop.annotations.JsMethod;
-import jsinterop.annotations.JsPackage;
 
 public class Home {
 

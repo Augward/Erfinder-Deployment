@@ -2,6 +2,8 @@ package edu.uiowa.team7;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.http.client.*;
+import jsinterop.annotations.JsMethod;
+import jsinterop.annotations.JsPackage;
 
 public class SearchUI extends VerticalPanel  {
     private Runnable onBack;

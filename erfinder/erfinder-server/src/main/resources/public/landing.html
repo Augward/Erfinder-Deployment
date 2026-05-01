@@ -12,7 +12,6 @@
     <title>ERFinder - Welcome Page</title>
 </head>
 
-
 <body>
 <p id="page" style="display:none;">Landing</p>
 
@@ -50,7 +49,15 @@
         <button class="emergency-btn" onclick="alert('This is a university project prototype. In a real medical emergency, please dial 911 directly from your phone.');">
             🚨 CALL 911 🚨
         </button>
+
         <div id="landingMap" class="map-container"></div>
+
+        <button class="emergency-btn search" onclick="runLandingSearch()">
+            🔍 Search ERs 🔍
+        </button>
+
+        <div id="searchContainer"></div>
+
     </div>
 
     <div class="dashboard-grid">
@@ -103,6 +110,52 @@
             })
             .catch(err => console.log("No facilities found."));
     });
+</script>
+
+<script>
+    function runLandingSearch() {
+        const container = document.getElementById("searchContainer");
+        container.innerHTML = "<p><b>Searching ERs...</b></p>";
+
+        // ✅ Same logical input as patient page
+        const pks = [1, 2, 3];   // demo / placeholder
+        const pkString = pks.join(",");
+
+        fetch("/api/search?pks=" + pkString)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Search request failed");
+                }
+                return res.json();
+            })
+            .then(data => {
+                container.innerHTML = "";
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = "<p>No ERs found.</p>";
+                    return;
+                }
+
+                data.forEach((fac, index) => {
+                    const card = document.createElement("div");
+                    card.className = "panel";
+                    card.style.marginBottom = "15px";
+
+                    card.innerHTML = `
+                        <b>${index === 0 ? "Best Match" : "Result #" + (index + 1)}</b><br>
+                        <b>${fac.name}</b><br>
+                        Wait Time: ${fac.wait} mins<br>
+                        Beds Available: ${fac.beds}
+                    `;
+
+                    container.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = "<p>Error loading ER search results.</p>";
+            });
+    }
 </script>
 
 
