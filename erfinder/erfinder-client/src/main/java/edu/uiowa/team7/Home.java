@@ -7,8 +7,6 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import jsinterop.annotations.JsMethod;
-import jsinterop.annotations.JsPackage;
 
 public class Home {
 
@@ -116,9 +114,16 @@ public class Home {
         //dynamicLayout.add(new Label("Location:"));
         //dynamicLayout.add(zipBox);
 
-        Button searchBtn = new Button("Search Nearest ER");
+        Button searchBtn = new Button("Search ERs");
         searchBtn.addStyleName("btn");
-        searchBtn.addClickHandler(event ->{ recommendERs();});
+        searchBtn.addClickHandler(event ->{
+            dynamicLayout.clear();
+
+            dynamicLayout.add(new SearchUI(()->{
+                dynamicLayout.clear();
+                loadDashboard();
+            }));
+        });
         dynamicLayout.add(searchBtn);
     }
     private HTMLPanel cw(Widget w) {
@@ -314,9 +319,6 @@ public class Home {
             loadDashboard();
         }));
     }
-
-    @JsMethod(namespace = JsPackage.GLOBAL)
-    public static native void recommendERs();
 
     private void sendWaitTimeUpdate(int facilityId, int waitMinutes){
         String payload = "{"
