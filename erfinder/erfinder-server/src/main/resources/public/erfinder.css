@@ -275,6 +275,15 @@ select,
     transform: scale(1.05);
 }
 
+.emergency-btn.search{
+    background-color: var(--primary-blue);
+    box-shadow: 0 6px 12px rgba(0,70,127,0.3);
+}
+
+.emergency-btn.search:hover{
+    background-color: #002d54;
+}
+
 .map-container {
     width: 500px;
     height: 300px;

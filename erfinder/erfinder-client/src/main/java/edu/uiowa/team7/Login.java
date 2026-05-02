@@ -5,6 +5,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 
 public class Login {
 
@@ -35,6 +38,18 @@ public class Login {
 
         // Click Handlers
         sendButton.addClickHandler(new SendCredentials());
+
+        KeyDownHandler enterHandler = new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+                    sendButton.click();
+                }
+            }
+        };
+
+        userIDBox.addKeyDownHandler(enterHandler);
+        passwordTextBox.addKeyDownHandler(enterHandler);
     }
 
     // API Handlers
