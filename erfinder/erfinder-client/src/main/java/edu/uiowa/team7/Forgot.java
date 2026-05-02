@@ -114,13 +114,13 @@ public class Forgot {
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
                 case 200:
-                    String token = response.getText();
-                    // Attach the token
-                    Window.Location.assign("reset.html?t=" + token + "&u=" + App.B64Encode(userIDBox.getText()));
+                    serverUpdates.getElement().getStyle().setColor("green");
+                    serverUpdates.setText("Success! A secure reset link has been sent to your email.");
                     break;
                 case 404:
                 default:
-                    serverUpdates.setText("Incorrect");
+                    serverUpdates.getElement().getStyle().setColor("red");
+                    serverUpdates.setText("Incorrect credentials.");
                     submitAnswer.setEnabled(true);
                     answerBox.setEnabled(true);
                     break;
@@ -129,7 +129,10 @@ public class Forgot {
 
         @Override
         public void onError(Request request, Throwable throwable) {
+            serverUpdates.getElement().getStyle().setColor("red");
             serverUpdates.setText("Network error occurred.");
+            submitAnswer.setEnabled(true);
+            answerBox.setEnabled(true);
         }
     }
 }

@@ -615,6 +615,18 @@ public class Queries {
         }
     }
 
+    public static String GetUserEmail(String userid) throws SQLException {
+        try (Connection c = GetConnection();
+             PreparedStatement stmt = c.prepareStatement("SELECT email FROM users WHERE userid = ?")) {
+            stmt.setString(1, userid);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("email");
+                }
+            }
+        }
+    }
+
     public static String[] GetFacility(int facilityId) throws SQLException{
         try(Connection c = GetConnection();
             CallableStatement stmt = c.prepareCall("SELECT er_name, address, zip, phonenum, trauma_level, specialties, bed_availability, waitTime_Minutes FROM facilities WHERE id = ?")
@@ -637,7 +649,6 @@ public class Queries {
                 }
             }
         }
-
         return null;
     }
 
