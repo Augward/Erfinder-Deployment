@@ -613,5 +613,16 @@ public class Queries {
         }
     }
 
-
+    public static String GetUserEmail(String userid) throws SQLException {
+        try (Connection c = GetConnection();
+             PreparedStatement stmt = c.prepareStatement("SELECT email FROM users WHERE userid = ?")) {
+            stmt.setString(1, userid);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("email");
+                }
+            }
+        }
+        return null;
+    }
 }

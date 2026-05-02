@@ -17,6 +17,17 @@ spring:
     banner-mode: off
   application:
     name: erfinder
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "ERFinderServicesT7@gmail.com"
+    password: "cpnt ezcf otfl wezl" ## "ERFinderServicesT34M7"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
   # Database Connection Settings
   datasource:

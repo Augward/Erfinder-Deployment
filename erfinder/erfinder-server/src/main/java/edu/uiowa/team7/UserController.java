@@ -2,6 +2,7 @@ package edu.uiowa.team7;
 
 import jakarta.servlet.http.*;
 import org.slf4j.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,9 @@ public class UserController {
 
     // Logger
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+    @Autowired
+    private EmailService emailService;
 
     // Helpers
     private String B64Decode(String encoded) {
@@ -158,6 +162,14 @@ public class UserController {
             String target = B64Decode(request.getParameter("target"));
             if (Queries.ApproveUser(target)) {
                 response.setStatus(HttpStatus.OK.value());
+
+                // Email
+                String targetEmail = Queries.GetUserEmail(target);
+
+                emailService.sendEmail(targetEmail,
+                        "ERFinder Account Approved",
+                        "Hello " + target + ", your ERFinder account request has been approved by an administrator! You may now log in to the system.");
+
             } else {
                 response.setStatus(HttpStatus.NOT_FOUND.value());
             }
@@ -170,12 +182,18 @@ public class UserController {
     @GetMapping("/api/rejectuser")
     public ResponseEntity<String> rejectUser(@RequestParam("target") String b64Target) {
         try {
-            // Decode the Base64 username that the frontend sent
             String targetUserID = new String(Base64.getDecoder().decode(b64Target));
 
-            // Call the database to delete this user entirely
-            Queries.DeleteUser(targetUserID);
+            // Email
+            String targetEmail = Queries.GetUserEmail(targetUserID);
 
+            if (targetEmail != null) {
+                emailService.sendEmail(targetEmail,
+                        "ERFinder Account Update",
+                        "Your account registration request has been denied by an administrator.");
+            }
+
+            Queries.DeleteUser(targetUserID);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
