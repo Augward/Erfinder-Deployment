@@ -4,6 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
+
     <link type="text/css" rel="stylesheet" href="erfinder.css">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -12,8 +13,11 @@
     <title>ERFinder - Welcome Page</title>
 </head>
 
+
 <body>
+
 <p id="page" style="display:none;">Landing</p>
+
 
 <div class="top-nav">
     <h1 class="brand-title">
@@ -32,12 +36,15 @@
     </div>
 </div>
 
+
 <div class="page-title-bar">Welcome to ERFinder Services</div>
+
 
 <div class="hero-image"></div>
 
 
 <div class="content-container">
+
     <div class="panel" style="margin-bottom: 40px; text-align: center;">
         <h2>Reliable Emergency Routing</h2>
         <p class="intro-text">
@@ -57,7 +64,6 @@
         </button>
 
         <div id="searchContainer"></div>
-
     </div>
 
     <div class="dashboard-grid">
@@ -81,6 +87,7 @@
             <p>Track ambulance routing and receive immediate notification updates directly from first responders.</p>
         </div>
     </div>
+
 </div>
 
 
@@ -91,7 +98,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Iowa City
+        // Initialize Map View
         var map = L.map('landingMap').setView([41.6611, -91.5302], 12);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -99,7 +106,7 @@
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // live facilities
+        // Fetch Facility Pins
         fetch('/api/facilities')
             .then(response => response.json())
             .then(data => {
@@ -112,13 +119,14 @@
     });
 </script>
 
+
 <script>
     function runLandingSearch() {
         const container = document.getElementById("searchContainer");
         container.innerHTML = "<p><b>Searching ERs...</b></p>";
 
-        // ✅ Same logical input as patient page
-        const pks = [1, 2, 3];   // demo / placeholder
+        // Result Data Logic
+        const pks = [1, 2, 3];
         const pkString = pks.join(",");
 
         fetch("/api/search?pks=" + pkString)
@@ -136,6 +144,7 @@
                     return;
                 }
 
+                // Render Result Cards
                 data.forEach((fac, index) => {
                     const card = document.createElement("div");
                     card.className = "panel";
@@ -158,7 +167,8 @@
     }
 </script>
 
-
 </body>
+
 <script src="app/app.nocache.js"></script>
+
 </html>

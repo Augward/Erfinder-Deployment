@@ -1,6 +1,6 @@
-/* ==========================================================================
-   GLOBAL COLOR VARIABLES (Simplified)
-   ========================================================================== */
+/* =========================================
+   GLOBAL COLOR VARIABLES
+   ========================================= */
 :root {
     --primary-blue: #00467f;
     --secondary-blue: #93c5fd;
@@ -18,9 +18,10 @@
     --warning-yellow: #ffc107;
 }
 
-/* ==========================================================================
-   Global Reset and Body Styles
-   ========================================================================== */
+
+/* =========================================
+   GLOBAL RESET AND BODY
+   ========================================= */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
@@ -33,7 +34,12 @@ html, body {
     flex-direction: column;
 }
 
-/* Header Section */
+
+/* =========================================
+   NAVIGATION AND HEADERS
+   ========================================= */
+
+/* Main Header Bar */
 .top-nav {
     background-color: var(--primary-blue);
     padding: 25px 40px;
@@ -44,7 +50,7 @@ html, body {
     box-sizing: border-box;
 }
 
-/* Brand Logo and Title */
+/* Brand Title Logo */
 .brand-title {
     color: var(--panel-white);
     font-size: 2.5em;
@@ -53,7 +59,7 @@ html, body {
     align-items: center;
 }
 
-/* Navigation Links */
+/* Link Interaction Styles */
 .nav-links a,
 .nav-links a:visited,
 .nav-links a:active {
@@ -69,7 +75,7 @@ html, body {
     color: var(--hover-blue);
 }
 
-/* Sub-title Bar */
+/* Sub-title Title Bar */
 .page-title-bar {
     background-color: var(--secondary-blue);
     color: black;
@@ -81,6 +87,7 @@ html, body {
     box-sizing: border-box;
 }
 
+/* Pending Account Status */
 .status-pending-bar {
     background-color: var(--warning-yellow);
     color: black;
@@ -91,18 +98,12 @@ html, body {
     text-align: center;
 }
 
-/* Footer Section */
-.footer {
-    background-color: var(--primary-blue);
-    color: var(--panel-white);
-    text-align: center;
-    padding: 20px;
-    margin-top: auto; /* Pushes footer to the bottom */
-    width: 100%;
-    box-sizing: border-box;
-}
 
-/* Hero Image Container */
+/* =========================================
+   HERO IMAGE SECTION
+   ========================================= */
+
+/* Hero Base Container */
 .hero-image {
     position: relative;
     width: 100%;
@@ -113,7 +114,7 @@ html, body {
     margin-bottom: 10px;
 }
 
-/* Hero Image Overlays */
+/* Background Image Overlay */
 .hero-image::before {
     content: "";
     position: absolute;
@@ -122,6 +123,7 @@ html, body {
     opacity: 0.20;
 }
 
+/* Centered Hero Graphic */
 .hero-image::after {
     content: "";
     position: absolute;
@@ -132,7 +134,12 @@ html, body {
     box-shadow: 0 0 30px rgba(0,0,0,0.6);
 }
 
-/* Layout Containers */
+
+/* =========================================
+   LAYOUT STRUCTURE
+   ========================================= */
+
+/* Main Content Container */
 .content-container {
     max-width: 1200px;
     margin: 20px auto 60px auto;
@@ -142,7 +149,7 @@ html, body {
     flex: 1 0 auto;
 }
 
-/* Dashboard Grid Layout */
+/* Grid Layout System */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -150,7 +157,7 @@ html, body {
     align-items: stretch;
 }
 
-/* UI Panels */
+/* UI Panel Components */
 .panel {
     background: var(--panel-white);
     padding: 30px;
@@ -162,7 +169,12 @@ html, body {
     box-sizing: border-box;
 }
 
-/* Map Display Element */
+
+/* =========================================
+   MAP COMPONENTS
+   ========================================= */
+
+/* Map Loading Container */
 .map-placeholder {
     height: 500px;
     width: 100%;
@@ -174,21 +186,29 @@ html, body {
     color: var(--text-muted);
 }
 
+/* Map Leaflet Instance */
 #map {
     flex: 1;
     min-width: 0;
     height: 100%;
 }
 
-/* Profile Form Grid */
+
+/* =========================================
+   FORM ELEMENTS
+   ========================================= */
+
+/* Data Form Grid */
 .profile-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-/* Form Inputs (Shrunk down for professionalism) */
-.form-row { margin-bottom: 15px; }
+/* Standard Form Row */
+.form-row {
+    margin-bottom: 15px;
+}
 
 .form-row label {
     font-weight: bold;
@@ -197,6 +217,7 @@ html, body {
     color: var(--text-dark);
 }
 
+/* Input Field Group */
 .form-input,
 input[type="text"],
 input[type="password"],
@@ -215,13 +236,19 @@ select,
     font-family: inherit;
 }
 
+/* Read Only States */
 .form-input[readonly], input[readonly] {
     background-color: #f3f4f6;
     color: #6b7280;
     border: 1px dashed #9ca3af;
 }
 
-/* Interactive Buttons */
+
+/* =========================================
+   BUTTON STYLES
+   ========================================= */
+
+/* Global Button Logic */
 .btn, .gwt-Button {
     background-color: var(--primary-blue) !important;
     color: var(--panel-white) !important;
@@ -237,9 +264,10 @@ select,
 }
 
 .btn:hover, .gwt-Button:hover {
-    background-color: #002d54; !important;
+    background-color: #002d54 !important;
 }
 
+/* Disabled Button States */
 .btn:disabled, .gwt-Button:disabled, .gwt-Button[disabled] {
     background-color: #cbd5e1 !important;
     color: #64748b !important;
@@ -247,7 +275,12 @@ select,
     box-shadow: none !important;
 }
 
-/* Quick Access Panel (Landing Page) */
+
+/* =========================================
+   LANDING SPECIFIC UI
+   ========================================= */
+
+/* Action Button Layout */
 .quick-access-panel {
     display: flex;
     justify-content: center;
@@ -257,6 +290,7 @@ select,
     flex-wrap: wrap;
 }
 
+/* Danger Button Theme */
 .emergency-btn {
     background-color: var(--danger-red);
     color: var(--panel-white);
@@ -275,15 +309,17 @@ select,
     transform: scale(1.05);
 }
 
-.emergency-btn.search{
+/* Search Variant Button */
+.emergency-btn.search {
     background-color: var(--primary-blue);
     box-shadow: 0 6px 12px rgba(0,70,127,0.3);
 }
 
-.emergency-btn.search:hover{
+.emergency-btn.search:hover {
     background-color: #002d54;
 }
 
+/* Landing Map Container */
 .map-container {
     width: 500px;
     height: 300px;
@@ -292,16 +328,36 @@ select,
     background-color: #e2e8f0;
 }
 
-/* ==========================================================================
-   Responsive Design Rules (For Laptops and Phones)
-   ========================================================================== */
+
+/* =========================================
+   FOOTER SECTION
+   ========================================= */
+.footer {
+    background-color: var(--primary-blue);
+    color: var(--panel-white);
+    text-align: center;
+    padding: 20px;
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================= */
 @media (max-width: 900px) {
+    /* Stack Grid Content */
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
+
+    /* Stack Form Content */
     .profile-grid {
         grid-template-columns: 1fr;
     }
+
+    /* Stack Nav Elements */
     .top-nav {
         flex-direction: column;
         gap: 15px;

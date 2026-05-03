@@ -4,13 +4,17 @@
 
 <head>
     <meta charset="UTF-8">
+
     <link type="text/css" rel="stylesheet" href="erfinder.css">
+
     <title>ERFinder - Profile</title>
 </head>
 
 
 <body>
+
 <p id="page" style="display:none;">Profile</p>
+
 
 <div class="top-nav">
     <h1 class="brand-title">
@@ -23,14 +27,20 @@
     </div>
 </div>
 
-<div class="page-title-bar">Your Account Profile</div>
+
+<div class="page-title-bar">
+    Your Account Profile
+</div>
 
 
 <div class="content-container">
+
     <div id="statusContainer" style="margin-bottom:15px; font-weight:bold; text-align: center;"></div>
+
 
     <div class="panel" style="margin-bottom: 30px;">
         <h3 style="margin-top: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Personal Information</h3>
+
         <div class="profile-grid">
             <div class="form-row"><label>First Name <span style="color:red;">*</span></label><div id="firstnContainer"></div></div>
             <div class="form-row"><label>Last Name</label><div id="lastnContainer"></div></div>
@@ -45,11 +55,15 @@
             <div class="form-row"><label>Emergency Contact</label><div id="contactContainer"></div></div>
             <div class="form-row"><label>Gender</label><div id="genderContainer"></div></div>
         </div>
+
+
         <div id="btnContainer" style="margin-top: 20px; text-align: right;"></div>
     </div>
 
+
     <div class="panel" style="margin-bottom: 30px;">
         <h3 style="margin-top: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Insurance Information:</h3>
+
         <div class="insurance-list">
             <p id="insuranceListContainer"></p>
             <p id="addInsuranceContainer"></p>
@@ -58,7 +72,11 @@
 
     <div class="panel" style="margin-bottom: 30px;">
         <h3 style="margin-top: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Security: Change Password</h3>
-        <p style="color: #475569; font-size: 0.9em;">You will be required to log back in after changing your password.</p>
+
+        <p style="color: #475569; font-size: 0.9em;">
+            You will be required to log back in after changing your password.
+        </p>
+
         <div class="form-row" style="max-width: 400px;">
             <label>New Password</label>
             <div id="passwordContainer"></div>
@@ -66,21 +84,32 @@
         </div>
     </div>
 
+
     <div class="panel" style="border: 2px solid #fca5a5;">
         <h3 style="margin-top: 0; color: #dc2626;">Danger Zone: Delete Account</h3>
-        <p style="color: #475569; font-size: 0.9em;">Confirm your current password to permanently delete your ERFinder account. This action cannot be undone.</p>
+
+        <p style="color: #475569; font-size: 0.9em;">
+            Confirm your current password to permanently delete your ERFinder account. This action cannot be undone.
+        </p>
+
         <div class="form-row" style="max-width: 400px;">
             <label>Current Password</label>
             <div id="deletePassContainer"></div>
             <div id="deleteAccountBtnContainer" style="margin-top: 10px; text-align: right;"></div>
         </div>
     </div>
+
 </div>
 
 
 <div class="footer">
     &copy; 2026 ERFinder | Team 7 Fundamentals of Software Engineering
 </div>
+
+
 </body>
+
+
 <script src="app/app.nocache.js"></script>
+
 </html>
