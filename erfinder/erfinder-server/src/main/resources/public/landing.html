@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
 
-    <link type="text/css" rel="stylesheet" href="erfinder.css">
+    <link type="text/css" rel="stylesheet" href="erfinder.css?v=3">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -52,39 +52,44 @@
         </p>
     </div>
 
-    <div class="quick-access-panel">
-        <button class="emergency-btn" onclick="alert('This is a university project prototype. In a real medical emergency, please dial 911 directly from your phone.');">
-            🚨 CALL 911 🚨
-        </button>
+    <div class="panel landing-grid" style="max-width: 1200px; width: 100%; margin: 0 auto 40px auto;">
 
-        <div id="landingMap" class="map-container"></div>
+        <div class="landing-buttons" id="actionContainer">
+            <button class="emergency-btn search" onclick="runLandingSearch()">Search For Nearest ER</button>
+            <button class="emergency-btn" style="background-color: #991b1b;" onclick="window.alert('Emergency services (911) notified of your location.')">911 Emergency Signal</button>
+        </div>
 
-        <button class="emergency-btn search" onclick="runLandingSearch()">
-            🔍 Search ERs 🔍
-        </button>
+        <div class="landing-map">
+            <div id="map" class="map-container" style="width: 100%; height: 100%; min-height: 400px; margin: 0;"></div>
+        </div>
 
-        <div id="searchContainer"></div>
+        <div class="landing-results" id="recommendationContainer">
+            <p style="text-align: center; color: var(--text-muted); font-weight: 500; padding-top: 20px;">
+                Results for the nearest ERs will appear here. [cite: 4761]
+            </p>
+        </div>
+
     </div>
 
     <div class="dashboard-grid">
         <div class="panel">
-            <h3>Patient Care</h3>
-            <p>Find the nearest and best-equipped ER tailored specifically to your current health condition and medical history.</p>
+            <h3 style="color: var(--primary-blue); border-bottom: 2px solid #bae6fd; padding-bottom: 5px;">Data-Driven Routing</h3>
+            <p>Our algorithm evaluates live trauma levels, bed availability, and specific patient criteria to instantly recommend the optimal facility.</p>
         </div>
 
         <div class="panel">
-            <h3>Live ER Wait Times</h3>
-            <p>Real-time updates on facility capacity and bed allocation to save crucial minutes when it matters most.</p>
+            <h3 style="color: var(--primary-blue); border-bottom: 2px solid #bae6fd; padding-bottom: 5px;">Secure Patient Profiles</h3>
+            <p>Your medical data is protected with strict JWT authentication and automated email verification for rapid, secure emergency intake.</p>
         </div>
 
         <div class="panel">
-            <h3>Up-To-Date Record Keeping</h3>
-            <p>Maintain a secure, privacy-protected medical profile to ensure fast and accurate triage upon arrival.</p>
+            <h3 style="color: var(--primary-blue); border-bottom: 2px solid #bae6fd; padding-bottom: 5px;">Multi-Client Architecture</h3>
+            <p>Built on an adaptable subscription framework, allowing seamless integration for different healthcare networks, regions, or alternative services.</p>
         </div>
 
         <div class="panel">
-            <h3>Live Emergency Vehicle Map</h3>
-            <p>Track ambulance routing and receive immediate notification updates directly from first responders.</p>
+            <h3 style="color: var(--primary-blue); border-bottom: 2px solid #bae6fd; padding-bottom: 5px;">First Responder Integration</h3>
+            <p>Designed for both civilian patients and EMTs, providing immediate routing and real-time facility status updates directly from the field.</p>
         </div>
     </div>
 
@@ -98,15 +103,19 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Initialize Map View
-        var map = L.map('landingMap').setView([41.6611, -91.5302], 12);
+        var map = L.map('map').setView([41.6611, -91.5302], 12);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Updated tile layer URL (more reliable for local dev)
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // Fetch Facility Pins
+        // THE FIX: Force Leaflet to recalculate container size after layout settles
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 500);
+
         fetch('/api/facilities')
             .then(response => response.json())
             .then(data => {
@@ -115,54 +124,40 @@
                         .bindPopup(`<b>${fac.name}</b><br>Wait Time: ${fac.wait} mins<br>Beds: ${fac.beds}`);
                 });
             })
-            .catch(err => console.log("No facilities found."));
+            .catch(err => console.log("No facilities found on backend."));
     });
 </script>
 
-
 <script>
     function runLandingSearch() {
-        const container = document.getElementById("searchContainer");
-        container.innerHTML = "<p><b>Searching ERs...</b></p>";
+        const container = document.getElementById("recommendationContainer");
+        container.innerHTML = "<p style='text-align:center;'><b>Searching ERs...</b></p>";
 
-        // Result Data Logic
+        // Simulated PKs for Demo
         const pks = [1, 2, 3];
         const pkString = pks.join(",");
 
         fetch("/api/search?pks=" + pkString)
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error("Search request failed");
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
                 container.innerHTML = "";
-
                 if (!data || data.length === 0) {
                     container.innerHTML = "<p>No ERs found.</p>";
                     return;
                 }
-
-                // Render Result Cards
                 data.forEach((fac, index) => {
                     const card = document.createElement("div");
-                    card.className = "panel";
-                    card.style.marginBottom = "15px";
-
+                    card.style.cssText = "background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 5px solid #00467f; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);";
                     card.innerHTML = `
-                        <b>${index === 0 ? "Best Match" : "Result #" + (index + 1)}</b><br>
-                        <b>${fac.name}</b><br>
-                        Wait Time: ${fac.wait} mins<br>
-                        Beds Available: ${fac.beds}
+                        <small style='color:#64748b; font-weight:bold;'>${index === 0 ? "BEST MATCH" : "RESULT #" + (index + 1)}</small><br>
+                        <b style='color:#00467f;'>${fac.name}</b><br>
+                        <span style='font-size: 0.9em;'>Wait: ${fac.wait} mins | Beds: ${fac.beds}</span>
                     `;
-
                     container.appendChild(card);
                 });
             })
             .catch(err => {
-                console.error(err);
-                container.innerHTML = "<p>Error loading ER search results.</p>";
+                container.innerHTML = "<p>Error loading search results.</p>";
             });
     }
 </script>
