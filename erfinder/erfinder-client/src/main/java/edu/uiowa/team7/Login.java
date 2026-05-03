@@ -11,13 +11,13 @@ import com.google.gwt.event.dom.client.KeyCodes;
 
 public class Login {
 
-    // Fields
+    // Authorization Controls
     private final Button sendButton;
     private final TextBox userIDBox;
     private final PasswordTextBox passwordTextBox;
     private final Label response;
 
-    // Constructor
+    // Component Registration Logic
     public Login() {
         sendButton = new Button("Log in");
         sendButton.addStyleName("sendButton");
@@ -27,7 +27,7 @@ public class Login {
         passwordTextBox.setMaxLength(32);
         response = new Label();
 
-        // UI Injection
+        // Inject Interface Tree
         RootPanel.get("userIDContainer").add(userIDBox);
         RootPanel.get("passwordContainer").add(passwordTextBox);
         RootPanel.get("sendButtonContainer").add(sendButton);
@@ -36,13 +36,14 @@ public class Login {
         userIDBox.setFocus(true);
         userIDBox.selectAll();
 
-        // Click Handlers
+        // Monitor Primary Action Click
         sendButton.addClickHandler(new SendCredentials());
 
+        // Keyboard Action Listener
         KeyDownHandler enterHandler = new KeyDownHandler() {
             @Override
             public void onKeyDown(KeyDownEvent event) {
-                if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                     sendButton.click();
                 }
             }
@@ -52,7 +53,7 @@ public class Login {
         passwordTextBox.addKeyDownHandler(enterHandler);
     }
 
-    // API Handlers
+    // Process Authorization Transmissions
     private class SendCredentials implements ClickHandler {
         public void onClick(ClickEvent event) {
             sendButton.setEnabled(false);
@@ -70,11 +71,11 @@ public class Login {
                 builder.sendRequest(null, new GetTokenResponse());
             } catch (RequestException e) {
                 response.setText("An unexpected error occured!");
-                // Compliance
             }
         }
     }
 
+    // Receive Validated Network Auth
     private class GetTokenResponse implements RequestCallback {
         public void onResponseReceived(Request request, Response received) {
             switch (received.getStatusCode()) {
@@ -83,9 +84,9 @@ public class Login {
                     break;
                 case App.HTTP_ACCEPTED_202:
                     Window.Location.assign("pending.html");
+                    break;
                 case App.HTTP_NOT_FOUND_404:
                 case App.HTTP_UNAUTHORIZED_401:
-                    // Error message
                     sendButton.setEnabled(true);
                     passwordTextBox.setEnabled(true);
                     userIDBox.setEnabled(true);

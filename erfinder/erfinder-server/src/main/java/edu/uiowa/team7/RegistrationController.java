@@ -5,16 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
+// Registration API Endpoints
 @RestController
 public class RegistrationController {
 
-    // Logger
+    // Component Logger
     private static final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
 
     @Autowired
     private EmailService emailService;
 
-    // Pre-Registration Validation Endpoint
+    // Check Existing Credentials
     @PostMapping("/register/check")
     public Map<String, Boolean> checkExisting(@RequestBody Map<String, String> data) {
         Map<String, Boolean> result = new HashMap<>();
@@ -33,7 +34,7 @@ public class RegistrationController {
         return result;
     }
 
-    // Registration Submission Endpoint
+    // Process Account Registration
     @PostMapping("/register/create")
     @ResponseBody
     public Map<String, String> createRegistration(@RequestBody Map<String, String> data) {
@@ -42,7 +43,7 @@ public class RegistrationController {
             boolean inserted = Queries.insertReg(data);
             response.put("status", inserted ? "success" : "failed");
 
-            // Email
+            // Forward Alert Email
             if (inserted) {
                 emailService.sendEmail(data.get("email"),
                         "ERFinder Registration Received",

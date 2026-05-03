@@ -1,39 +1,51 @@
+# Build Environment Image
 image: maven:3.9-eclipse-temurin-17
 
-variables:
 
+# Global Environment Variables
+variables:
   MYSQL_DATABASE: erfinder
   DB_HOST: mysql
   MYSQL_ROOT_PASSWORD: insecure_password
 
+
+# Pipeline Stages Definition
 stages:
   - build
   - test
   - sonarqube
 
+
+# =========================================
+# JOB: COMPILE PROJECT
+# =========================================
 build_project:
   stage: build
   script:
     - cd erfinder
     - mvn clean install -DskipTests
 
+
+# =========================================
+# JOB: BACKEND TESTS
+# =========================================
 test_backend:
   stage: test
   services:
     - name: mysql:8.0
       alias: mysql
   before_script:
-
     - apt-get update && apt-get install -y default-mysql-client
     - cd erfinder
-
     - sleep 15
-
     - mysql -h mysql -u root -pinsecure_password erfinder < schema.sql
   script:
-
     - mvn test -pl erfinder-server -am -e
 
+
+# =========================================
+# JOB: STATIC CODE ANALYSIS
+# =========================================
 sonarqube_scan:
   stage: sonarqube
   services:
@@ -45,6 +57,5 @@ sonarqube_scan:
     - sleep 15
     - mysql -h mysql -u root -pinsecure_password erfinder < schema.sql
   script:
-
     - mvn verify sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=ERFinder_Team7
   allow_failure: true

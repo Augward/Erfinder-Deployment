@@ -8,31 +8,30 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+// Geocoding Service Utility
 public class GeoCodeService {
 
-    public static double[] geocode(String address) throws Exception{
-        String encoded = URLEncoder.encode(address,"UTF-8");
-
-        String urlStr = "https://nominatim.openstreetmap.org/search" + "?q=" + encoded + "&format=json&limit=1";
+    // Fetch Coordinates via API
+    public static double[] geocode(String address) throws Exception {
+        String encoded = URLEncoder.encode(address, "UTF-8");
+        String urlStr = "https://nominatim.openstreetmap.org/search?q=" + encoded + "&format=json&limit=1";
 
         URL url = new URL(urlStr);
-
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
         conn.setRequestProperty("User-Agent", "Team7-ER-Finder (student project)");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         StringBuilder response = new StringBuilder();
         String line;
 
-        while((line = reader.readLine()) != null){
+        while ((line = reader.readLine()) != null) {
             response.append(line);
         }
         reader.close();
 
         JsonArray arr = JsonParser.parseString(response.toString()).getAsJsonArray();
 
-        if (arr.isEmpty()){
+        if (arr.isEmpty()) {
             throw new Exception("Address Could Not Be GeoCoded");
         }
 

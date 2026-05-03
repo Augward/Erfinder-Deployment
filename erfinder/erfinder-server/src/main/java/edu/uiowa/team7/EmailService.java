@@ -7,14 +7,18 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+// Email Service Component
 @Service
 public class EmailService {
 
+    // Service Execution Logger
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
+    // Spring Mail Autowire
     @Autowired
     private JavaMailSender mailSender;
 
+    // Send Email Execution
     public void sendEmail(String to, String subject, String body) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+// Facility API Endpoints
 @WebServlet({
         "/api/facilities",
         "/api/addfacility",
@@ -16,15 +17,10 @@ import java.sql.SQLException;
 })
 public class FacilityController extends HttpServlet {
 
-    /* -------------------------
-       GET Requests
-       ------------------------- */
+    // GET Request Routing
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
-            throws IOException {
-
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String path = req.getServletPath();
-
         if ("/api/facilities".equals(path)) {
             handleGetFacilities(res);
         } else {
@@ -32,40 +28,27 @@ public class FacilityController extends HttpServlet {
         }
     }
 
-    /* -------------------------
-       POST Requests
-       ------------------------- */
+    // POST Request Routing
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse res)
-            throws IOException {
-
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String path = req.getServletPath();
-
         switch (path) {
             case "/api/addfacility":
                 handleAddFacility(req, res);
                 break;
-
             case "/api/updateFacility":
                 handleUpdateFacility(req, res);
                 break;
             case "/api/updateWaitTime":
                 handleUpdateWaitTime(req, res);
                 break;
-
             default:
                 res.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    /* =========================
-       HANDLERS
-       ========================= */
-
-    /* -------- GET /api/facilities -------- */
-    private void handleGetFacilities(HttpServletResponse res)
-            throws IOException {
-
+    // Handle Get Facilities
+    private void handleGetFacilities(HttpServletResponse res) throws IOException {
         res.setContentType("application/json");
         res.setCharacterEncoding("UTF-8");
 
@@ -79,10 +62,8 @@ public class FacilityController extends HttpServlet {
         }
     }
 
-    /* -------- POST /api/addfacility -------- */
-    private void handleAddFacility(HttpServletRequest req, HttpServletResponse res)
-            throws IOException {
-
+    // Handle Add Facility
+    private void handleAddFacility(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("text/plain");
         res.setCharacterEncoding("UTF-8");
 
@@ -106,8 +87,8 @@ public class FacilityController extends HttpServlet {
         }
 
         String fullAddress = address + " " + zip;
-
         double lat, lon;
+
         try {
             double[] coords = GeoCodeService.geocode(fullAddress);
             lat = coords[0];
@@ -119,12 +100,7 @@ public class FacilityController extends HttpServlet {
         }
 
         try {
-            Queries.AddFacility(
-                    name, phone, address, zip,
-                    trauma, specialties,
-                    beds, waitTime,
-                    lat, lon
-            );
+            Queries.AddFacility(name, phone, address, zip, trauma, specialties, beds, waitTime, lat, lon);
         } catch (SQLException e) {
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             res.getWriter().write("Database error while adding facility");
@@ -135,10 +111,8 @@ public class FacilityController extends HttpServlet {
         res.getWriter().write("OK");
     }
 
-    /* -------- POST /api/updateFacility -------- */
-    private void handleUpdateFacility(HttpServletRequest req, HttpServletResponse res)
-            throws IOException {
-
+    // Handle Update Facility
+    private void handleUpdateFacility(HttpServletRequest req, HttpServletResponse res) throws IOException {
         int facilityId, beds, wait;
 
         try {
@@ -153,26 +127,21 @@ public class FacilityController extends HttpServlet {
 
         try {
             boolean updated = Queries.UpdateFacility(facilityId, beds, wait);
-
             if (!updated) {
                 res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 res.getWriter().write("No facility was updated");
                 return;
             }
-
             res.setStatus(HttpServletResponse.SC_OK);
             res.getWriter().write("OK");
-
         } catch (SQLException e) {
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             res.getWriter().write("Database error updating facility");
         }
     }
 
-    /* -------- POST /api/updateWaitTime -------- */
-    private void handleUpdateWaitTime(HttpServletRequest req, HttpServletResponse res)
-            throws IOException {
-
+    // Handle Update Wait Time
+    private void handleUpdateWaitTime(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("text/plain");
         res.setCharacterEncoding("UTF-8");
 
@@ -180,10 +149,7 @@ public class FacilityController extends HttpServlet {
         int waitTime;
 
         try {
-            // Read raw JSON body
-            String body = req.getReader().lines()
-                    .reduce("", (acc, line) -> acc + line);
-
+            String body = req.getReader().lines().reduce("", (acc, line) -> acc + line);
             body = body.replaceAll("[{}\"]", "");
             String[] parts = body.split(",");
 
@@ -220,21 +186,16 @@ public class FacilityController extends HttpServlet {
 
         try {
             boolean updated = Queries.UpdateWaitTime(facilityId, waitTime);
-
             if (!updated) {
                 res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 res.getWriter().write("No facility updated");
                 return;
             }
-
             res.setStatus(HttpServletResponse.SC_OK);
             res.getWriter().write("OK");
-
         } catch (SQLException e) {
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             res.getWriter().write("Database error updating wait time");
         }
     }
-
-
 }
