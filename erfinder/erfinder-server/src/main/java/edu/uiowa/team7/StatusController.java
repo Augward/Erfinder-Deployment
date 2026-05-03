@@ -8,26 +8,27 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+// Status API Endpoints
 @RestController
 public class StatusController {
 
-    // Logger
+    // Component Logger
     private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
-    // Tracks failed logins
+    // Track Consecutive Failures
     private static final java.util.concurrent.ConcurrentHashMap<String, Integer> failedLogins = new java.util.concurrent.ConcurrentHashMap<>();
 
     @Autowired
     private EmailService emailService;
 
-    // Helpers
+    // Base64 Decoding Utility
     public static String B64Decode(String encoded) {
         if (encoded == null || encoded.equals("null")) return "";
 
-        // 1. Fix URL spaces
+        // Fix Network Spaces
         String clean = encoded.replace(" ", "+");
 
-        // 2. Re-add missing padding to prevent the 4-byte ending unit crash
+        // Validate Required Byte Padding Block
         while (clean.length() % 4 != 0) {
             clean += "=";
         }
@@ -35,13 +36,13 @@ public class StatusController {
         return new String(Base64.getDecoder().decode(clean));
     }
 
-    // System Check Endpoint
+    // System Health Check
     @GetMapping(value = "/api/status", produces = "application/json")
     public String getStatus() {
         return "{\"message\": \"ER Finder Backend is live and connected to MySQL!\"}";
     }
 
-    // Authentication Entry Point (Login)
+    // Authentication Entry Point Route
     @GetMapping(value ="/api/gettoken")
     public void GetToken(HttpServletRequest req, HttpServletResponse res) {
         try {
@@ -51,7 +52,7 @@ public class StatusController {
             Queries.AuthResult auth = Queries.ValidateCredentials(userID, password);
 
             if (!auth.isValid) {
-                // Email logic (3x Fails)
+                // Email Notification Logic
                 int attempts = failedLogins.getOrDefault(userID, 0) + 1;
                 failedLogins.put(userID, attempts);
 
@@ -62,7 +63,6 @@ public class StatusController {
                                 "ERFinder Security Alert",
                                 "There have been 3 failed login attempts on your account. Please reset your password if you do not recognize this activity.");
                     }
-                    // Reset counter
                     failedLogins.put(userID, 0);
                 }
 
@@ -71,15 +71,14 @@ public class StatusController {
             }
 
             failedLogins.remove(userID);
-
             String device = Security.GetDevice(req);
             res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieFresh(userID, device));
 
-            // Routing Backbone: Return 202 for Pending, 200 for Approved
+            // Process Verification Level Result Code
             if ("PENDING".equalsIgnoreCase(auth.status)) {
-                res.setStatus(HttpStatus.ACCEPTED.value()); // 202
+                res.setStatus(HttpStatus.ACCEPTED.value());
             } else {
-                res.setStatus(HttpStatus.OK.value()); // 200
+                res.setStatus(HttpStatus.OK.value());
             }
 
         } catch (Exception e) {
@@ -89,7 +88,7 @@ public class StatusController {
         }
     }
 
-    // Forgot Password - Question
+    // Fetch Password Question Check
     @GetMapping("/api/usersecq")
     public String GetSecurityQuestion(HttpServletRequest req, HttpServletResponse res) {
         try {
@@ -107,15 +106,14 @@ public class StatusController {
         }
     }
 
-    // Forgot Password - Answer
+    // Password Recovery Submission Flow
     @GetMapping("/api/userseca")
     public String GetTokenFromSecq(HttpServletRequest req, HttpServletResponse res) {
         String userID = B64Decode(req.getParameter("userid"));
         String ans = B64Decode(req.getParameter("answer"));
+
         try {
-            // Check answer
             if (!Queries.ValidateSecurityAnswer(userID, ans)) {
-                // Email logic
                 try {
                     String targetEmail = Queries.GetUserEmail(userID);
                     if (targetEmail != null) {
@@ -126,27 +124,21 @@ public class StatusController {
                 } catch (Exception ex) {
                     logger.error("Failed to send security alert", ex);
                 }
-
                 res.setStatus(HttpStatus.NOT_FOUND.value());
                 return "Unauthorized";
             }
 
-            // Answer is correct
+            // Generate Temporary Password Route Key
             String tempToken = java.util.UUID.randomUUID().toString();
             res.setStatus(HttpStatus.OK.value());
 
-            // Email
             String userEmail = Queries.GetUserEmail(userID);
-
-            // Construct the reset link
             String resetLink = "http://localhost:8080/reset.html?t=" + tempToken + "&u=" + req.getParameter("userid");
 
-            // Send the email
             emailService.sendEmail(userEmail,
                     "ERFinder Password Reset Request",
                     "A password reset was requested for your account. Click the link below to securely reset your password:\n\n" + resetLink);
 
-            // Success message.
             return "Email Dispatched";
 
         } catch (Exception e) {
@@ -157,14 +149,14 @@ public class StatusController {
         }
     }
 
-    // Session Termination
+    // Account Session Termination End
     @GetMapping("/api/logout")
     public void Logout(HttpServletResponse res) {
         res.addHeader(HttpHeaders.SET_COOKIE, Security.BuildJWTCookieDelete());
         res.setStatus(HttpStatus.OK.value());
     }
 
-    // JWT Verification Check
+    // Session Verification Route Token
     @GetMapping("/api/username")
     public String GetUsernameInToken(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
@@ -179,7 +171,7 @@ public class StatusController {
         return result.UserID();
     }
 
-    // Dedicated Email Password Reset Endpoint (No JWT Required)
+    // Email Password Reset Flow Target
     @GetMapping("/api/resetpassword")
     public void ResetPasswordFromEmail(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -187,20 +179,15 @@ public class StatusController {
             String token = request.getParameter("t");
             String userIDB64 = request.getParameter("u");
 
-            // Safety check against missing parameters
             if (token == null || userIDB64 == null || newPassB64 == null) {
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
                 return;
             }
 
-            // Decode using the fortified helper
             String userID = B64Decode(userIDB64);
             String newPass = B64Decode(newPassB64);
 
-            // Execute the database update
             Queries.UpdatePassword(userID, newPass);
-
-            // Return success
             response.setStatus(HttpStatus.OK.value());
 
         } catch (Exception e) {

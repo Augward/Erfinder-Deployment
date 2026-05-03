@@ -9,12 +9,13 @@ import java.security.KeyPair;
 import java.time.*;
 import java.util.*;
 
+// JWT Security Implementation
 public class Security {
 
-    // Logger
+    // Component Logger
     private static final Logger logger = LoggerFactory.getLogger(Security.class);
 
-    // Key Generation
+    // Cryptographic Key Generation
     private static KeyPair pair;
     private static KeyPair GetPair() {
         if (pair == null) {
@@ -23,13 +24,13 @@ public class Security {
         return pair;
     }
 
-    // Session Tracking (Locks token to IP Address)
+    // Device Session Tracking
     public static String GetDevice(HttpServletRequest req) {
         String ip = req.getRemoteAddr();
         return ip != null ? ip : "unknown_device";
     }
 
-    // JWT Token Construction
+    // Token Creation Architecture
     public static String GenerateJWT(String username, String device) {
         return Jwts.builder()
                 .claim("userid", username)
@@ -40,13 +41,13 @@ public class Security {
                 .compact();
     }
 
-    // HTTP Cookie Builders
+    // Cookie Construction Utility
     public static String BuildJWTCookieFresh(String username, String device) {
         return ResponseCookie
                 .from("token", GenerateJWT(username, device))
                 .httpOnly(true)
                 .path("/")
-                .secure(false) // Can be set True at some point
+                .secure(false) // Ready for true when HTTPS active
                 .sameSite("Strict")
                 .maxAge(Duration.ofMillis(Configuration.TokenLife()))
                 .build().toString();
@@ -63,7 +64,7 @@ public class Security {
                 .build().toString();
     }
 
-    // JWT Parsing and Validation Overloads
+    // Token Verification Overloads
     public static TokenParseResult ParseRequestJWT(HttpServletRequest request) {
         Optional<String> token = GetToken(request);
         if (token.isEmpty()) {
@@ -89,10 +90,9 @@ public class Security {
         private final String userid;
 
         public boolean Invalid() { return !valid; }
-        // public boolean NeedsRefresh() { return needsRefresh; }
         public String UserID() { return userid; }
 
-        // Core parsing logic
+        // Core Parsing Logic
         public TokenParseResult(String token, String device) {
             String casted;
             boolean refresh;
@@ -119,28 +119,25 @@ public class Security {
             valid = true;
         }
 
-        // Empty Constructor
+        // Empty Status Constructor
         public TokenParseResult() {
             userid = "";
             needsRefresh = false;
             valid = false;
         }
 
-        // Refresh Handler
+        // Token Refresh Handler
         public void TryRefreshToken(HttpServletRequest req, HttpServletResponse res) {
-            if (!valid || !needsRefresh) {
-                return;
-            }
+            if (!valid || !needsRefresh) return;
             res.addHeader(HttpHeaders.SET_COOKIE, BuildJWTCookieFresh(userid, GetDevice(req)));
         }
     }
 
-    // Helper Method: Extracts token from request cookies
+    // Cookie Extraction Helper
     private static Optional<String> GetToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return Optional.empty();
-        }
+        if (cookies == null) return Optional.empty();
+
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("token")) {
                 return Optional.of(cookie.getValue());

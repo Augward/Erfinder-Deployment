@@ -7,17 +7,16 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+// Search UI API Endpoints
 @WebServlet("/api/search")
 public class SearchUIController extends HttpServlet {
 
+    // Process Facility Search Route
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
-            throws IOException {
-
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("application/json");
         res.setCharacterEncoding("UTF-8");
 
-        // Get PK list from URL: /api/search?pks=1,2,3
         String pksParam = req.getParameter("pks");
 
         if (pksParam == null || pksParam.isEmpty()) {
@@ -33,8 +32,6 @@ public class SearchUIController extends HttpServlet {
         for (String pkStr : pkStrings) {
             try {
                 int pk = Integer.parseInt(pkStr.trim());
-
-                // CALL YOUR EXISTING METHOD
                 String[] f = Queries.GetFacility(pk);
 
                 if (f != null) {
@@ -56,7 +53,7 @@ public class SearchUIController extends HttpServlet {
                 }
 
             } catch (Exception e) {
-                // Skip bad PK values so UI doesn't crash
+                // Skip unparseable primary keys to protect display
                 e.printStackTrace();
             }
         }
@@ -67,7 +64,7 @@ public class SearchUIController extends HttpServlet {
         res.getWriter().write(json.toString());
     }
 
-    // Helper to avoid null values breaking JSON
+    // JSON String Safety Formatting
     private String safe(String s) {
         return (s == null) ? "" : s.replace("\"", "'");
     }
