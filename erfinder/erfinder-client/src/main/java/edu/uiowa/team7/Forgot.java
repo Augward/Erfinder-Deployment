@@ -3,12 +3,11 @@ package edu.uiowa.team7;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 public class Forgot {
 
-    // Fields
+    // View Components
     private final TextBox userIDBox;
     private final Button submitID;
     private final Label questionLabel;
@@ -16,7 +15,7 @@ public class Forgot {
     private final Button submitAnswer;
     private final Label serverUpdates;
 
-    // Constructor
+    // Initialize Forgot Page
     public Forgot() {
         userIDBox = new TextBox();
         submitID = new Button("Next");
@@ -30,22 +29,20 @@ public class Forgot {
         answerBox.setEnabled(false);
         submitAnswer.setEnabled(false);
 
-        // UI Injection
+        // Inject DOM Elements
         RootPanel.get("userIDContainer").add(userIDBox);
         RootPanel.get("submitID").add(submitID);
-
         RootPanel.get("questionContainer").add(questionLabel);
         RootPanel.get("answerContainer").add(answerBox);
         RootPanel.get("submitAnswer").add(submitAnswer);
-
         RootPanel.get("responseContainer").add(serverUpdates);
 
-        // Click Handlers
+        // Setup Event Listeners
         submitID.addClickHandler(new SubmitUserID());
         submitAnswer.addClickHandler(new SubmitAnswer());
     }
 
-    // API Handlers
+    // Step 1: Submit Username
     private class SubmitUserID implements ClickHandler {
         @Override
         public void onClick(ClickEvent clickEvent) {
@@ -63,12 +60,12 @@ public class Forgot {
         }
     }
 
+    // Step 1: Handle Server Response
     private class RetrieveUserSecq implements RequestCallback {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
                 case 200:
-                    // userid is response text
                     serverUpdates.setText("Found userID. Waiting for answer.");
                     questionLabel.setText(response.getText());
                     answerBox.setEnabled(true);
@@ -76,7 +73,6 @@ public class Forgot {
                     break;
                 case 404:
                 default:
-                    // not valid userid
                     serverUpdates.setText("Failed to find user with that UserID.");
                     userIDBox.setEnabled(true);
                     submitID.setEnabled(true);
@@ -90,6 +86,7 @@ public class Forgot {
         }
     }
 
+    // Step 2: Submit Secure Answer
     private class SubmitAnswer implements ClickHandler {
         @Override
         public void onClick(ClickEvent clickEvent) {
@@ -98,8 +95,7 @@ public class Forgot {
 
             RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
                     "api/userseca?userid=" + App.B64Encode(userIDBox.getText()) +
-                            "&answer=" + App.B64Encode(answerBox.getText())
-            );
+                            "&answer=" + App.B64Encode(answerBox.getText()));
 
             try {
                 builder.sendRequest(null, new GetTokenResponse());
@@ -109,6 +105,7 @@ public class Forgot {
         }
     }
 
+    // Step 2: Handle Verification Response
     private class GetTokenResponse implements RequestCallback {
         @Override
         public void onResponseReceived(Request request, Response response) {
