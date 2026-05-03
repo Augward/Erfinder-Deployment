@@ -52,13 +52,23 @@ public class Reset {
                 return;
             }
 
+            // Grab the secure parameters from the email link URL
+            String t = Window.Location.getParameter("t");
+            String u = Window.Location.getParameter("u");
+
+            if (t == null || u == null) {
+                responseLabel.getElement().getStyle().setColor("red");
+                responseLabel.setText("Invalid reset link. Missing security tokens.");
+                return;
+            }
+
             submitBtn.setEnabled(false);
             responseLabel.getElement().getStyle().setColor("black");
             responseLabel.setText("Updating password...");
 
-            // Call existing update password API
+            // Call the NEW dedicated reset password API, attaching the tokens
             RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
-                    "/api/updatepassword?newpass=" + App.B64Encode(pass1));
+                    "/api/resetpassword?newpass=" + App.B64Encode(pass1) + "&t=" + t + "&u=" + u);
 
             try {
                 builder.sendRequest(null, new RequestCallback() {

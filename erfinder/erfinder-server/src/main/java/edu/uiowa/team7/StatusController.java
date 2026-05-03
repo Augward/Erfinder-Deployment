@@ -22,9 +22,17 @@ public class StatusController {
 
     // Helpers
     public static String B64Decode(String encoded) {
-        if (encoded == null) return "";
-        // URL fix
-        return new String(Base64.getDecoder().decode(encoded.replace(" ", "+")));
+        if (encoded == null || encoded.equals("null")) return "";
+
+        // 1. Fix URL spaces
+        String clean = encoded.replace(" ", "+");
+
+        // 2. Re-add missing padding to prevent the 4-byte ending unit crash
+        while (clean.length() % 4 != 0) {
+            clean += "=";
+        }
+
+        return new String(Base64.getDecoder().decode(clean));
     }
 
     // System Check Endpoint
@@ -169,5 +177,35 @@ public class StatusController {
 
         result.TryRefreshToken(request, response);
         return result.UserID();
+    }
+
+    // Dedicated Email Password Reset Endpoint (No JWT Required)
+    @GetMapping("/api/resetpassword")
+    public void ResetPasswordFromEmail(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String newPassB64 = request.getParameter("newpass");
+            String token = request.getParameter("t");
+            String userIDB64 = request.getParameter("u");
+
+            // Safety check against missing parameters
+            if (token == null || userIDB64 == null || newPassB64 == null) {
+                response.setStatus(HttpStatus.BAD_REQUEST.value());
+                return;
+            }
+
+            // Decode using the fortified helper
+            String userID = B64Decode(userIDB64);
+            String newPass = B64Decode(newPassB64);
+
+            // Execute the database update
+            Queries.UpdatePassword(userID, newPass);
+
+            // Return success
+            response.setStatus(HttpStatus.OK.value());
+
+        } catch (Exception e) {
+            logger.error("FATAL ERROR during email password reset", e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 }
