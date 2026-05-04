@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: erfinder-deployment
+    env: docker
+    plan: free
+    branch: main
+    envVars:
+      - key: PORT
+        value: 8080
