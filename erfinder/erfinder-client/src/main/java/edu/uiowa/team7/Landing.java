@@ -4,12 +4,11 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class Landing {
 
+    // Configure Navbar Authentication View
     public Landing(boolean logged_in) {
-        // the navbar should respond to log-in status
         if (logged_in) {
             RootPanel.get("navbar-yes-auth").getElement().removeAttribute("hidden");
-        }
-        else {
+        } else {
             RootPanel.get("navbar-no-auth").getElement().removeAttribute("hidden");
         }
     }

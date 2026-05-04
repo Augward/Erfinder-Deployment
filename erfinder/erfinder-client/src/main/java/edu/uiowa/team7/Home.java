@@ -10,23 +10,24 @@ import com.google.gwt.user.client.ui.*;
 
 public class Home {
 
+    // Component Logger
     private static final Logger logger = Logger.getLogger(Home.class.getName());
 
-    // Fields
+    // Main Content Containers
     private final VerticalPanel dynamicLayout;
 
-    // private final CheckBox[] ESIBoxes = new CheckBox[4];
 
-    // Constructor
+    // Build Home Page
     public Home() {
         dynamicLayout = new VerticalPanel();
         dynamicLayout.setSpacing(10);
         dynamicLayout.setWidth("100%");
+
         RootPanel.get("dynamicContent").add(dynamicLayout);
         loadDashboard();
     }
 
-    // API Data Loading
+    // Fetch Authorized User Data
     private void loadDashboard() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/myinfo");
         try {
@@ -42,20 +43,12 @@ public class Home {
                         dynamicLayout.add(new HTML("<h2>Welcome, " + firstName + "</h2>"));
 
                         switch (role) {
-                            case "PENDING":
-                                buildPendingView();
-                                break;
-                            case "ADMIN":
-                                buildAdminView();
-                                break;
+                            case "PENDING": buildPendingView(); break;
+                            case "ADMIN": buildAdminView(); break;
                             case "DOCTOR":
                             case "NURSE":
-                            case "EMT":
-                                buildMedicalView();
-                                break;
-                            default:
-                                buildPatientView();
-                                break;
+                            case "EMT": buildMedicalView(); break;
+                            default: buildPatientView();
                         }
                     } else {
                         dynamicLayout.clear();
@@ -67,7 +60,9 @@ public class Home {
                     dynamicLayout.add(new HTML("<h2 style='color:red;'>Server Connection Error.</h2>"));
                 }
             });
-        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred during the request", e);
+        }
     }
 
     // Role-Specific Views
@@ -76,29 +71,30 @@ public class Home {
         dynamicLayout.add(new Label("Your account request is currently being reviewed. Please check back later."));
     }
 
+    // Render Standard Patient Form
     private void buildPatientView() {
         dynamicLayout.add(new HTML("<h3>Find Immediate Care</h3>"));
         dynamicLayout.add(new HTML("<h4>Check all that apply:</h3>"));
 
         CheckBox[] boxes = new CheckBox[4];
 
-        HTMLPanel t = new HTMLPanel("table","");
-        String[] lines = {
+        HTMLPanel tablePanel = new HTMLPanel("table", "");
+        String[] criteriaLines = {
                 "Require life-saving intervention now.",
                 "In a dangerous situation.",
                 "In severe pain.",
                 "Feel strange, disoriented, and/or lethargic."
         };
+
         HTMLPanel[] rows = new HTMLPanel[4];
-        for (int i = 0; i < 4; i ++) {
+        for (int i = 0; i < 4; i++) {
             rows[i] = new HTMLPanel("tr", "");
-            rows[i].add(cw(new Label(lines[i])));
-            rows[i].add(cw(/*ESIBoxes[i] = */ boxes[i] = new CheckBox()));
-            // ESIBoxes[i].addClickHandler(event -> ESIBoxEvent());
-            t.add(rows[i]);
+            rows[i].add(wrapWidget(new Label(criteriaLines[i])));
+            rows[i].add(wrapWidget(boxes[i] = new CheckBox()));
+            tablePanel.add(rows[i]);
         }
 
-        dynamicLayout.add(t);
+        dynamicLayout.add(tablePanel);
 
         ListBox injuryType = new ListBox();
         injuryType.addStyleName("form-input");
@@ -107,6 +103,7 @@ public class Home {
         injuryType.addItem("Trauma / Broken Bones");
         injuryType.addItem("Neurological / Stroke");
         injuryType.addItem("General Illness");
+
         dynamicLayout.add(new Label("Current Condition:"));
         dynamicLayout.add(injuryType);
 
@@ -118,15 +115,9 @@ public class Home {
         dynamicLayout.add(new Label("Search Priority:"));
         dynamicLayout.add(priority);
 
-        //TextBox zipBox = new TextBox();
-        //zipBox.addStyleName("form-input");
-        //zipBox.getElement().setPropertyString("placeholder", "Enter current Zip Code...");
-        //dynamicLayout.add(new Label("Location:"));
-        //dynamicLayout.add(zipBox);
-
         Button searchBtn = new Button("Search ERs");
         searchBtn.addStyleName("btn");
-        searchBtn.addClickHandler(event ->{
+        searchBtn.addClickHandler(event -> {
             int esiScore = boxes[0].getValue() ? 1 :
                     (boxes[1].getValue() || boxes[2].getValue() || boxes[3].getValue() ? 2 : 3);
 
@@ -134,32 +125,24 @@ public class Home {
             int pr = priority.getSelectedIndex();
 
             dynamicLayout.clear();
-
-            dynamicLayout.add(new SearchUI(esiScore, in, pr, ()->{
+            dynamicLayout.add(new SearchUI(esiScore, in, pr, () -> {
                 dynamicLayout.clear();
                 loadDashboard();
             }));
         });
         dynamicLayout.add(searchBtn);
     }
-    private HTMLPanel cw(Widget w) {
-        HTMLPanel p = new HTMLPanel("td", "");
-        p.add(w);
-        return p;
+
+    // Wrap Component in Table Data Tags
+    private HTMLPanel wrapWidget(Widget w) {
+        HTMLPanel panel = new HTMLPanel("td", "");
+        panel.add(w);
+        return panel;
     }
 
+    // Render Medical Provider Interface
     private void buildMedicalView() {
         dynamicLayout.add(new HTML("<h3>Facility Status Update</h3>"));
-
-        /*
-        ListBox statusBox = new ListBox();
-        statusBox.addStyleName("form-input");
-        statusBox.addItem("Accepting Patients (Normal Capacity)");
-        statusBox.addItem("High Capacity (Expect Delays)");
-        statusBox.addItem("Divert (Critical Status)");
-        dynamicLayout.add(new Label("Set Current ER Status:"));
-        dynamicLayout.add(statusBox);
-        */
 
         ListBox erselect = new ListBox();
         erselect.addStyleName("form-input");
@@ -172,33 +155,30 @@ public class Home {
         dynamicLayout.add(new Label("Update Wait Time:"));
         dynamicLayout.add(waitTimeBox);
 
-
         Button updateBtn = new Button("Broadcast Update");
         updateBtn.addStyleName("btn");
-        updateBtn.addClickHandler(event->{
-            if(erselect.getSelectedIndex() == 0){
+        updateBtn.addClickHandler(event -> {
+            if (erselect.getSelectedIndex() == 0){
                 Window.alert("Please Select an ER");
                 return;
             }
 
             String waitTime = waitTimeBox.getText().trim();
-            if(!waitTime.matches("\\d+")){
+            if (!waitTime.matches("\\d+")){
                 Window.alert("Must Enter Valid Wait Time");
                 return;
             }
 
-            String facilityId = erselect.getValue(erselect.getSelectedIndex());
-            int facilityid = Integer.parseInt(facilityId);
+            int facilityid = Integer.parseInt(erselect.getValue(erselect.getSelectedIndex()));
             int waitMinutes = Integer.parseInt(waitTime);
             sendWaitTimeUpdate(facilityid, waitMinutes);
-
-
         });
-        dynamicLayout.add(updateBtn);
 
+        dynamicLayout.add(updateBtn);
         FacilityUpdate.loadFacilities(erselect);
     }
 
+    // Render System Admin Dashboard
     private void buildAdminView() {
         dynamicLayout.add(new HTML("<h3>Pending User Approvals</h3>"));
         dynamicLayout.add(new Label("The following accounts are awaiting verification:"));
@@ -211,7 +191,21 @@ public class Home {
         approvalTable.setHTML(0, 2, "<b>Action</b>");
 
         dynamicLayout.add(approvalTable);
+        fetchPendingUsers(approvalTable);
 
+        Button facilityReg = new Button("Register ER Facility");
+        facilityReg.addStyleName("btn");
+        facilityReg.addClickHandler(event -> registerFacility());
+        dynamicLayout.add(facilityReg);
+
+        Button upFac = new Button("Update ER Facility");
+        upFac.addStyleName("btn");
+        upFac.addClickHandler(event -> updateFacility());
+        dynamicLayout.add(upFac);
+    }
+
+    // Pull Pending Accounts Array
+    private void fetchPendingUsers(FlexTable approvalTable) {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/pendingusers");
         try {
             builder.sendRequest(null, new RequestCallback() {
@@ -237,12 +231,11 @@ public class Home {
 
                                 Button rejectBtn = new Button("Reject");
                                 rejectBtn.addStyleName("btn");
-                                rejectBtn.getElement().getStyle().setProperty("backgroundColor", "#dc3545"); // Red button
+                                rejectBtn.getElement().getStyle().setProperty("backgroundColor", "#dc3545");
                                 rejectBtn.addClickHandler(event -> rejectUser(uid));
 
                                 actions.add(approveBtn);
                                 actions.add(rejectBtn);
-
                                 approvalTable.setWidget(row, 2, actions);
                                 row++;
                             }
@@ -255,43 +248,35 @@ public class Home {
                     dynamicLayout.add(new HTML("<p style='color:red;'>Failed to load users.</p>"));
                 }
             });
-        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
-
-        //ER FACILITY REGISTER STUFF
-        Button facilityReg = new Button("Register ER Facility");
-        facilityReg.addStyleName("btn");
-        facilityReg.addClickHandler(event -> registerFacility());
-        dynamicLayout.add(facilityReg);
-
-        //ER FACILITY UPDATE STUFF
-        Button upFac = new Button("Update ER Facility");
-        upFac.addStyleName("btn");
-        upFac.addClickHandler(event -> updateFacility());
-        dynamicLayout.add(upFac);
-
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred during the request", e);
+        }
     }
 
-    // Admin Helper Action
+    // Approve Targeted User API
     private void approveUser(final String targetID) {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/approveuser?target=" + App.B64Encode(targetID));
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     if (response.getStatusCode() == 200) {
-                        com.google.gwt.user.client.Window.alert("User " + targetID + " approved successfully!");
+                        Window.alert("User " + targetID + " approved successfully!");
                         dynamicLayout.clear();
                         loadDashboard();
                     } else {
-                        com.google.gwt.user.client.Window.alert("Failed to approve user.");
+                        Window.alert("Failed to approve user.");
                     }
                 }
                 public void onError(Request request, Throwable exception) {
-                    com.google.gwt.user.client.Window.alert("Server connection error.");
+                    Window.alert("Server connection error.");
                 }
             });
-        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred during the request", e);
+        }
     }
 
+    // Reject Targeted User API
     private void rejectUser(final String targetID) {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/rejectuser?target=" + App.B64Encode(targetID));
         try {
@@ -300,7 +285,7 @@ public class Home {
                     if (response.getStatusCode() == 200) {
                         Window.alert("User " + targetID + " has been rejected and removed.");
                         dynamicLayout.clear();
-                        loadDashboard(); // Refresh the table
+                        loadDashboard();
                     } else {
                         Window.alert("Failed to reject user.");
                     }
@@ -309,10 +294,13 @@ public class Home {
                     Window.alert("Server connection error.");
                 }
             });
-        } catch (RequestException e) { logger.log(java.util.logging.Level.SEVERE, "An error occurred", e); }
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred", e);
+        }
     }
 
-    private void registerFacility(){
+    // Swap to Registration UI
+    private void registerFacility() {
         dynamicLayout.clear();
         dynamicLayout.add(new Facility_Register(() -> {
             dynamicLayout.clear();
@@ -320,7 +308,8 @@ public class Home {
         }));
     }
 
-    private void updateFacility(){
+    // Swap to Update UI
+    private void updateFacility() {
         dynamicLayout.clear();
         dynamicLayout.add(new FacilityUpdate(() -> {
             dynamicLayout.clear();
@@ -328,36 +317,33 @@ public class Home {
         }));
     }
 
-    private void sendWaitTimeUpdate(int facilityId, int waitMinutes){
+    // Post Facility Wait Time Changes
+    private void sendWaitTimeUpdate(int facilityId, int waitMinutes) {
         String payload = "{"
-                        + "\"facilityId\":" + facilityId + ","
-                        + "\"waitTime\":" + waitMinutes
-                        + "}";
+                + "\"facilityId\":" + facilityId + ","
+                + "\"waitTime\":" + waitMinutes
+                + "}";
 
         RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, "/api/updateWaitTime");
         rb.setHeader("Content-Type", "application/json");
-        try{
+
+        try {
             rb.sendRequest(payload, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    if(response.getStatusCode() == 200){
+                    if (response.getStatusCode() == 200) {
                         Window.alert("Wait Time Updated SuccessFully!!");
-                    }
-                    else{
+                    } else {
                         Window.alert("Update Failed (status " + response.getStatusCode() + ")");
                     }
                 }
-
                 @Override
                 public void onError(Request request, Throwable throwable) {
                     Window.alert("Server Error While Updating Wait Time");
-
                 }
             });
-        }
-        catch(RequestException e){
+        } catch(RequestException e) {
             Window.alert("Request Didn't Send");
         }
-
     }
 }

@@ -2,21 +2,18 @@ package edu.uiowa.team7;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.http.client.*;
-import jsinterop.annotations.JsMethod;
-import jsinterop.annotations.JsPackage;
 
 import java.util.Arrays;
 
 public class SearchUI extends VerticalPanel  {
+
+    // UI Routing Navigation Pointer
     private Runnable onBack;
 
-    //ONCE THE SEARCH STUFF HAS BEEN DONE THE ARRAY SHOULD BE STORED HERE
-    //EXAMPLE CODE TO STORE: SearchUI.facilitypks = computed array of facility pks
+    // Computed Array List Index
+    int[] facilitypks;
 
-    //public static int[] facilitypks;
-
-    int[] facilitypks;// = new int[] {1,2,3};
-
+    // Constructor Entry Routine Generation
     public SearchUI(int esiScore, int injury, int priority, Runnable onBack){
         this.onBack = onBack;
 
@@ -39,6 +36,7 @@ public class SearchUI extends VerticalPanel  {
         Button backbtn = new Button(" <- Back to DashBoard");
         backbtn.addClickHandler(event -> { Backout(); onBack.run();});
         add(backbtn);
+
         add(new HTML("<h3>ER Search Results</h3>"));
         loadSearchResults();
     }
@@ -51,34 +49,30 @@ public class SearchUI extends VerticalPanel  {
         $wnd.return_to_input();
     }-*/;
 
+    // Call Endpoints Passing Primary Array Array Values
     private void loadSearchResults(){
-
-        if(facilitypks == null || facilitypks.length == 0){
+        if (facilitypks == null || facilitypks.length == 0){
             add(new Label("No ER Facilities found"));
             return;
         }
 
-        // Build "42,7,101"
         StringBuilder pkString = new StringBuilder();
 
-        for(int i = 0; i < facilitypks.length; i++){
-            if(i > 0) pkString.append(",");
+        for (int i = 0; i < facilitypks.length; i++){
+            if (i > 0) pkString.append(",");
             pkString.append(facilitypks[i]);
         }
 
         String url = "/api/search?pks=" + pkString.toString();
-
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
 
-        try{
+        try {
             builder.sendRequest(null, new RequestCallback(){
-
                 @Override
                 public void onResponseReceived(Request request, Response response){
-                    if(response.getStatusCode() == 200){
+                    if (response.getStatusCode() == 200){
                         displayFacilities(response.getText());
-                    }
-                    else{
+                    } else {
                         add(new Label("Failed to load results"));
                     }
                 }
@@ -88,25 +82,23 @@ public class SearchUI extends VerticalPanel  {
                     add(new Label("Error connecting to server"));
                 }
             });
-
         } catch (RequestException e){
             add(new Label("Request failed"));
         }
     }
 
+    // Organize String Array Return Content For Graphics Block Output
     private void displayFacilities(String json){
-
         json = json.replace("[", "").replace("]", "");
 
-        if(json.trim().isEmpty()){
+        if (json.trim().isEmpty()){
             add(new Label("No results returned"));
             return;
         }
 
         String[] items = json.split("},");
 
-        for(int i = 0; i < items.length; i++){
-
+        for (int i = 0; i < items.length; i++){
             String item = items[i]
                     .replace("{", "")
                     .replace("}", "");
@@ -114,7 +106,7 @@ public class SearchUI extends VerticalPanel  {
             VerticalPanel card = new VerticalPanel();
             card.setSpacing(5);
 
-            if(i == 0){
+            if (i == 0){
                 card.add(new HTML("<b>Best Match</b>"));
             } else {
                 card.add(new HTML("<b>Result #" + (i + 1) + "</b>"));
@@ -122,10 +114,10 @@ public class SearchUI extends VerticalPanel  {
 
             String[] fields = item.split(",");
 
-            for(String f : fields){
+            for (String f : fields){
                 String[] kv = f.split(":");
 
-                if(kv.length == 2){
+                if (kv.length == 2){
                     String key = kv[0].replace("\"", "");
                     String value = kv[1].replace("\"", "");
 
@@ -137,4 +129,3 @@ public class SearchUI extends VerticalPanel  {
         }
     }
 }
-

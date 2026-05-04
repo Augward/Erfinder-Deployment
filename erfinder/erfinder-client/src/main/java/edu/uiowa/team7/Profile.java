@@ -9,9 +9,10 @@ import com.google.gwt.user.client.ui.*;
 
 public class Profile {
 
+    // File Execution Logger
     private static final Logger logger = Logger.getLogger(Profile.class.getName());
 
-    // Fields - Form Inputs
+    // Demographic Input Boxes
     private final TextBox firstnBox = new TextBox();
     private final TextBox lastnBox = new TextBox();
     private final TextBox legalnBox = new TextBox();
@@ -25,9 +26,10 @@ public class Profile {
     private final TextBox contactBox = new TextBox();
     private final TextBox genderBox = new TextBox();
 
+    // Insurance Array Wrap
     private final HTMLPanel insPanel = new HTMLPanel("p","");
 
-    // Fields - Security & Actions
+    // Secure Interaction Targets
     private final PasswordTextBox passwordBox = new PasswordTextBox();
     private final PasswordTextBox deletePassBox = new PasswordTextBox();
 
@@ -36,15 +38,16 @@ public class Profile {
     private final Button deleteAccountBtn;
     private final Label statusLabel;
 
-    // State Tracker
+    // Record Lock Configuration
     private boolean isEditing = false;
 
-    // Constructor
+    // Attach Controls And Hooks
     public Profile() {
         TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox,
                 addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox, passwordBox, deletePassBox};
         for (TextBox box : boxes) { box.addStyleName("form-input"); }
         setFieldsReadOnly(true);
+
         passwordBox.setReadOnly(false);
         deletePassBox.setReadOnly(false);
 
@@ -62,7 +65,7 @@ public class Profile {
 
         statusLabel = new Label("Loading...");
 
-        // UI Injection
+        // Push Elements To HTML Root
         RootPanel.get("firstnContainer").add(firstnBox);
         RootPanel.get("lastnContainer").add(lastnBox);
         RootPanel.get("legalnContainer").add(legalnBox);
@@ -85,9 +88,7 @@ public class Profile {
         RootPanel.get("btnContainer").add(toggleEditBtn);
         RootPanel.get("statusContainer").add(statusLabel);
 
-        //HTMLPanel pan = HTMLPanel.wrap(RootPanel.get("insuranceListContainer").getElement());
-
-        // API Fetch
+        // Download Contextual Record Objects
         fetchCurrentInfo();
         fetchInsurance();
 
@@ -96,25 +97,26 @@ public class Profile {
                 isEditing = true;
                 setFieldsReadOnly(false);
                 toggleEditBtn.setText("Save Changes");
-            } else { saveUpdatedInfo(); }
+            } else {
+                saveUpdatedInfo();
+            }
         });
 
         updatePassBtn.addClickHandler(event -> updatePassword());
         deleteAccountBtn.addClickHandler(event -> deleteAccount());
-
 
         Button addInsurance = new Button("Add Insurance Source");
         addInsurance.addClickHandler(event -> AddInsurance());
         RootPanel.get("addInsuranceContainer").add(addInsurance);
     }
 
-    // UI Helper Methods
+    // Toggle Editing Modifiers Set
     private void setFieldsReadOnly(boolean readOnly) {
         TextBox[] boxes = {firstnBox, lastnBox, legalnBox, dobBox, emailBox, phoneBox, addrBox, zipBox, dlnBox, ssnBox, contactBox, genderBox};
         for (TextBox box : boxes) { box.setReadOnly(readOnly); }
     }
 
-    // API Calls
+    // Gather Live Account Details
     private void fetchCurrentInfo() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/myinfo");
         try {
@@ -122,7 +124,7 @@ public class Profile {
                 public void onResponseReceived(Request request, Response response) {
                     if (response.getStatusCode() == 200) {
                         String[] data = response.getText().split(",", -1);
-                        if(data.length >= 13) {
+                        if (data.length >= 13) {
                             firstnBox.setText(data[1]);
                             lastnBox.setText(data[2]);
                             legalnBox.setText(data[3]);
@@ -137,20 +139,30 @@ public class Profile {
                             contactBox.setText(data[12]);
                             statusLabel.setText("");
                         }
-                    } else { statusLabel.setText("Session expired. Please log in."); }
+                    } else {
+                        statusLabel.setText("Session expired. Please log in.");
+                    }
                 }
-                public void onError(Request request, Throwable exception) { statusLabel.setText("Server connection error."); }
+                public void onError(Request request, Throwable exception) {
+                    statusLabel.setText("Server connection error.");
+                }
             });
-        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred during the request", e);
+        }
     }
 
+    // Gather Insurance Link List
     private void fetchInsurance() {
-        // get insurance info::
         RequestBuilder b2 = new RequestBuilder(RequestBuilder.GET, "/api/getinsurances");
-        try { b2.sendRequest(null, new GetInsuranceInfoCallback()); }
-        catch (RequestException e) { logger.log(Level.SEVERE, "Could not grab insurances for user"); }
+        try {
+            b2.sendRequest(null, new GetInsuranceInfoCallback());
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "Could not grab insurances for user");
+        }
     }
 
+    // Transmit Alterations Database Routine
     private void saveUpdatedInfo() {
         toggleEditBtn.setEnabled(false);
         statusLabel.setText("Updating database...");
@@ -186,9 +198,12 @@ public class Profile {
                     statusLabel.setText("Server connection error.");
                 }
             });
-        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred during the request", e);
+        }
     }
 
+    // Pass Verification Sequence Key
     private void updatePassword() {
         String newPass = passwordBox.getText();
         if (newPass == null || newPass.trim().isEmpty()) {
@@ -201,14 +216,24 @@ public class Profile {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) { Window.Location.assign("landing.html"); }
-                    else { updatePassBtn.setEnabled(true); statusLabel.setText("Failed to update password."); }
+                    if (response.getStatusCode() == 200) {
+                        Window.Location.assign("landing.html");
+                    } else {
+                        updatePassBtn.setEnabled(true);
+                        statusLabel.setText("Failed to update password.");
+                    }
                 }
-                public void onError(Request request, Throwable exception) { updatePassBtn.setEnabled(true); statusLabel.setText("Server error."); }
+                public void onError(Request request, Throwable exception) {
+                    updatePassBtn.setEnabled(true);
+                    statusLabel.setText("Server error.");
+                }
             });
-        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred during the request", e);
+        }
     }
 
+    // Total System Flush Termination
     private void deleteAccount() {
         String pass = deletePassBox.getText();
         if (pass == null || pass.trim().isEmpty()) {
@@ -223,8 +248,9 @@ public class Profile {
         try {
             builder.sendRequest(null, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == 200) { Window.Location.assign("landing.html"); }
-                    else {
+                    if (response.getStatusCode() == 200) {
+                        Window.Location.assign("landing.html");
+                    } else {
                         deleteAccountBtn.setEnabled(true);
                         statusLabel.getElement().getStyle().setColor("red");
                         statusLabel.setText("Incorrect password. Account not deleted.");
@@ -235,9 +261,12 @@ public class Profile {
                     statusLabel.setText("Server error.");
                 }
             });
-        } catch (RequestException e) { logger.log(Level.SEVERE, "An error occurred during the request", e); }
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "An error occurred during the request", e);
+        }
     }
 
+    // Populate Dynamic Card Set
     private class GetInsuranceInfoCallback implements RequestCallback {
         @Override
         public void onResponseReceived(Request request, Response response) {
@@ -251,6 +280,7 @@ public class Profile {
                     "\n\n" +
                     "    display: flex;\n" +
                     "    flex-direction: column;");
+
             for (String in : ins) {
                 new InsuranceBox(in, insPanel);
             }
@@ -259,12 +289,12 @@ public class Profile {
 
         @Override
         public void onError(Request request, Throwable throwable) {
-            //RootPanel.get("insuranceListContainer").getElement().setInnerText(":(");
+            // Error handling ignored context
         }
     }
 
+    // Instantiation For Injection List
     private void AddInsurance() {
         new InsuranceBox(insPanel);
     }
-
 }

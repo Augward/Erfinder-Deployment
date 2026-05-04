@@ -6,20 +6,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.util.Base64;
 import java.util.Optional;
 
+// User Account API Endpoints
 @RestController
 public class UserController {
 
-    // Logger
+    // Component Logger
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private EmailService emailService;
 
-    // Helpers
+    // Base64 Decoding Utility
     private String B64Decode(String encoded) {
         if (encoded == null) return "";
         return new String(Base64.getDecoder().decode(encoded.replace(" ", "+")));
@@ -29,7 +29,10 @@ public class UserController {
     @GetMapping("/api/myinfo")
     public String GetMyInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return "Not logged in"; }
+        if (result.Invalid()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return "Not logged in";
+        }
         try {
             String[] info = Queries.GetUserInfo(result.UserID());
             if (info != null) {
@@ -46,7 +49,10 @@ public class UserController {
     @GetMapping("/api/updateinfo")
     public void UpdateInfo(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
         try {
             Queries.UpdateUserInfo(
                     result.UserID(),
@@ -64,10 +70,14 @@ public class UserController {
         }
     }
 
+    // Fetch Linked Insurance
     @GetMapping("/api/getinsurances")
     public String GetInsurances(HttpServletRequest req, HttpServletResponse res) {
         Security.TokenParseResult result = Security.ParseRequestJWT(req);
-        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
+        if (result.Invalid()) {
+            res.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return "";
+        }
         try {
             return Queries.GetInsurances(result.UserID());
         } catch (Exception e) {
@@ -77,10 +87,14 @@ public class UserController {
         return "";
     }
 
+    // Submit Insurance Revisions
     @GetMapping("/api/setinsurance")
     public void SetInsurance(HttpServletRequest req, HttpServletResponse res) {
         Security.TokenParseResult result = Security.ParseRequestJWT(req);
-        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return;}
+        if (result.Invalid()) {
+            res.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
         try {
             boolean fresh = req.getParameter("f").equals("y");
             String blob = B64Decode(req.getParameter("blob"));
@@ -91,10 +105,14 @@ public class UserController {
         }
     }
 
+    // Process Insurance Deletion
     @GetMapping("/api/delinsurance")
     public void DeleteInsurance(HttpServletRequest req, HttpServletResponse res) {
         Security.TokenParseResult result = Security.ParseRequestJWT(req);
-        if (result.Invalid()) { res.setStatus(HttpStatus.UNAUTHORIZED.value()); return;}
+        if (result.Invalid()) {
+            res.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
         try {
             String blob = B64Decode(req.getParameter("blob"));
             Queries.DeleteInsurance(result.UserID(), blob);
@@ -104,11 +122,14 @@ public class UserController {
         }
     }
 
-    // Security Updates
+    // Profile Password Updates
     @GetMapping("/api/updatepassword")
     public void UpdatePassword(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
         try {
             String newPass = B64Decode(request.getParameter("newpass"));
             Queries.UpdatePassword(result.UserID(), newPass);
@@ -121,11 +142,14 @@ public class UserController {
         }
     }
 
-    // Account Management
+    // Account Self-Termination
     @GetMapping("/api/deleteaccount")
     public void DeleteAccount(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
         try {
             String pass = B64Decode(request.getParameter("password"));
 
@@ -142,11 +166,14 @@ public class UserController {
         }
     }
 
-    // Admin Capabilities
+    // Admin Pending Accounts Array
     @GetMapping("/api/pendingusers")
     public String GetPendingUsers(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return ""; }
+        if (result.Invalid()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return "";
+        }
         try {
             return Queries.GetPendingUsers();
         } catch (Exception e) {
@@ -156,16 +183,20 @@ public class UserController {
         }
     }
 
+    // Admin Approve Account
     @GetMapping("/api/approveuser")
     public void ApproveUser(HttpServletRequest request, HttpServletResponse response) {
         Security.TokenParseResult result = Security.ParseRequestJWT(request);
-        if (result.Invalid()) { response.setStatus(HttpStatus.UNAUTHORIZED.value()); return; }
+        if (result.Invalid()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
         try {
             String target = B64Decode(request.getParameter("target"));
             if (Queries.ApproveUser(target)) {
                 response.setStatus(HttpStatus.OK.value());
 
-                // Email
+                // Admin Approval Alert
                 Optional<String> targetEmail = Queries.GetUserEmail(target);
 
                 if (targetEmail.isEmpty()) {
@@ -187,12 +218,13 @@ public class UserController {
         }
     }
 
+    // Admin Reject Account
     @GetMapping("/api/rejectuser")
     public ResponseEntity<String> rejectUser(@RequestParam("target") String b64Target) {
         try {
             String targetUserID = new String(Base64.getDecoder().decode(b64Target));
 
-            // Email
+            // Admin Rejection Alert
             Optional<String> targetEmail = Queries.GetUserEmail(targetUserID);
 
             if (targetEmail.isPresent()) {
