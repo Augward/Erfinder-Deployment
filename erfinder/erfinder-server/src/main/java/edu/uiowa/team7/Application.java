@@ -20,7 +20,7 @@ import java.util.Objects;
 @EnableConfigurationProperties(Configuration.class)
 public class Application extends SpringBootServletInitializer {
 
-  // Main Entry Point
+  // Main Application Entry Point
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
   }
@@ -39,7 +39,6 @@ public class Application extends SpringBootServletInitializer {
     public void customize(ConfigurableServletWebServerFactory factory) {
       File launcherDirDirectory = new File(Objects.requireNonNull(getClass().getResource("/")).getFile(), "launcherDir");
       if (launcherDirDirectory.exists()) {
-        // Sets document root
         factory.setDocumentRoot(launcherDirDirectory);
       }
     }

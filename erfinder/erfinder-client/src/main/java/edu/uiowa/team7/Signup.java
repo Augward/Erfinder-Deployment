@@ -1,7 +1,6 @@
 package edu.uiowa.team7;
 
 import com.google.gwt.http.client.*;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -9,7 +8,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class Signup {
 
-    // Fields
+    // Identity and Authentication Widgets
     private final TextBox firstname = new TextBox();
     private final TextBox lastname = new TextBox();
     private final TextBox legalname = new TextBox();
@@ -28,7 +27,7 @@ public class Signup {
     private final TextBox securityAns = new TextBox();
     private final ListBox securityQues = new ListBox();
 
-    // Error Labels
+    // Field Error State Labels
     private final Label firstnameerror = new Label();
     private final Label lastnameerror = new Label();
     private final Label legalnameerror = new Label();
@@ -47,13 +46,13 @@ public class Signup {
     private final Label securityAnserror = new Label();
     private final Label securityQueserror = new Label();
 
-    // Submission Button
+    // Data Transmission Execution Trigger Button Event Control Binding Location Map System Link
     private final Button submit = new Button("Submit");
 
-    // Constructor
+    // Interface Building Engine Block
     public Signup() {
 
-        // Set error fields red
+        // Default Reset Styles Values
         firstnameerror.getElement().getStyle().setProperty("color", "red");
         lastnameerror.getElement().getStyle().setProperty("color", "red");
         legalnameerror.getElement().getStyle().setProperty("color", "red");
@@ -75,13 +74,12 @@ public class Signup {
         VerticalPanel form = new VerticalPanel();
         form.setSpacing(30);
 
-        // Header Section
         Label header = new Label("ERFinder Account Signup");
         header.getElement().getStyle().setProperty("fontSize","20px");
         header.getElement().getStyle().setProperty("fontWeight","bold");
         form.add(header);
 
-        // Roles
+        // Map Account Permission Selection Set Items
         form.add(new Label("Role"));
         role.addItem("Select Role: ", " ");
         role.addItem("Patient", "PATIENT");
@@ -94,7 +92,7 @@ public class Signup {
         form.add(role);
         form.add(roleerror);
 
-        // Personal Information Fields
+        // Core Patient String Parameters
         form.add(new Label("First Name"));
         form.add(firstname);
         form.add(firstnameerror);
@@ -115,7 +113,6 @@ public class Signup {
         form.add(email);
         form.add(emailerror);
 
-        // Account Details Fields
         form.add(new Label("Username"));
         form.add(username);
         form.add(usernameerror);
@@ -160,7 +157,7 @@ public class Signup {
         form.add(ssn);
         form.add(ssnerror);
 
-        // Security Configuration Fields
+        // Map Validated Questions Arrays
         form.add(new Label("Security Question"));
         securityQues.addItem("Select Security Question", " ");
         securityQues.addItem("What is your mother's maiden name?", "SQ1");
@@ -180,11 +177,10 @@ public class Signup {
         form.add(securityAns);
         form.add(securityAnserror);
 
-        // Submit Button ClickHandler
+        // Execute Pre-Transmission Checks Validation
         submit.addClickHandler(clickEvent -> {
             boolean valid = true;
 
-            // Clear error fields
             roleerror.setText("");
             firstnameerror.setText("");
             lastnameerror.setText("");
@@ -203,142 +199,116 @@ public class Signup {
             securityQueserror.setText("");
             securityAnserror.setText("");
 
-                //validate role
-                if(role.getSelectedIndex()==0){
-                    valid = false;
-                    roleerror.setText("Must Select a Role");
-                }
+            if (role.getSelectedIndex() == 0) {
+                valid = false;
+                roleerror.setText("Must Select a Role");
+            }
 
-                //validate firstname
-                if(firstname.getText().trim().isEmpty()){
-                    valid = false;
-                    firstnameerror.setText("First Name Required");
-                }
+            if (firstname.getText().trim().isEmpty()) {
+                valid = false;
+                firstnameerror.setText("First Name Required");
+            }
 
-                //validate lastname
-                if(lastname.getText().trim().isEmpty()){
-                    valid = false;
-                    lastnameerror.setText("Last Name Required");
-                }
+            if (lastname.getText().trim().isEmpty()) {
+                valid = false;
+                lastnameerror.setText("Last Name Required");
+            }
 
-                //validate legalname
-                if(legalname.getText().trim().isEmpty()){
-                    valid = false;
-                    legalnameerror.setText("Full Legal Name Required");
-                }
+            if (legalname.getText().trim().isEmpty()) {
+                valid = false;
+                legalnameerror.setText("Full Legal Name Required");
+            }
 
-                //validate phoneNumber
-                if(phoneNumber.getText().trim().isEmpty()){
-                    valid = false;
-                    phoneNumbererror.setText("Phone Number Required");
-                }
-                else if(!phoneNumber.getText().trim().matches("\\d{10}")){
-                    valid = false;
-                    phoneNumbererror.setText("Phone Number Must be 10 Digits");
-                }
+            if (phoneNumber.getText().trim().isEmpty()) {
+                valid = false;
+                phoneNumbererror.setText("Phone Number Required");
+            } else if (!phoneNumber.getText().trim().matches("\\d{10}")) {
+                valid = false;
+                phoneNumbererror.setText("Phone Number Must be 10 Digits");
+            }
 
+            if (email.getText().trim().isEmpty()) {
+                valid = false;
+                emailerror.setText("Email is Required");
+            } else if (!email.getText().trim().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                valid = false;
+                emailerror.setText("Email Must Be Valid");
+            }
 
-                //validate email
-                if(email.getText().trim().isEmpty()){
-                    valid = false;
-                    emailerror.setText("Email is Required");
-                }
-                else if(!email.getText().trim().matches("^[A-Za-z0-9+_.-]+@(.+)$")){
-                    valid = false;
-                    emailerror.setText("Email Must Be Valid");
-                }
+            if (username.getText().trim().isEmpty()) {
+                valid = false;
+                usernameerror.setText("Username Required");
+            }
 
-                //validate username
-                if(username.getText().trim().isEmpty()){
-                    valid = false;
-                    usernameerror.setText("Username Required");
-                }
+            if (password.getText().trim().isEmpty()) {
+                valid = false;
+                passworderror.setText("Password is Required");
+            } else if (!password.getText().trim().matches("^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$")) {
+                valid = false;
+                passworderror.setText("Password Must Be At Least 8 Digits Long With A Letter and Number");
+            }
 
-                //validate password
-                if(password.getText().trim().isEmpty()){
-                    valid = false;
-                    passworderror.setText("Password is Required");
-                }
-                else if(!password.getText().trim().matches("^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$")){
-                    valid = false;
-                    passworderror.setText("Password Must Be At Least 8 Digits Long With A Letter and Number");
-                }
+            if (address.getText().trim().isEmpty()) {
+                valid = false;
+                addresserror.setText("Address is Required");
+            }
 
-                //validate address
-                if(address.getText().trim().isEmpty()){
-                    valid = false;
-                    addresserror.setText("Address is Required");
-                }
+            if (zipcode.getText().trim().isEmpty()) {
+                valid = false;
+                zipcodeerror.setText("Zipcode is Required");
+            } else if (!zipcode.getText().trim().matches("\\d{5}")) {
+                valid = false;
+                zipcodeerror.setText("Zipcode Must Be 5 Digits");
+            }
 
-                //validate zipcode
-                if(zipcode.getText().trim().isEmpty()){
-                    valid = false;
-                    zipcodeerror.setText("Zipcode is Required");
-                }
-                else if (!zipcode.getText().trim().matches("\\d{5}")){
-                    valid = false;
-                    zipcodeerror.setText("Zipcode Must Be 5 Digits");
-                }
+            if (dob.getValue() == null) {
+                valid = false;
+                doberror.setText("Date of Birth is Required");
+            }
 
-                //validate dob
-                if(dob.getValue() == null){
-                    valid = false;
-                    doberror.setText("Date of Birth is Required");
-                }
+            if (gender.getSelectedIndex() == 0) {
+                valid = false;
+                gendererror.setText("Must Select a Gender");
+            }
 
-                //validate gender
-                if(gender.getSelectedIndex() == 0){
-                    valid = false;
-                    gendererror.setText("Must Select a Gender");
-                }
+            if (emergency.getText().trim().isEmpty()) {
+                valid = false;
+                emergencyerror.setText("Emergency Contact's Phone Number Required");
+            } else if (!emergency.getText().trim().matches("\\d{10}")) {
+                valid = false;
+                emergencyerror.setText("Emergency Contact's Phone Number Must be 10 Digits");
+            }
 
-                //validate emergency
-                if(emergency.getText().trim().isEmpty()){
-                    valid = false;
-                    emergencyerror.setText("Emergency Contact's Phone Number Required");
-                }
-                else if(!emergency.getText().trim().matches("\\d{10}")){
-                    valid = false;
-                    emergencyerror.setText("Emergency Contact's Phone Number Must be 10 Digits");
-                }
+            if (driversLicense.getText().trim().isEmpty()) {
+                valid = false;
+                driversLicenseerror.setText("Driver's License Number Required");
+            } else if (!driversLicense.getText().trim().matches("[A-Za-z0-9]{5,15}")) {
+                valid = false;
+                driversLicenseerror.setText("Driver's License Number Must Be Valid");
+            }
 
-                //validate driversLicense
-                if(driversLicense.getText().trim().isEmpty()){
-                    valid = false;
-                    driversLicenseerror.setText("Driver's License Number Required");
-                }
-                else if(!driversLicense.getText().trim().matches("[A-Za-z0-9]{5,15}")){
-                    valid = false;
-                    driversLicenseerror.setText("Driver's License Number Must Be Valid");
-                }
+            if (ssn.getText().trim().isEmpty()) {
+                valid = false;
+                ssnerror.setText("Social Security Number Required");
+            } else if (!ssn.getText().trim().matches("\\d{9}")) {
+                valid = false;
+                ssnerror.setText("Social Security Number Must Be 9 Digits");
+            } else if (ssn.getText().trim().startsWith("000") || ssn.getText().trim().startsWith("00", 3) || ssn.getText().trim().substring(5).equals("0000")) {
+                valid = false;
+                ssnerror.setText("Social Security Number Must Be Valid");
+            }
 
-                //validate ssn
-                if(ssn.getText().trim().isEmpty()){
-                    valid = false;
-                    ssnerror.setText("Social Security Number Required");
-                }
-                else if (!ssn.getText().trim().matches("\\d{9}")){
-                    valid = false;
-                    ssnerror.setText("Social Security Number Must Be 9 Digits");
-                }
-                else if(ssn.getText().trim().startsWith("000") || ssn.getText().trim().startsWith("00", 3) || ssn.getText().trim().substring(5).equals("0000")){
-                    valid = false;
-                    ssnerror.setText("Social Security Number Must Be Valid");
-                }
+            if (securityQues.getSelectedIndex() == 0) {
+                valid = false;
+                securityQueserror.setText("Must Select a Security Question");
+            }
 
-                //validate security question
-                if(securityQues.getSelectedIndex() == 0){
-                    valid = false;
-                    securityQueserror.setText("Must Select a Security Question");
-                }
+            if (securityAns.getText().trim().isEmpty()) {
+                valid = false;
+                securityAnserror.setText("Security Answer is Required");
+            }
 
-                //validate security answer
-                if(securityAns.getText().trim().isEmpty()){
-                    valid = false;
-                    securityAnserror.setText("Security Answer is Required");
-                }
-
-            if(!valid){
+            if (!valid) {
                 Window.alert("Not all Information is Valid. Can't Submit");
             } else {
                 submit.setEnabled(false);
@@ -348,7 +318,7 @@ public class Signup {
 
         form.add(submit);
 
-        // Form setup and adding to page
+        // Push Elements To HTML Root Link
         form.setWidth("300px");
 
         HorizontalPanel wrapper = new HorizontalPanel();
@@ -359,8 +329,8 @@ public class Signup {
         RootPanel.get("registerContainer").add(wrapper);
     }
 
-    // Validation & Submission Methods
-    private void checkExistingAccounts(){
+    // Ping API For Unique Validation Requirements Data
+    private void checkExistingAccounts() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/register/check");
         builder.setHeader("Content-Type", "application/json");
 
@@ -369,11 +339,11 @@ public class Signup {
                 + "\"ssn\":\"" + ssn.getText().trim() + "\","
                 + "\"driversLicense\":\"" + driversLicense.getText().trim() + "\"" + "}";
 
-        try{
+        try {
             builder.sendRequest(json, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response res) {
-                    if(res.getStatusCode() == 200){
+                    if (res.getStatusCode() == 200) {
                         String response = res.getText();
                         handleDuplicateResponse(response);
                     } else {
@@ -387,34 +357,35 @@ public class Signup {
                     Window.alert("Unable to Connect to Server");
                 }
             });
-        } catch (RequestException e){
+        } catch (RequestException e) {
             Window.alert("Request Failed");
         }
     }
 
-    private void handleDuplicateResponse(String json){
+    // Process Invalid Account Duplications Results Output
+    private void handleDuplicateResponse(String json) {
         boolean valid = true;
-        if(json.contains("\"usernameExists\":true")){
+        if (json.contains("\"usernameExists\":true")) {
             valid = false;
             usernameerror.setText("Username Already In Use");
         }
 
-        if(json.contains("\"emailExists\":true")){
+        if (json.contains("\"emailExists\":true")) {
             valid = false;
             emailerror.setText("Email Already Has An Account");
         }
 
-        if(json.contains("\"ssnExists\":true")){
+        if (json.contains("\"ssnExists\":true")) {
             valid = false;
             ssnerror.setText("Social Security Number Already Has An Account");
         }
 
-        if(json.contains("\"licenseExists\":true")){
+        if (json.contains("\"licenseExists\":true")) {
             valid = false;
             driversLicenseerror.setText("Driver's License Already Has An Account");
         }
 
-        if(valid){
+        if (valid) {
             submitRegistration();
         } else {
             submit.setEnabled(true);
@@ -422,7 +393,8 @@ public class Signup {
         }
     }
 
-    private void submitRegistration(){
+    // Construct Payload and Request Approval Transmit
+    private void submitRegistration() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/register/create");
         builder.setHeader("Content-Type", "application/json");
 
@@ -449,14 +421,13 @@ public class Signup {
                 + "\"role\":\"" + role.getValue(role.getSelectedIndex()) + "\""
                 + "}";
 
-        try{
+        try {
             builder.sendRequest(json, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-
-                    if(response.getStatusCode() == 200){
+                    if (response.getStatusCode() == 200) {
                         String respText = response.getText();
-                        if(respText.contains("\"status\":\"success\"")){
+                        if (respText.contains("\"status\":\"success\"")) {
                             Window.alert("Account Successfully Submitted!");
                             requestToken();
                         } else {
@@ -475,12 +446,13 @@ public class Signup {
                     Window.alert("Unable to Connect to Server");
                 }
             });
-        } catch(RequestException e) {
+        } catch (RequestException e) {
             submit.setEnabled(true);
             Window.alert("Request Failed");
         }
     }
 
+    // Force Token Fetch To Sign In Session
     private void requestToken() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
                 "/api/gettoken?userID="
@@ -509,7 +481,6 @@ public class Signup {
             });
         } catch (RequestException e) {
             Window.alert("An unexpected error occured!");
-            // Compliance
         }
     }
 }

@@ -12,10 +12,14 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class InsuranceBox {
+
+    // Core Panel Tracking
     public HTMLPanel p;
     public boolean fresh;
     public boolean deleting = false;
     public boolean editing = false;
+
+    // Controls
     public final Button editButton = new Button("Edit");
     public final Button delButton = new Button("Delete");
     public final Button canButton = new Button("Cancel");
@@ -24,12 +28,15 @@ public class InsuranceBox {
 
     private InsuranceField[] fields;
 
+    // Create Fresh Component
     public InsuranceBox(HTMLPanel par) {
         InstanceFields(true);
         BuildForm(par);
         fresh = true;
         Confirm();
     }
+
+    // Create Parsed Component
     public InsuranceBox(String info, HTMLPanel par) {
         InstanceFields(false);
         ParseFields(info);
@@ -37,6 +44,7 @@ public class InsuranceBox {
         fresh = false;
     }
 
+    // Initialize Box Models
     private void InstanceFields(boolean fresh) {
         fields = new InsuranceField[] {
                 new InsuranceTextField("member_id", "Member ID:", true, fresh),
@@ -55,6 +63,8 @@ public class InsuranceBox {
                 new InsuranceIntField("out_of_pocket_max", "Out of Pocket Maximum (Cents):", 10),
         };
     }
+
+    // Decode Network Information
     private void ParseFields(String info) {
         String[] fieldvalpairs = info.split(",");
         HashMap<String,String> map = new HashMap<>();
@@ -66,6 +76,8 @@ public class InsuranceBox {
             f.Parse(map);
         }
     }
+
+    // Construct HTML Table Map
     public void BuildForm(HTMLPanel par) {
         p = new HTMLPanel("table", "");
         p.getElement().setAttribute("style", "\n" +
@@ -93,10 +105,8 @@ public class InsuranceBox {
         c1.add(delButton);
         brow.add(c0);
         brow.add(c1);
-        //brow.add(c2);
 
         p.add(brow);
-
         p.add(progress);
 
         editButton.addClickHandler(event -> Confirm());
@@ -105,9 +115,10 @@ public class InsuranceBox {
         canButton.setVisible(false);
         par.add(p);
     }
+
+    // Handle Save / Finalize Confirmation
     public void Confirm() {
         if (deleting) {
-            // call deletion
             progress.setText("Processing...");
             areYouSureLabel.setVisible(false);
             progress.setVisible(true);
@@ -117,10 +128,10 @@ public class InsuranceBox {
 
             InsuranceTextField f = (InsuranceTextField) fields[0];
 
-            RequestBuilder req = new RequestBuilder(RequestBuilder.GET, "/api/delinsurance?blob="+
+            RequestBuilder req = new RequestBuilder(RequestBuilder.GET, "/api/delinsurance?blob=" +
                     App.B64Encode(f.box.getText()));
             try {
-                req.sendRequest(null,new DeleteInsuranceCallback());
+                req.sendRequest(null, new DeleteInsuranceCallback());
             } catch (Exception e) {
                 progress.setText("Unexpected Error. Try refreshing the page.");
             }
@@ -136,17 +147,12 @@ public class InsuranceBox {
                 f.BeginEdit();
             }
             editing = true;
-        }
-        else {
+        } else {
             boolean can_submit = true;
             boolean edited = false;
             for (InsuranceField f : fields) {
-                if (!f.ValidSub()) {
-                    can_submit = false;
-                }
-                if (f.Edited()) {
-                    edited = true;
-                }
+                if (!f.ValidSub()) can_submit = false;
+                if (f.Edited()) edited = true;
             }
 
             if (can_submit && edited) {
@@ -156,17 +162,20 @@ public class InsuranceBox {
                 editButton.setVisible(false);
                 canButton.setVisible(false);
                 delButton.setVisible(false);
+
                 for (InsuranceField f : fields) {
                     f.SubmitEdit();
                 }
                 editing = false;
+
                 String res = BuildResult();
-                RequestBuilder req = new RequestBuilder(RequestBuilder.GET,
-                        (fresh ? "/api/setinsurance?f=y&blob=" : "/api/setinsurance?f=n&blob=")+res);
+                String endpoint = fresh ? "/api/setinsurance?f=y&blob=" : "/api/setinsurance?f=n&blob=";
+                RequestBuilder req = new RequestBuilder(RequestBuilder.GET, endpoint + res);
+
                 try {
                     req.sendRequest(null, new SubmitInsuranceCallback());
                 } catch (Exception e) {
-
+                    // Ignored
                 }
             } else if (!can_submit) {
                 progress.setVisible(true);
@@ -183,13 +192,12 @@ public class InsuranceBox {
             fresh = false;
         }
     }
+
+    // Reject Revisions Command
     public void Cancel() {
         if (fresh) {
-            // just remove it! it's just ui if it's fresh.
             p.removeFromParent();
-
         }
-
         editing = false;
         editButton.setText("Edit");
         canButton.setVisible(false);
@@ -198,9 +206,10 @@ public class InsuranceBox {
             f.CancelEdit();
         }
     }
+
+    // Confirm Destructive Event
     public void Delete() {
         if (deleting) {
-            //
             areYouSureLabel.setVisible(false);
             editButton.setText("Edit");
             delButton.setText("Delete");
@@ -213,6 +222,7 @@ public class InsuranceBox {
         delButton.setText("No; Keep Info");
     }
 
+    // Prepare JSON Submissions
     public String BuildResult() {
         StringBuilder b = new StringBuilder();
         for (InsuranceField f : fields) {
@@ -225,6 +235,7 @@ public class InsuranceBox {
         return App.B64Encode(b.toString());
     }
 
+    // Submit Action Request Processor
     private class SubmitInsuranceCallback implements RequestCallback {
         @Override
         public void onResponseReceived(Request request, Response response) {
@@ -235,7 +246,6 @@ public class InsuranceBox {
                     delButton.setVisible(true);
                     break;
                 case App.HTTP_UNAUTHORIZED_401:
-                    progress.setText("An error occured. Please refresh the page.");
                 case App.HTTP_INTERNAL_SERVER_ERROR_500:
                     progress.setText("An error occured. Please refresh the page.");
                     break;
@@ -244,12 +254,11 @@ public class InsuranceBox {
 
         @Override
         public void onError(Request request, Throwable throwable) {
-
         }
     }
 
-    private class DeleteInsuranceCallback implements  RequestCallback {
-
+    // Delete Action Callback Processor
+    private class DeleteInsuranceCallback implements RequestCallback {
         @Override
         public void onResponseReceived(Request request, Response response) {
             switch (response.getStatusCode()) {
@@ -267,14 +276,15 @@ public class InsuranceBox {
 
         @Override
         public void onError(Request request, Throwable throwable) {
-
         }
     }
 
+    // Abstract Shared Field Methods
     private abstract class InsuranceField {
         public final Label label = new Label();
         public boolean always_submit = false;
         public final String fieldname;
+
         public InsuranceField(String fieldname, String label) {
             this.fieldname = fieldname;
             this.label.setText(label);
@@ -288,10 +298,13 @@ public class InsuranceBox {
         public abstract void SubmitEdit();
         public abstract boolean Edited();
     }
+
+    // GWT Standard Text Inputs
     private class InsuranceTextField extends InsuranceField {
         public boolean fresh;
         public final TextBox box = new TextBox();
         public String preEditText = "";
+
         public InsuranceTextField(String fieldname, String label, boolean always, boolean fresh) {
             super(fieldname, label);
             this.always_submit = always;
@@ -324,15 +337,13 @@ public class InsuranceBox {
             if (!always_submit && box.getText().equals(preEditText)) {
                 return null;
             }
-            return fieldname+":"+App.B64Encode(box.getText());
+            return fieldname + ":" + App.B64Encode(box.getText());
         }
         @Override
         public void BeginEdit() {
             preEditText = this.box.getText();
             if (always_submit) {
-                if (!fresh) {
-                    return;
-                }
+                if (!fresh) return;
                 fresh = false;
             }
             this.box.setReadOnly(false);
@@ -345,6 +356,7 @@ public class InsuranceBox {
         public boolean ValidSub() {
             return !always_submit || !this.box.getText().isEmpty();
         }
+        @Override
         public boolean Edited() {
             return !box.getValue().equals(preEditText);
         }
@@ -354,82 +366,12 @@ public class InsuranceBox {
             this.box.setReadOnly(true);
         }
     }
-    /*
-    private class InsuranceDecField extends  InsuranceField {
-        public int preEditInt;
-        public int preEditDec;
-        public final IntegerBox intbox = new IntegerBox();
-        public final IntegerBox decbox = new IntegerBox();
-        public InsuranceDecField(String fieldname, String label, boolean onlyCents) {
-            super(fieldname, label);
-            if (onlyCents) {
-                intbox.setVisible(false);
-            }
-            intbox.setReadOnly(true);
-            decbox.setReadOnly(true);
-            decbox.setMaxLength(2);
-            intbox.setMaxLength(8);
-        }
-        public void Parse(HashMap<String,String> map) {
-            String[] div = map.getOrDefault(fieldname, "0.0").split("\\.");
-            intbox.setValue(Integer.valueOf(div[0]));
-            decbox.setValue(Integer.valueOf(div[1]));
-        }
 
-        @Override
-        public void Add(HTMLPanel parent) {
-            HTMLPanel row = new HTMLPanel("tr","");
-            HTMLPanel c0 = new HTMLPanel("td","");
-            c0.add(this.label);
-            row.add(c0);
-            HTMLPanel c1 = new HTMLPanel("td","");
-            c1.getElement().setPropertyInt("colspan",2);
-            c1.add(this.intbox);
-            c1.add(new HTMLPanel("p","."));
-            c1.add(this.decbox);
-            row.add(c1);
-            parent.add(row);
-        }
-        @Override
-        public String Encode() {
-            if (intbox.getValue() == preEditInt && decbox.getValue() == preEditDec) {
-                return null;
-            }
-            return fieldname+":"+App.B64Encode(intbox.getValue()+"."+decbox.getValue());
-        }
-
-        @Override
-        public void BeginEdit() {
-            preEditInt = intbox.getValue();
-            preEditDec = decbox.getValue();
-            intbox.setReadOnly(false);
-            decbox.setReadOnly(false);
-        }
-        @Override
-        public void SubmitEdit() {
-            intbox.setReadOnly(true);
-            decbox.setReadOnly(true);
-        }
-        @Override
-        public boolean ValidSub() {
-            return true;
-        }
-        @Override
-        public void CancelEdit() {
-            intbox.setValue(preEditInt);
-            intbox.setReadOnly(true);
-            decbox.setValue(preEditDec);
-            decbox.setReadOnly(true);
-        }
-        public boolean Edited() {
-            return intbox.getValue() != preEditInt || decbox.getValue() != preEditDec;
-        }
-
-    }
-    */
+    // GWT Standard Integer Parsers
     private class InsuranceIntField extends InsuranceField {
         public int preEditInt = 0;
         public final IntegerBox box = new IntegerBox();
+
         public InsuranceIntField(String fieldname, String label, int maxlength) {
             super(fieldname, label);
             this.box.setReadOnly(true);
@@ -458,10 +400,8 @@ public class InsuranceBox {
         }
         @Override
         public String Encode() {
-            if (box.getValue() == preEditInt) {
-                return null;
-            }
-            return fieldname+":"+box.getValue();
+            if (box.getValue() == preEditInt) return null;
+            return fieldname + ":" + box.getValue();
         }
 
         @Override
@@ -482,13 +422,17 @@ public class InsuranceBox {
             this.box.setValue(preEditInt);
             this.box.setReadOnly(true);
         }
+        @Override
         public boolean Edited() {
             return box.getValue() != preEditInt;
         }
     }
+
+    // Formatting Calendar Inputs
     private class InsuranceDateField extends InsuranceField {
         public Date preEditDate = new Date(0);
         public final DateBox box = new DateBox();
+
         public InsuranceDateField(String fieldname, String label) {
             super(fieldname, label);
             this.box.setEnabled(false);
@@ -517,11 +461,8 @@ public class InsuranceBox {
         }
         @Override
         public String Encode() {
-            if (this.box.getValue().equals(this.preEditDate)) {
-                return null;
-            }
-            //Date val = box.getValue();
-            return fieldname+":"+App.B64Encode(box.getFormat().format(box,box.getValue()));
+            if (this.box.getValue().equals(this.preEditDate)) return null;
+            return fieldname + ":" + App.B64Encode(box.getFormat().format(box,box.getValue()));
         }
 
         @Override
@@ -542,13 +483,17 @@ public class InsuranceBox {
             this.box.setValue(preEditDate);
             this.box.setEnabled(false);
         }
+        @Override
         public boolean Edited() {
             return !box.getValue().equals(preEditDate);
         }
     }
+
+    // Formatting Standard Plan Tiers
     private class InsurancePlanField extends InsuranceField {
         public int preEditPlan = 0;
         public final ListBox box = new ListBox();
+
         public InsurancePlanField(String fieldname, String label) {
             super(fieldname, label);
             box.addItem("--");
@@ -595,10 +540,8 @@ public class InsuranceBox {
         }
         @Override
         public String Encode() {
-            if (box.getSelectedIndex() == preEditPlan) {
-                return null;
-            }
-            return fieldname+":"+App.B64Encode(box.getSelectedValue());
+            if (box.getSelectedIndex() == preEditPlan) return null;
+            return fieldname + ":" + App.B64Encode(box.getSelectedValue());
         }
 
         @Override
@@ -619,6 +562,7 @@ public class InsuranceBox {
             this.box.setSelectedIndex(preEditPlan);
             this.box.setEnabled(false);
         }
+        @Override
         public boolean Edited() {
             return box.getSelectedIndex() != preEditPlan;
         }

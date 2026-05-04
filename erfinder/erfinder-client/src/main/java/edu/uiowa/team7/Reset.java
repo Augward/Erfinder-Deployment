@@ -8,11 +8,13 @@ import com.google.gwt.user.client.ui.*;
 
 public class Reset {
 
+    // View Input Target Links
     private final PasswordTextBox newPassBox;
     private final PasswordTextBox confirmPassBox;
     private final Button submitBtn;
     private final Label responseLabel;
 
+    // Attach Interface Configuration
     public Reset() {
         newPassBox = new PasswordTextBox();
         newPassBox.addStyleName("form-input");
@@ -25,6 +27,7 @@ public class Reset {
 
         responseLabel = new Label();
 
+        // Pass UI Elements Into Document
         RootPanel.get("newPassContainer").add(newPassBox);
         RootPanel.get("confirmPassContainer").add(confirmPassBox);
         RootPanel.get("submitResetContainer").add(submitBtn);
@@ -33,6 +36,7 @@ public class Reset {
         submitBtn.addClickHandler(new SubmitNewPassword());
     }
 
+    // Security Parameter Transmission Event
     private class SubmitNewPassword implements ClickHandler {
         @Override
         public void onClick(ClickEvent event) {
@@ -43,12 +47,24 @@ public class Reset {
                 responseLabel.setText("Please fill out both fields.");
                 return;
             }
+
             if (!pass1.equals(pass2)) {
                 responseLabel.setText("Passwords do not match!");
                 return;
             }
+
             if (!pass1.matches("^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$")) {
                 responseLabel.setText("Password must be 8+ chars with a letter and number.");
+                return;
+            }
+
+            // Extract Handshake Keys Out Parameter Array
+            String t = Window.Location.getParameter("t");
+            String u = Window.Location.getParameter("u");
+
+            if (t == null || u == null) {
+                responseLabel.getElement().getStyle().setColor("red");
+                responseLabel.setText("Invalid reset link. Missing security tokens.");
                 return;
             }
 
@@ -56,9 +72,9 @@ public class Reset {
             responseLabel.getElement().getStyle().setColor("black");
             responseLabel.setText("Updating password...");
 
-            // Call existing update password API
+            // Pass Recovery Auth Back Door
             RequestBuilder builder = new RequestBuilder(RequestBuilder.GET,
-                    "/api/updatepassword?newpass=" + App.B64Encode(pass1));
+                    "/api/resetpassword?newpass=" + App.B64Encode(pass1) + "&t=" + t + "&u=" + u);
 
             try {
                 builder.sendRequest(null, new RequestCallback() {

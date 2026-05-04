@@ -1,6 +1,8 @@
 package edu.uiowa.team7;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import org.aspectj.weaver.ast.Call;
+import org.hibernate.annotations.processing.SQL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,8 @@ public class Queries {
 
             String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
             SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
+//            String url = "jdbc:mysql://localhost:3306/erfinder";// + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
+//            SQLConnection = DriverManager.getConnection(url, "root", "insecure_password");//"avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
 
             return SQLConnection;
 
@@ -613,5 +617,41 @@ public class Queries {
         }
     }
 
+    public static Optional<String> GetUserEmail(String userid) throws SQLException {
+        try (Connection c = GetConnection();
+             PreparedStatement stmt = c.prepareStatement("SELECT email FROM users WHERE userid = ?")) {
+            stmt.setString(1, userid);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(rs.getString("email"));
+                }
+            }
+        }
+        return Optional.empty();
+    }
 
+    public static String[] GetFacility(int facilityId) throws SQLException{
+        try(Connection c = GetConnection();
+            CallableStatement stmt = c.prepareCall("SELECT er_name, address, zip, phonenum, trauma_level, specialties, bed_availability, waitTime_Minutes FROM facilities WHERE id = ?")
+                ){
+            stmt.setInt(1, facilityId);
+            try(ResultSet r = stmt.executeQuery()){
+                if(r.next()){
+                    String[] info = new String[8];
+
+                    info[0] = r.getString("er_name");
+                    info[1] = r.getString("address");
+                    info[2] = r.getString("zip");
+                    info[3] = r.getString("phonenum");
+                    info[4] = r.getString("trauma_level");
+                    info[5] = r.getString("specialties");
+                    info[6] = String.valueOf(r.getInt("bed_availability"));
+                    info[7] = String.valueOf(r.getInt("waitTime_Minutes"));
+
+                    return info;
+                }
+            }
+        }
+        return null;
+    }
 }

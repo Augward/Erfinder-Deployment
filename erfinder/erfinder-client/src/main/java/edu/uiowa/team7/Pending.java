@@ -8,25 +8,28 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class Pending {
 
+    // Status Tracking Widgets
     private final Label statusLabel;
     private final Timer checkTimer;
 
+    // Boot Automated Checks
     public Pending() {
         statusLabel = new Label("Checking live status...");
         RootPanel.get("pendingStatusContainer").add(statusLabel);
 
-        // Auto-poll the server every 5 seconds
+        // Schedule Polling Thread Iteration
         checkTimer = new Timer() {
             @Override
             public void run() {
                 checkApprovalStatus();
             }
         };
-        // Initial check, then start loop
+
         checkApprovalStatus();
         checkTimer.scheduleRepeating(5000);
     }
 
+    // Fire Polling Server Request
     private void checkApprovalStatus() {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/api/myinfo");
         try {
@@ -36,14 +39,13 @@ public class Pending {
                         String[] data = response.getText().split(",", -1);
                         String role = data[0].trim().toUpperCase();
 
-                        // If the role is no longer PENDING, they have been approved!
+                        // Route Upon Status Change
                         if (!role.equals("PENDING")) {
-                            checkTimer.cancel(); // Stop polling
+                            checkTimer.cancel();
                             statusLabel.getElement().getStyle().setColor("green");
                             statusLabel.setText("Account Approved! Redirecting...");
                             Window.Location.assign("home.html");
                         } else {
-                            // Simple visual indicator that polling is active
                             String text = statusLabel.getText();
                             statusLabel.setText(text.endsWith("...") ? "Checking live status." : text + ".");
                         }

@@ -1,24 +1,41 @@
-
-# Application Configuration Properties
+# =========================================
+# APPLICATION CORE SETTINGS
+# =========================================
 erfinder:
   login:
     max-attempts-in-period: 10
     clear-attempt-after-minutes: 30
     timeout-period-minutes: 300
 
-# Server Properties
+# Server HTTP Properties
 server:
   forward-headers-strategy: framework
   port: 8080
 
-# Spring Boot Configuration
+
+# =========================================
+# SPRING BOOT CONFIGURATION
+# =========================================
 spring:
   main:
     banner-mode: off
   application:
     name: erfinder
 
-  # Database Connection Settings
+  # SMTP Email Settings
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "ERFinderServicesT7@gmail.com"
+    password: "cpnt ezcf otfl wezl" ## "ERFinderServicesT34M7"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # Database Connection String
   datasource:
     url: jdbc:mysql://erfinder-erfinder.k.aivencloud.com:26268/defaultdb?sslMode=REQUIRED
     username: avnadmin
@@ -28,17 +45,17 @@ spring:
       hibernate:
         ddl-auto: update
 
-  # Development Tools
+  # Local Development Tools
   devtools:
     restart:
       additional-exclude: launcherDir/**
     add-properties: false
 
-  # Serialization
+  # JSON Serialization Rules
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
 
-  # Console Output
+  # Console Formatting
   output:
     ansi:
       enabled: detect
@@ -49,7 +66,7 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
 
-  # Web Resource Handling
+  # Static Web Resources
   web:
     resources:
       static-locations: classpath:/launcherDir/,classpath:/public/
@@ -60,12 +77,16 @@ spring:
 
 debug: false
 
-# Logging Configuration
+
+# =========================================
+# SYSTEM LOGGING RULES
+# =========================================
 logging:
   level:
     web: info
     root: info
 
+  # Log Format Patterns
   pattern:
     file: '%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n'
     console: '%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n'

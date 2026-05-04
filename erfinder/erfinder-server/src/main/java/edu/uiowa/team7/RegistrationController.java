@@ -1,16 +1,21 @@
 package edu.uiowa.team7;
 
 import org.slf4j.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
+// Registration API Endpoints
 @RestController
 public class RegistrationController {
 
-    // Logger
+    // Component Logger
     private static final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
 
-    // Pre-Registration Validation Endpoint
+    @Autowired
+    private EmailService emailService;
+
+    // Check Existing Credentials
     @PostMapping("/register/check")
     public Map<String, Boolean> checkExisting(@RequestBody Map<String, String> data) {
         Map<String, Boolean> result = new HashMap<>();
@@ -29,7 +34,7 @@ public class RegistrationController {
         return result;
     }
 
-    // Registration Submission Endpoint
+    // Process Account Registration
     @PostMapping("/register/create")
     @ResponseBody
     public Map<String, String> createRegistration(@RequestBody Map<String, String> data) {
@@ -37,6 +42,14 @@ public class RegistrationController {
         try {
             boolean inserted = Queries.insertReg(data);
             response.put("status", inserted ? "success" : "failed");
+
+            // Forward Alert Email
+            if (inserted) {
+                emailService.sendEmail(data.get("email"),
+                        "ERFinder Registration Received",
+                        "Your account request has been submitted and is pending administrator approval.");
+            }
+
         } catch (Exception e) {
             logger.error("Failed to insert new registration request", e);
             response.put("status", "error");
