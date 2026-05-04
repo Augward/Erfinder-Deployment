@@ -1,0 +1,18 @@
+# IntelliJ & IDE files
+.idea/
+*.iml
+*.iws
+
+# Maven Compiled output
+target/
+*/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# Logs
+*.log
+
+# OS System Files
+.DS_Store
+Thumbs.db

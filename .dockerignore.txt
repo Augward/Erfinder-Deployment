@@ -1,0 +1,8 @@
+.git
+.idea/
+target/
+erfinder-client/target/
+erfinder-server/target/
+erfinder-shared/target/
+*.class
+*.log
