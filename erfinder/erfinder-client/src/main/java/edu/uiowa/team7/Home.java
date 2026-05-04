@@ -15,7 +15,7 @@ public class Home {
     // Fields
     private final VerticalPanel dynamicLayout;
 
-    private final CheckBox[] ESIBoxes = new CheckBox[4];
+    // private final CheckBox[] ESIBoxes = new CheckBox[4];
 
     // Constructor
     public Home() {
@@ -80,6 +80,8 @@ public class Home {
         dynamicLayout.add(new HTML("<h3>Find Immediate Care</h3>"));
         dynamicLayout.add(new HTML("<h4>Check all that apply:</h3>"));
 
+        CheckBox[] boxes = new CheckBox[4];
+
         HTMLPanel t = new HTMLPanel("table","");
         String[] lines = {
                 "Require life-saving intervention now.",
@@ -91,8 +93,8 @@ public class Home {
         for (int i = 0; i < 4; i ++) {
             rows[i] = new HTMLPanel("tr", "");
             rows[i].add(cw(new Label(lines[i])));
-            rows[i].add(cw(ESIBoxes[i] = new CheckBox()));
-            ESIBoxes[i].addClickHandler(event -> ESIBoxEvent());
+            rows[i].add(cw(/*ESIBoxes[i] = */ boxes[i] = new CheckBox()));
+            // ESIBoxes[i].addClickHandler(event -> ESIBoxEvent());
             t.add(rows[i]);
         }
 
@@ -108,6 +110,14 @@ public class Home {
         dynamicLayout.add(new Label("Current Condition:"));
         dynamicLayout.add(injuryType);
 
+        ListBox priority = new ListBox();
+        priority.addStyleName("form-input");
+        priority.addItem("By Lowest Estimated Time-To-Care"); // DIST + WAIT
+        priority.addItem("By Nearest"); // DIST ONLY
+        priority.addItem("By Lowest Wait Time"); // WAIT ONLY
+        dynamicLayout.add(new Label("Search Priority:"));
+        dynamicLayout.add(priority);
+
         //TextBox zipBox = new TextBox();
         //zipBox.addStyleName("form-input");
         //zipBox.getElement().setPropertyString("placeholder", "Enter current Zip Code...");
@@ -117,9 +127,15 @@ public class Home {
         Button searchBtn = new Button("Search ERs");
         searchBtn.addStyleName("btn");
         searchBtn.addClickHandler(event ->{
+            int esiScore = boxes[0].getValue() ? 1 :
+                    (boxes[1].getValue() || boxes[2].getValue() || boxes[3].getValue() ? 2 : 3);
+
+            int in = injuryType.getSelectedIndex();
+            int pr = priority.getSelectedIndex();
+
             dynamicLayout.clear();
 
-            dynamicLayout.add(new SearchUI(()->{
+            dynamicLayout.add(new SearchUI(esiScore, in, pr, ()->{
                 dynamicLayout.clear();
                 loadDashboard();
             }));
@@ -130,14 +146,6 @@ public class Home {
         HTMLPanel p = new HTMLPanel("td", "");
         p.add(w);
         return p;
-    }
-    private int EvalESI() {
-        if (ESIBoxes[0].getValue()) return 1;
-        for (int i = 1; i < 4; i ++) if (ESIBoxes[i].getValue()) return 2;
-        return 3;
-    }
-    private void ESIBoxEvent() {
-        //logger.log(Level.INFO,"ESI: "+EvalESI());
     }
 
     private void buildMedicalView() {

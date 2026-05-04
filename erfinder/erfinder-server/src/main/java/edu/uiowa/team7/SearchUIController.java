@@ -9,7 +9,6 @@ import java.io.IOException;
 
 @WebServlet("/api/search")
 public class SearchUIController extends HttpServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws IOException {

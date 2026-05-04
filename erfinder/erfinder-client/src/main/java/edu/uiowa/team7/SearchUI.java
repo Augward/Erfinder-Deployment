@@ -5,6 +5,8 @@ import com.google.gwt.http.client.*;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;
 
+import java.util.Arrays;
+
 public class SearchUI extends VerticalPanel  {
     private Runnable onBack;
 
@@ -13,20 +15,41 @@ public class SearchUI extends VerticalPanel  {
 
     //public static int[] facilitypks;
 
-    int[] facilitypks = new int[] {1,2,3};
+    int[] facilitypks;// = new int[] {1,2,3};
 
-    public SearchUI(Runnable onBack){
+    public SearchUI(int esiScore, int injury, int priority, Runnable onBack){
         this.onBack = onBack;
 
         setSpacing(10);
         setWidth("100%");
 
+        String results = GetSearchPK(esiScore, injury, priority);
+
+        if (results.isEmpty()) {
+            facilitypks = new int[0];
+        }
+        else {
+            String[] pks = results.split(",");
+            facilitypks = new int[pks.length];
+            for (int i = 0; i < facilitypks.length; i ++) {
+                facilitypks[i] = Integer.parseInt(pks[i]);
+            }
+        }
+
         Button backbtn = new Button(" <- Back to DashBoard");
-        backbtn.addClickHandler(event -> onBack.run());
+        backbtn.addClickHandler(event -> { Backout(); onBack.run();});
         add(backbtn);
         add(new HTML("<h3>ER Search Results</h3>"));
         loadSearchResults();
     }
+
+    public static native String GetSearchPK(int esi, int inj, int pri) /*-{
+        return $wnd.get_search_pk(esi, inj, pri, true);
+    }-*/;
+
+    public static native void Backout() /*-{
+        $wnd.return_to_input();
+    }-*/;
 
     private void loadSearchResults(){
 

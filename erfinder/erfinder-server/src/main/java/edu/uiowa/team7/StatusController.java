@@ -48,9 +48,9 @@ public class StatusController {
                 failedLogins.put(userID, attempts);
 
                 if (attempts >= 3) {
-                    String targetEmail = Queries.GetUserEmail(userID);
-                    if (targetEmail != null) {
-                        emailService.sendEmail(targetEmail,
+                    Optional<String> targetEmail = Queries.GetUserEmail(userID);
+                    if (targetEmail.isPresent()) {
+                        emailService.sendEmail(targetEmail.get(),
                                 "ERFinder Security Alert",
                                 "There have been 3 failed login attempts on your account. Please reset your password if you do not recognize this activity.");
                     }
@@ -109,9 +109,9 @@ public class StatusController {
             if (!Queries.ValidateSecurityAnswer(userID, ans)) {
                 // Email logic
                 try {
-                    String targetEmail = Queries.GetUserEmail(userID);
-                    if (targetEmail != null) {
-                        emailService.sendEmail(targetEmail,
+                    Optional<String> targetEmail = Queries.GetUserEmail(userID);
+                    if (targetEmail.isPresent()) {
+                        emailService.sendEmail(targetEmail.get(),
                                 "ERFinder Security Alert",
                                 "Someone recently failed a security question attempt on your account. If this was not you, please ensure your account is secure.");
                     }
@@ -128,13 +128,20 @@ public class StatusController {
             res.setStatus(HttpStatus.OK.value());
 
             // Email
-            String userEmail = Queries.GetUserEmail(userID);
+            Optional<String> userEmail = Queries.GetUserEmail(userID);
+
+            if (userEmail.isEmpty()) {
+                logger.error("Could not get user email.");
+                res.getHeaders(HttpHeaders.SET_COOKIE).clear();
+                res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                return "Server Error";
+            }
 
             // Construct the reset link
             String resetLink = "http://localhost:8080/reset.html?t=" + tempToken + "&u=" + req.getParameter("userid");
 
             // Send the email
-            emailService.sendEmail(userEmail,
+            emailService.sendEmail(userEmail.get(),
                     "ERFinder Password Reset Request",
                     "A password reset was requested for your account. Click the link below to securely reset your password:\n\n" + resetLink);
 
@@ -169,5 +176,14 @@ public class StatusController {
 
         result.TryRefreshToken(request, response);
         return result.UserID();
+    }
+
+    // Returns a list of service PKs to display for the search screen.
+    @GetMapping("/api/findservices")
+    public String FindServices(
+            HttpServletRequest req,
+            HttpServletResponse res
+    ) {
+        return "1,2,3";
     }
 }

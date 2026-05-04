@@ -30,8 +30,8 @@ public class Queries {
 
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 
-            String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
-            SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
+            String url = "jdbc:mysql://localhost:3306/erfinder";// + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
+            SQLConnection = DriverManager.getConnection(url, "root", "insecure_password");//"avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
 
             return SQLConnection;
 
@@ -615,16 +615,17 @@ public class Queries {
         }
     }
 
-    public static String GetUserEmail(String userid) throws SQLException {
+    public static Optional<String> GetUserEmail(String userid) throws SQLException {
         try (Connection c = GetConnection();
              PreparedStatement stmt = c.prepareStatement("SELECT email FROM users WHERE userid = ?")) {
             stmt.setString(1, userid);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getString("email");
+                    return Optional.of(rs.getString("email"));
                 }
             }
         }
+        return Optional.empty();
     }
 
     public static String[] GetFacility(int facilityId) throws SQLException{
@@ -651,17 +652,17 @@ public class Queries {
         }
         return null;
     }
-
-    public static String GetUserEmail(String userid) throws SQLException {
-        try (Connection c = GetConnection();
-             PreparedStatement stmt = c.prepareStatement("SELECT email FROM users WHERE userid = ?")) {
-            stmt.setString(1, userid);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("email");
-                }
-            }
-        }
-        return null;
-    }
+//
+//    public static String GetUserEmail(String userid) throws SQLException {
+//        try (Connection c = GetConnection();
+//             PreparedStatement stmt = c.prepareStatement("SELECT email FROM users WHERE userid = ?")) {
+//            stmt.setString(1, userid);
+//            try (ResultSet rs = stmt.executeQuery()) {
+//                if (rs.next()) {
+//                    return rs.getString("email");
+//                }
+//            }
+//        }
+//        return null;
+//    }
 }

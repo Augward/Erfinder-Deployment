@@ -50,7 +50,7 @@
             🚨 CALL 911 🚨
         </button>
 
-        <div id="landingMap" class="map-container"></div>
+        <div id="landing-map" class="map-container"></div>
 
         <button class="emergency-btn search" onclick="runLandingSearch()">
             🔍 Search ERs 🔍
@@ -89,37 +89,39 @@
 </div>
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Iowa City
-        var map = L.map('landingMap').setView([41.6611, -91.5302], 12);
+<!--<script>-->
+<!--    let ER_MAP = null;-->
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+<!--    document.addEventListener("DOMContentLoaded", function() {-->
+<!--        // Iowa City-->
+<!--        ER_MAP = L.map('landingMap').setView([41.6611, -91.5302], 12);-->
 
-        // live facilities
-        fetch('/api/facilities')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(fac => {
-                    L.marker([fac.lat, fac.lon]).addTo(map)
-                        .bindPopup(`<b>${fac.name}</b><br>Wait Time: ${fac.wait} mins<br>Beds: ${fac.beds}`);
-                });
-            })
-            .catch(err => console.log("No facilities found."));
-    });
-</script>
+<!--        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {-->
+<!--            maxZoom: 19,-->
+<!--            attribution: '© OpenStreetMap'-->
+<!--        }).addTo(map);-->
+
+<!--        // live facilities-->
+<!--        fetch('/api/facilities')-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                data.forEach(fac => {-->
+<!--                    L.marker([fac.lat, fac.lon]).addTo(map)-->
+<!--                        .bindPopup(`<b>${fac.name}</b><br>Wait Time: ${fac.wait} mins<br>Beds: ${fac.beds}`);-->
+<!--                });-->
+<!--            })-->
+<!--            .catch(err => console.log("No facilities found."));-->
+<!--    });-->
+<!--</script>-->
+
+<script src="map_handler.js"></script>
 
 <script>
     function runLandingSearch() {
         const container = document.getElementById("searchContainer");
         container.innerHTML = "<p><b>Searching ERs...</b></p>";
 
-        // ✅ Same logical input as patient page
-        const pks = [1, 2, 3];   // demo / placeholder
-        const pkString = pks.join(",");
+        var pkString = get_search_pk(5, 0, 0, true);
 
         fetch("/api/search?pks=" + pkString)
             .then(res => {

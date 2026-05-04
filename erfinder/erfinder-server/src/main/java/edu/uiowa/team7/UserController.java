@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.Base64;
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -164,9 +166,15 @@ public class UserController {
                 response.setStatus(HttpStatus.OK.value());
 
                 // Email
-                String targetEmail = Queries.GetUserEmail(target);
+                Optional<String> targetEmail = Queries.GetUserEmail(target);
 
-                emailService.sendEmail(targetEmail,
+                if (targetEmail.isEmpty()) {
+                    logger.error("Could not get user email.");
+                    response.setStatus(HttpStatus.NOT_FOUND.value());
+                    return;
+                }
+
+                emailService.sendEmail(targetEmail.get(),
                         "ERFinder Account Approved",
                         "Hello " + target + ", your ERFinder account request has been approved by an administrator! You may now log in to the system.");
 
@@ -185,10 +193,10 @@ public class UserController {
             String targetUserID = new String(Base64.getDecoder().decode(b64Target));
 
             // Email
-            String targetEmail = Queries.GetUserEmail(targetUserID);
+            Optional<String> targetEmail = Queries.GetUserEmail(targetUserID);
 
-            if (targetEmail != null) {
-                emailService.sendEmail(targetEmail,
+            if (targetEmail.isPresent()) {
+                emailService.sendEmail(targetEmail.get(),
                         "ERFinder Account Update",
                         "Your account registration request has been denied by an administrator.");
             }
