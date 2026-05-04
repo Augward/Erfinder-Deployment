@@ -143,7 +143,7 @@ public class StatusController {
             }
 
             // Construct the reset link
-            String resetLink = "http://localhost:8080/reset.html?t=" + tempToken + "&u=" + req.getParameter("userid");
+            String resetLink = "https://erfinder-deployment.onrender.com/reset.html?t=" + tempToken + "&u=" + req.getParameter("userid");
 
             // Send the email
             emailService.sendEmail(userEmail.get(),
