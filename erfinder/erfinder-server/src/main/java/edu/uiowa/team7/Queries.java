@@ -30,10 +30,10 @@ public class Queries {
 
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 
-            //String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
-            //SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
-            String url = "jdbc:mysql://localhost:3306/erfinder";// + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
-            SQLConnection = DriverManager.getConnection(url, "root", "insecure_password");//"avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
+            String url = "jdbc:mysql://" + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
+            SQLConnection = DriverManager.getConnection(url, "avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
+//            String url = "jdbc:mysql://localhost:3306/erfinder";// + "erfinder-erfinder.k.aivencloud.com" + ":" + "26268" + "/" + "erfinder" + "?sslMode=REQUIRED";
+//            SQLConnection = DriverManager.getConnection(url, "root", "insecure_password");//"avnadmin", "AVNS_2kwhLT7ZoRaVQ6GpXiz");
 
             return SQLConnection;
 
