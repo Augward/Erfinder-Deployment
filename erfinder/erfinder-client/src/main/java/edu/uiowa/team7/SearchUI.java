@@ -121,7 +121,18 @@ public class SearchUI extends VerticalPanel  {
                     String key = kv[0].replace("\"", "");
                     String value = kv[1].replace("\"", "");
 
-                    card.add(new Label(key + ": " + value));
+                    if (key.equals("wait")){
+                        card.add(new Label ("wait time: " + value + " mins"));
+                    }
+                    else if (key.equals("beds")){
+                        card.add(new Label("beds available: " + value));
+                    }
+                    else if (key.equals("name")){
+                        card.add(new HTML("<b>" + value + "</b>"));
+                    }
+                    else {
+                        card.add(new Label(key + ": " + value));
+                    }
                 }
             }
 
