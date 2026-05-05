@@ -6,6 +6,8 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
+import java.util.Date;
+
 public class Signup {
 
     // Identity and Authentication Widgets
@@ -264,6 +266,22 @@ public class Signup {
             if (dob.getValue() == null) {
                 valid = false;
                 doberror.setText("Date of Birth is Required");
+            } else {
+                Date selectedDOB = dob.getValue();
+                Date today = new Date();
+
+                long userAge = today.getTime() - selectedDOB.getTime();
+                long minAge = 18L * 365 * 24 * 60 * 60 * 1000;
+                long maxAge = 130L * 365 * 24 * 60 *60 * 1000;
+
+                if(userAge < minAge){
+                    valid = false;
+                    doberror.setText("Must be 18 years or older");
+                }
+                else if (userAge > maxAge){
+                    valid = false;
+                    doberror.setText("Must not exceed 130 years");
+                }
             }
 
             if (gender.getSelectedIndex() == 0) {
